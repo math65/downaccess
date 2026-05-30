@@ -111,6 +111,9 @@ class _AppDownloadDialog(wx.Frame):
         )
         self._build_ui(version)
         self.CentreOnParent()
+        self.Bind(wx.EVT_CLOSE, self.cancel_close)
+    def cancel_close(self, e):
+        e.Veto()
 
     def _build_ui(self, version: str) -> None:
         panel = wx.Panel(self)
@@ -126,10 +129,13 @@ class _AppDownloadDialog(wx.Frame):
             name=_("Progression du téléchargement"),
         )
         self._lbl_pct = wx.StaticText(panel, label="0 %")
+        self._btnCancel=wx.Button(panel, label="&Annuler")
+        self._btnCancel.Bind(wx.EVT_BUTTON, self.on_cancel)
 
         sizer.Add(self._lbl,     0, wx.ALL,             12)
         sizer.Add(self._gauge,   0, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
         sizer.Add(self._lbl_pct, 0, wx.LEFT | wx.TOP,   12)
+        sizer.Add(self._btnCancel, 0, wx.RIGHT|wx.BOTTOM, 12)
         panel.SetSizer(sizer)
 
         # Frame sizer pour que le panel remplisse correctement la frame
@@ -149,7 +155,13 @@ class _AppDownloadDialog(wx.Frame):
         if pct >= 100:
             self._lbl.SetLabel(_("Installation en cours…"))
             speech.speak(_("Téléchargement terminé. Installation en cours."))
-
+    def cancel(self):
+        speech.speak(_("Mise à jour annulé."))
+        self.Parent.mi_update_app.Enable(True)
+        self.Destroy()
+    def on_cancel(self, e):
+        if self.Parent.cancel_update:
+            self.Parent.cancel_update()
 
 class _URLDropTarget(wx.TextDropTarget):
     """Accepte du texte glissé-déposé et le transmet au callback."""
@@ -1413,10 +1425,11 @@ class MainWindow(wx.Frame):
                 self._app_dl_progress_dlg.Raise()
                 self._app_dl_progress_dlg.focus_gauge()
                 update_started = True
-                app_updater.download_and_install(
+                self.cancel_update=app_updater.download_and_install(
                     new_version=info,
                     on_progress=lambda pct: wx.CallAfter(self._on_app_dl_progress, pct),
                     on_error=lambda msg: wx.CallAfter(self._on_app_dl_error, msg),
+                    on_cancel=lambda: wx.CallAfter(self._app_dl_progress_dlg.cancel),
                     on_quit=lambda: wx.CallAfter(self.Close),
                 )
             else:
@@ -1451,7 +1464,10 @@ class MainWindow(wx.Frame):
             _("Impossible de télécharger la mise à jour :\n\n{error}").format(error=message),
             _("Erreur de mise à jour"), wx.OK | wx.ICON_ERROR, self,
         )
-
+    def btnCancelUpdateClick(self, e):
+            if self.cancel_update:
+                self.cancel_update()
+                self.cancel_update=None
     def check_app_update_at_startup(self) -> None:
         """Vérification silencieuse au démarrage — annonce seulement si mise à jour dispo."""
         def _on_done(status, info, notes):

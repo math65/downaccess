@@ -20,6 +20,7 @@ import os
 import subprocess
 import tempfile
 import threading
+from urllib import response
 import urllib.request
 import urllib.error
 import json
@@ -136,6 +137,7 @@ def check_for_update(on_done) -> None:
 # ---------------------------------------------------------------------------
 
 def download_and_install(new_version: str, on_progress, on_error,
+                         on_cancel=None,
                          on_quit=None) -> None:
     """
     Télécharge l'installeur et le lance.
@@ -143,7 +145,9 @@ def download_and_install(new_version: str, on_progress, on_error,
     on_progress(percent: float)  — progression 0-100
     on_error(message: str)       — appelé si échec ; l'app NE se ferme PAS
     on_quit()                    — appelé pour fermer l'app après lancement installeur
+    on_cancel()                    — appelé pour fermer la boîte de dialogue si annulation
     """
+    cancel_event=threading.Event()
     def _run():
         tmp_path  = os.path.join(tempfile.gettempdir(), ASSET_NAME + ".tmp")
         dest_path = os.path.join(tempfile.gettempdir(), ASSET_NAME)
@@ -159,23 +163,37 @@ def download_and_install(new_version: str, on_progress, on_error,
         try:
             req = urllib.request.Request(DOWNLOAD_URL)
             req.add_header("User-Agent", _UA)
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                total      = int(resp.headers.get("Content-Length", 0))
-                downloaded = 0
-                chunk_size = 65536  # 64 Ko
-                last_pct   = -1
-                with open(tmp_path, "wb") as f:
-                    while True:
-                        buf = resp.read(chunk_size)
-                        if not buf:
-                            break
-                        f.write(buf)
-                        downloaded += len(buf)
-                        if total > 0:
-                            pct = int(downloaded / total * 100)
-                            if pct != last_pct:
-                                on_progress(pct)
-                                last_pct = pct
+            resp=urllib.request.urlopen(req, timeout=60)
+            total      = int(resp.headers.get("Content-Length", 0))
+            downloaded = 0
+            chunk_size = 65536  # 64 Ko
+            last_pct   = -1
+            f=open(tmp_path, "wb")
+            while True:
+                    if cancel_event.is_set():
+                        resp.close()
+                        f.close()
+                        try:
+                            os.remove(tmp_path)
+                        except OSError:
+                            pass
+                        if on_cancel:
+                            on_cancel()
+                            return
+                    buf = resp.read(chunk_size)
+                    if not buf:
+                        break
+                    f.write(buf)
+                    downloaded += len(buf)
+                    if total > 0:
+                        pct = int(downloaded / total * 100)
+                        if pct != last_pct:
+                            on_progress(pct)
+                            last_pct = pct
+            if not resp.closed:
+                resp.close()
+            if not f.closed:
+                f.close()
 
         except Exception as exc:
             # Supprimer le fichier partiel
@@ -251,3 +269,4 @@ def download_and_install(new_version: str, on_progress, on_error,
             on_quit()
 
     threading.Thread(target=_run, daemon=True).start()
+    return cancel_event.set
