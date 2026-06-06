@@ -27,7 +27,7 @@ def get_installed_version() -> str | None:
         for dist_info in ytdlp_dir.glob("yt_dlp-*.dist-info"):
             metadata_file = dist_info / "METADATA"
             try:
-                with open(metadata_file, "r", encoding="utf-8") as f:
+                with open(metadata_file, encoding="utf-8") as f:
                     for line in f:
                         if line.startswith("Version:"):
                             versions.append(line.split(":", 1)[1].strip())

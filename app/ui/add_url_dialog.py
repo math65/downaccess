@@ -2,7 +2,6 @@ from urllib.parse import urlparse
 
 import wx
 
-from app.core import speech
 
 # Choix de format (valeur retournée par get_format_choice())
 FORMAT_AUTO       = "auto"

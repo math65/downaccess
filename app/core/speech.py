@@ -33,6 +33,18 @@ def speak(text: str, interrupt: bool = True) -> None:
             pass
 
 
+def active_screen_reader() -> str:
+    """Retourne le nom du lecteur d'écran actif ('NVDA', 'Jaws') ou 'aucun'.
+    Utile pour les rapports de diagnostic."""
+    for output in _outputs:
+        try:
+            if output.is_active():
+                return type(output).__name__
+        except Exception:
+            pass
+    return "aucun"
+
+
 def braille(text: str) -> None:
     """Envoie le texte sur la plage braille si disponible."""
     for output in _outputs:

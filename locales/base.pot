@@ -10,15 +10,15 @@ msgstr ""
 msgid " et "
 msgstr ""
 
-#: app/ui/main_window.py:702
+#: app/ui/main_window.py:914
 msgid "&Aide"
 msgstr ""
 
-#: app/ui/main_window.py:594
+#: app/ui/main_window.py:806
 msgid "&Ajouter URL...\tCtrl+N"
 msgstr ""
 
-#: app/ui/main_window.py:690
+#: app/ui/main_window.py:902
 msgid "&Contacter le support / Faire une suggestion"
 msgstr ""
 
@@ -26,31 +26,31 @@ msgstr ""
 msgid "&Copier l'URL"
 msgstr ""
 
-#: app/ui/main_window.py:628
+#: app/ui/main_window.py:840
 msgid "&Fichier"
 msgstr ""
 
-#: app/ui/main_window.py:669
+#: app/ui/main_window.py:881
 msgid "&Historique...\tCtrl+H"
 msgstr ""
 
-#: app/ui/main_window.py:610
+#: app/ui/main_window.py:822
 msgid "&Importer une liste d'URLs..."
 msgstr ""
 
-#: app/ui/main_window.py:615
+#: app/ui/main_window.py:827
 msgid "&Ouvrir le dossier de destination\tCtrl+O"
 msgstr ""
 
-#: app/ui/main_window.py:637
+#: app/ui/main_window.py:849
 msgid "&Pause / Reprendre\tSpace"
 msgstr ""
 
-#: app/ui/main_window.py:620
+#: app/ui/main_window.py:832
 msgid "&Préférences...\tCtrl+P"
 msgstr ""
 
-#: app/ui/main_window.py:625
+#: app/ui/main_window.py:837
 msgid "&Quitter\tAlt+F4"
 msgstr ""
 
@@ -58,15 +58,15 @@ msgstr ""
 msgid "&Re-télécharger"
 msgstr ""
 
-#: app/ui/main_window.py:606
+#: app/ui/main_window.py:818
 msgid "&Rechercher...\tCtrl+F"
 msgstr ""
 
-#: app/ui/main_window.py:650
+#: app/ui/main_window.py:862
 msgid "&Réessayer\tF2"
 msgstr ""
 
-#: app/ui/main_window.py:672
+#: app/ui/main_window.py:884
 msgid "&Téléchargements"
 msgstr ""
 
@@ -74,7 +74,7 @@ msgstr ""
 msgid "&Vider l'historique"
 msgstr ""
 
-#: app/ui/main_window.py:645
+#: app/ui/main_window.py:857
 msgid "&Vider la liste\tShift+Delete"
 msgstr ""
 
@@ -86,7 +86,7 @@ msgstr ""
 msgid "0 sélectionné(s)"
 msgstr ""
 
-#: app/ui/main_window.py:760
+#: app/ui/main_window.py:976
 msgid "0 téléchargement(s)"
 msgstr ""
 
@@ -114,7 +114,7 @@ msgstr ""
 msgid "512 Ko/s"
 msgstr ""
 
-#: app/ui/main_window.py:641
+#: app/ui/main_window.py:853
 msgid "A&nnuler\tDelete"
 msgstr ""
 
@@ -143,23 +143,27 @@ msgstr ""
 msgid "Adresse URL"
 msgstr ""
 
-#: app/ui/login_dialog.py:56
+#: app/ui/login_dialog.py:80
 msgid "Adresse du site"
 msgstr ""
 
-#: app/ui/login_dialog.py:52
+#: app/ui/login_dialog.py:76
 msgid "Adresse du site :"
 msgstr ""
 
-#: app/ui/contact_dialog.py:48 app/ui/report_dialog.py:64
+#: app/ui/contact_dialog.py:48 app/ui/report_dialog.py:70
 msgid "Adresse email"
 msgstr ""
 
-#: app/ui/main_window.py:670
+#: app/ui/report_dialog.py:156
+msgid "Adresse email requise"
+msgstr ""
+
+#: app/ui/main_window.py:882
 msgid "Afficher l'historique des téléchargements"
 msgstr ""
 
-#: app/ui/main_window.py:678
+#: app/ui/main_window.py:890
 msgid "Afficher la liste des raccourcis clavier"
 msgstr ""
 
@@ -167,15 +171,15 @@ msgstr ""
 msgid "Ajout direct du média intercepté…"
 msgstr ""
 
-#: app/ui/main_window.py:708
+#: app/ui/main_window.py:920
 msgid "Ajouter URL"
 msgstr ""
 
-#: app/ui/main_window.py:708
+#: app/ui/main_window.py:920
 msgid "Ajouter URL (Ctrl+N)"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:50
+#: app/ui/add_url_dialog.py:49
 msgid "Ajouter des URLs"
 msgstr ""
 
@@ -183,11 +187,11 @@ msgstr ""
 msgid "Ajouter le média sélectionné à la file de téléchargement"
 msgstr ""
 
-#: app/ui/main_window.py:595
+#: app/ui/main_window.py:807
 msgid "Ajouter un ou plusieurs URLs à télécharger"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:115 app/ui/uge_dialog.py:301
+#: app/ui/add_url_dialog.py:114 app/ui/uge_dialog.py:301
 msgid "Ajouter à la file"
 msgstr ""
 
@@ -195,7 +199,7 @@ msgstr ""
 msgid "Ajouté à la file de téléchargement."
 msgstr ""
 
-#: app/ui/main_window.py:1044
+#: app/ui/main_window.py:1261
 msgid "Ajouté à la file."
 msgstr ""
 
@@ -207,28 +211,30 @@ msgstr ""
 msgid "Aller à l'adresse"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:116 app/ui/confirm_dialog.py:44
+#: app/ui/add_url_dialog.py:115 app/ui/confirm_dialog.py:44
 #: app/ui/contact_dialog.py:80 app/ui/contact_dialog.py:81
-#: app/ui/format_dialog.py:69 app/ui/main_window.py:712
-#: app/ui/main_window.py:974 app/ui/playlist_dialog.py:89
-#: app/ui/report_dialog.py:87 app/ui/report_dialog.py:88
+#: app/ui/format_dialog.py:69 app/ui/guided_login_dialog.py:78
+#: app/ui/guided_login_dialog.py:79 app/ui/login_required_dialog.py:59
+#: app/ui/login_required_dialog.py:60 app/ui/main_window.py:1191
+#: app/ui/main_window.py:924 app/ui/playlist_dialog.py:89
+#: app/ui/report_dialog.py:93 app/ui/report_dialog.py:94
 #: app/ui/settings_dialog.py:127
 msgid "Annuler"
 msgstr ""
 
-#: app/ui/main_window.py:712
+#: app/ui/main_window.py:924
 msgid "Annuler (Suppr)"
 msgstr ""
 
-#: app/ui/main_window.py:1160
+#: app/ui/main_window.py:1377
 msgid "Annuler ce téléchargement ?"
 msgstr ""
 
-#: app/ui/main_window.py:646
+#: app/ui/main_window.py:858
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:383 app/core/downloader.py:386
+#: app/core/downloader.py:448 app/core/downloader.py:451
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -248,7 +254,7 @@ msgstr ""
 msgid "Aperçu — {title}"
 msgstr ""
 
-#: app/core/app_updater.py:112
+#: app/core/app_updater.py:148
 msgid "Asset '{asset}' absent de la release {version}."
 msgstr ""
 
@@ -271,49 +277,49 @@ msgid ""
 "Installez Google Chrome, Microsoft Edge ou Brave."
 msgstr ""
 
-#: app/ui/login_dialog.py:117
+#: app/core/browser.py:116 app/core/browser.py:76
 msgid ""
 "Aucun navigateur compatible trouvé.\n"
 "Installez Google Chrome, Microsoft Edge ou Brave."
 msgstr ""
 
-#: app/ui/main_window.py:856 app/ui/main_window.py:857
+#: app/ui/main_window.py:1071 app/ui/main_window.py:1072
 msgid "Aucun résultat trouvé."
 msgstr ""
 
-#: app/ui/main_window.py:723
+#: app/ui/main_window.py:935
 msgid ""
 "Aucun téléchargement pour le moment.\r\n"
 "\r\n"
 "Ajoutez une URL via le menu Fichier, collez-la depuis le presse-papiers, glissez-déposez du texte sur cette fenêtre, ou utilisez la recherche pour trouver des médias."
 msgstr ""
 
-#: app/ui/main_window.py:1135 app/ui/main_window.py:1155
-#: app/ui/main_window.py:1202
+#: app/ui/main_window.py:1352 app/ui/main_window.py:1372
+#: app/ui/main_window.py:1419
 msgid "Aucun téléchargement sélectionné."
 msgstr ""
 
-#: app/ui/main_window.py:1307
+#: app/ui/main_window.py:1532
 msgid "Aucune URL dans le presse-papiers."
 msgstr ""
 
-#: app/ui/main_window.py:1274
+#: app/ui/main_window.py:1491
 msgid "Aucune URL détectée"
 msgstr ""
 
-#: app/ui/main_window.py:1306
+#: app/ui/main_window.py:1531
 msgid "Aucune URL valide dans le presse-papiers."
 msgstr ""
 
-#: app/ui/main_window.py:1080
+#: app/ui/main_window.py:1297
 msgid "Aucune information disponible."
 msgstr ""
 
-#: app/ui/main_window.py:1403
+#: app/ui/main_window.py:1628
 msgid "Aucune mise à jour disponible"
 msgstr ""
 
-#: app/ui/update_dialog.py:46
+#: app/ui/update_dialog.py:47
 msgid "Aucune note disponible."
 msgstr ""
 
@@ -321,11 +327,11 @@ msgstr ""
 msgid "Aucune sélection"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:32 app/ui/settings_dialog.py:33
+#: app/ui/add_url_dialog.py:31 app/ui/settings_dialog.py:33
 msgid "Audio M4A"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:31 app/ui/settings_dialog.py:32
+#: app/ui/add_url_dialog.py:30 app/ui/settings_dialog.py:32
 msgid "Audio MP3"
 msgstr ""
 
@@ -337,8 +343,8 @@ msgstr ""
 msgid "Auteur"
 msgstr ""
 
-#: app/ui/history_dialog.py:185 app/ui/main_window.py:1029
-#: app/ui/main_window.py:332 app/ui/search_dialog.py:170
+#: app/ui/history_dialog.py:185 app/ui/main_window.py:1246
+#: app/ui/main_window.py:360 app/ui/search_dialog.py:170
 msgid "Auto"
 msgstr ""
 
@@ -378,11 +384,17 @@ msgstr ""
 msgid "Avertissements réinitialisés"
 msgstr ""
 
-#: app/ui/main_window.py:1138 app/ui/main_window.py:1139
+#: app/core/downloader.py:106
+msgid ""
+"Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
+"adultes, privée ou réservée aux membres)."
+msgstr ""
+
+#: app/ui/main_window.py:1355 app/ui/main_window.py:1356
 msgid "Ce téléchargement n'est pas en cours."
 msgstr ""
 
-#: app/ui/main_window.py:966
+#: app/ui/main_window.py:1183
 msgid ""
 "Cette URL contient une vidéo et une playlist.\n"
 "\n"
@@ -390,15 +402,24 @@ msgid ""
 "ou uniquement cette vidéo ?"
 msgstr ""
 
-#: app/ui/main_window.py:922
+#: app/ui/main_window.py:1137
 msgid ""
-"Cette fonction ouvre votre navigateur pour vous connecter à un site.\n"
+"Cette fonction ouvre un navigateur dédié à DownAccess pour vous\n"
+"connecter à un site (par exemple YouTube).\n"
 "\n"
-"Vos cookies de connexion seront sauvegardés dans votre navigateur.\n"
-"Si un téléchargement échoue, DownAccess vous proposera automatiquement\n"
-"de réessayer avec les cookies du navigateur.\n"
+"Vous restez connecté une fois pour toutes : les vidéos réservées aux\n"
+"personnes connectées pourront alors être téléchargées. Si un\n"
+"téléchargement nécessite une connexion, DownAccess vous proposera\n"
+"aussi de vous connecter au moment voulu.\n"
 "\n"
 "Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video…) ne sont pas pris en charge."
+msgstr ""
+
+#: app/ui/login_required_dialog.py:33
+msgid ""
+"Cette vidéo {site} est réservée aux personnes connectées à leur compte.\n"
+"\n"
+"DownAccess va ouvrir une fenêtre pour vous connecter, puis reprendra le téléchargement automatiquement."
 msgstr ""
 
 #: app/ui/contact_dialog.py:147 app/ui/contact_dialog.py:160
@@ -413,7 +434,7 @@ msgstr ""
 msgid "Chargement…"
 msgstr ""
 
-#: app/ui/main_window.py:611
+#: app/ui/main_window.py:823
 msgid "Charger un fichier texte contenant une URL par ligne"
 msgstr ""
 
@@ -437,7 +458,7 @@ msgstr ""
 msgid "Choisir le dossier de destination"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:34
+#: app/ui/add_url_dialog.py:33
 msgid "Choisir le format manuellement…"
 msgstr ""
 
@@ -457,11 +478,11 @@ msgstr ""
 msgid "Codec vidéo"
 msgstr ""
 
-#: app/ui/report_dialog.py:74
+#: app/ui/report_dialog.py:80
 msgid "Commentaire"
 msgstr ""
 
-#: app/ui/report_dialog.py:68
+#: app/ui/report_dialog.py:74
 msgid "Commentaire (optionnel) :"
 msgstr ""
 
@@ -469,28 +490,64 @@ msgstr ""
 msgid "Confirmation"
 msgstr ""
 
-#: app/ui/history_dialog.py:167 app/ui/main_window.py:1186
+#: app/ui/history_dialog.py:167 app/ui/main_window.py:1403
 msgid "Confirmer"
 msgstr ""
 
-#: app/ui/main_window.py:1161
+#: app/ui/main_window.py:1378
 msgid "Confirmer l'annulation"
 msgstr ""
 
-#: app/ui/login_dialog.py:178
+#: app/ui/login_dialog.py:193
 msgid "Confirmer la suppression"
 msgstr ""
 
-#: app/ui/main_window.py:930
+#: app/ui/guided_login_dialog.py:118
+msgid ""
+"Connectez-vous à {site} dans la fenêtre du navigateur, puis cliquez sur « "
+"J'ai terminé »."
+msgstr ""
+
+#: app/ui/guided_login_dialog.py:48
+msgid ""
+"Connectez-vous à {site} dans le navigateur, puis cliquez sur « J'ai terminé "
+"»."
+msgstr ""
+
+#: app/ui/guided_login_dialog.py:68
+msgid "Connexion guidée"
+msgstr ""
+
+#: app/ui/main_window.py:456
+msgid "Connexion insuffisante"
+msgstr ""
+
+#: app/ui/login_required_dialog.py:23 app/ui/login_required_dialog.py:46
+msgid "Connexion nécessaire"
+msgstr ""
+
+#: app/ui/main_window.py:406
+msgid "Connexion nécessaire pour télécharger cette vidéo {site}."
+msgstr ""
+
+#: app/ui/main_window.py:1147
 msgid "Connexion à un site — Comment ça marche"
 msgstr ""
 
-#: app/ui/login_dialog.py:38
+#: app/ui/login_dialog.py:62
 msgid ""
-"Connexion à un site. Saisissez l'adresse et connectez-vous dans le "
-"navigateur. Vos cookies seront conservés pour les prochains téléchargements."
-" Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video) ne "
-"sont pas pris en charge."
+"Connexion à un site. Saisissez l'adresse : un navigateur dédié à DownAccess "
+"s'ouvrira. Connectez-vous une fois ; vos cookies seront conservés pour les "
+"prochains téléchargements. Note : les contenus protégés par DRM (Netflix, "
+"Disney+, Prime Video) ne sont pas pris en charge."
+msgstr ""
+
+#: app/ui/guided_login_dialog.py:36
+msgid "Connexion à {site}"
+msgstr ""
+
+#: app/ui/main_window.py:485
+msgid "Connexion à {site} mémorisée."
 msgstr ""
 
 #: app/ui/contact_dialog.py:28
@@ -501,21 +558,17 @@ msgstr ""
 msgid "Continuer"
 msgstr ""
 
-#: app/ui/login_dialog.py:202
+#: app/ui/login_dialog.py:217
 msgid "Cookies de {domain} supprimés."
 msgstr ""
 
-#: app/ui/login_dialog.py:200
+#: app/ui/login_dialog.py:215
 msgid ""
 "Cookies de {domain} supprimés.\n"
 "Vous êtes déconnecté de ce site."
 msgstr ""
 
-#: app/ui/main_window.py:374
-msgid "Cookies mémorisés pour {host}."
-msgstr ""
-
-#: app/ui/main_window.py:1356
+#: app/ui/main_window.py:1581
 msgid ""
 "Ctrl+N           Ajouter URL(s)\n"
 "Ctrl+F           Rechercher (YouTube, SoundCloud...)\n"
@@ -539,15 +592,15 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: app/ui/main_window.py:659
+#: app/ui/main_window.py:871
 msgid "Descen&dre dans la file\tAlt+Down"
 msgstr ""
 
-#: app/ui/report_dialog.py:110
+#: app/ui/report_dialog.py:116
 msgid "Diagnostic en cours."
 msgstr ""
 
-#: app/ui/report_dialog.py:109 app/ui/report_dialog.py:111
+#: app/ui/report_dialog.py:115 app/ui/report_dialog.py:117
 msgid "Diagnostic en cours…"
 msgstr ""
 
@@ -563,7 +616,7 @@ msgstr ""
 msgid "Dossier introuvable"
 msgstr ""
 
-#: app/ui/main_window.py:1492
+#: app/ui/main_window.py:1753
 msgid ""
 "DownAccess\n"
 "\n"
@@ -573,11 +626,26 @@ msgid ""
 "Propulsé par yt-dlp et ffmpeg."
 msgstr ""
 
-#: app/ui/main_window.py:1399
+#: app/ui/main_window.py:1624
 msgid "DownAccess est à jour. Version {version}."
 msgstr ""
 
-#: app/ui/update_dialog.py:60
+#: app/ui/guided_login_dialog.py:56
+msgid ""
+"DownAccess ouvre {site} dans son navigateur.\n"
+"\n"
+"Connectez-vous à votre compte, puis revenez ici et cliquez sur « J'ai terminé » : le téléchargement reprendra automatiquement.\n"
+"\n"
+"Inutile de fermer le navigateur vous-même, DownAccess s'en charge."
+msgstr ""
+
+#: app/ui/main_window.py:487
+msgid ""
+"DownAccess se souviendra de votre connexion à {site} pour les prochaines "
+"vidéos."
+msgstr ""
+
+#: app/ui/update_dialog.py:61
 msgid "DownAccess {version} est disponible !"
 msgstr ""
 
@@ -585,51 +653,51 @@ msgstr ""
 msgid "Durée"
 msgstr ""
 
-#: app/ui/main_window.py:633
+#: app/ui/main_window.py:845
 msgid "Dé&marrer\tF5"
 msgstr ""
 
-#: app/ui/main_window.py:1128
+#: app/ui/main_window.py:1345
 msgid "Démarrage de la file disponible en Phase 2."
 msgstr ""
 
-#: app/ui/main_window.py:1587
+#: app/ui/main_window.py:1848
 msgid "Démarrage de {count} téléchargement en attente."
 msgstr ""
 
-#: app/ui/main_window.py:1585
+#: app/ui/main_window.py:1846
 msgid "Démarrage de {count} téléchargements en attente."
 msgstr ""
 
-#: app/ui/main_window.py:710
+#: app/ui/main_window.py:922
 msgid "Démarrer"
 msgstr ""
 
-#: app/ui/main_window.py:710
+#: app/ui/main_window.py:922
 msgid "Démarrer (F5)"
 msgstr ""
 
-#: app/ui/main_window.py:634
+#: app/ui/main_window.py:846
 msgid "Démarrer les téléchargements en attente"
 msgstr ""
 
-#: app/ui/main_window.py:660
+#: app/ui/main_window.py:872
 msgid "Déplacer l'item sélectionné vers le bas"
 msgstr ""
 
-#: app/ui/main_window.py:656
+#: app/ui/main_window.py:868
 msgid "Déplacer l'item sélectionné vers le haut"
 msgstr ""
 
-#: app/ui/main_window.py:1240
+#: app/ui/main_window.py:1457
 msgid "Déplacé vers le bas."
 msgstr ""
 
-#: app/ui/main_window.py:1229
+#: app/ui/main_window.py:1446
 msgid "Déplacé vers le haut."
 msgstr ""
 
-#: app/ui/main_window.py:665
+#: app/ui/main_window.py:877
 msgid "Détecter automatiquement les URLs copiées"
 msgstr ""
 
@@ -665,11 +733,12 @@ msgstr ""
 msgid "Enregistrer"
 msgstr ""
 
-#: app/ui/login_dialog.py:68
+#: app/ui/login_dialog.py:92
 msgid ""
-"Entrez l'adresse du site et connectez-vous dans le navigateur.\n"
-"Votre vrai profil Chrome est utilisé : vos cookies seront conservés\n"
-"et réutilisés automatiquement pour les téléchargements.\n"
+"Entrez l'adresse du site et connectez-vous dans le navigateur dédié à\n"
+"DownAccess qui va s'ouvrir. C'est un navigateur séparé de votre navigation\n"
+"habituelle : vous restez connecté une fois pour toutes, et vos cookies sont\n"
+"réutilisés automatiquement pour les téléchargements.\n"
 "\n"
 "Note : les contenus protégés par DRM ne sont pas pris en charge."
 msgstr ""
@@ -702,7 +771,7 @@ msgstr ""
 msgid "Envoyer le message"
 msgstr ""
 
-#: app/ui/main_window.py:691
+#: app/ui/main_window.py:903
 msgid "Envoyer un message, une suggestion ou signaler un problème"
 msgstr ""
 
@@ -710,25 +779,26 @@ msgstr ""
 msgid "Envoyer un rapport"
 msgstr ""
 
-#: app/ui/error_dialog.py:51 app/ui/error_dialog.py:52
-#: app/ui/report_dialog.py:21
+#: app/ui/error_dialog.py:49 app/ui/error_dialog.py:50
+#: app/ui/report_dialog.py:27
 msgid "Envoyer un rapport d'erreur"
 msgstr ""
 
-#: app/ui/download_list.py:22 app/ui/history_dialog.py:113
-#: app/ui/history_dialog.py:155 app/ui/login_dialog.py:155
-#: app/ui/login_dialog.py:172 app/ui/login_dialog.py:207
-#: app/ui/main_window.py:1074 app/ui/main_window.py:850
+#: app/ui/download_list.py:22 app/ui/guided_login_dialog.py:125
+#: app/ui/guided_login_dialog.py:165 app/ui/history_dialog.py:113
+#: app/ui/history_dialog.py:155 app/ui/login_dialog.py:170
+#: app/ui/login_dialog.py:187 app/ui/login_dialog.py:222
+#: app/ui/main_window.py:1065 app/ui/main_window.py:1291
 #: app/ui/settings_dialog.py:600
 msgid "Erreur"
 msgstr ""
 
-#: app/ui/login_dialog.py:152 app/ui/uge_dialog.py:623
+#: app/ui/login_dialog.py:167 app/ui/uge_dialog.py:623
 msgid "Erreur : {error}"
 msgstr ""
 
-#: app/core/error_reporter.py:124 app/core/error_reporter.py:126
-#: app/core/error_reporter.py:165 app/core/error_reporter.py:167
+#: app/core/error_reporter.py:175 app/core/error_reporter.py:177
+#: app/core/error_reporter.py:217 app/core/error_reporter.py:219
 msgid "Erreur HTTP {code}."
 msgstr ""
 
@@ -736,39 +806,39 @@ msgstr ""
 msgid "Erreur d'aperçu"
 msgstr ""
 
-#: app/ui/main_window.py:1261
+#: app/ui/main_window.py:1478
 msgid "Erreur de lecture"
 msgstr ""
 
-#: app/ui/main_window.py:1452
+#: app/ui/main_window.py:1677
 msgid "Erreur de mise à jour"
 msgstr ""
 
-#: app/ui/main_window.py:849
+#: app/ui/main_window.py:1064
 msgid ""
 "Erreur de recherche :\n"
 "\n"
 "{error}"
 msgstr ""
 
-#: app/ui/error_dialog.py:24
+#: app/ui/error_dialog.py:25
 msgid "Erreur de téléchargement"
 msgstr ""
 
-#: app/ui/main_window.py:1431
+#: app/ui/main_window.py:1656
 msgid "Erreur de vérification"
 msgstr ""
 
-#: app/core/error_reporter.py:119 app/core/error_reporter.py:161
+#: app/core/error_reporter.py:170 app/core/error_reporter.py:213
 #: app/core/updater.py:110
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:543
+#: app/core/downloader.py:608
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
-#: app/ui/main_window.py:847
+#: app/ui/main_window.py:1062
 msgid "Erreur lors de la recherche."
 msgstr ""
 
@@ -778,21 +848,21 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/ui/login_dialog.py:206
+#: app/ui/login_dialog.py:221
 msgid ""
 "Erreur lors de la suppression des cookies :\n"
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:1449
+#: app/ui/main_window.py:1674
 msgid "Erreur lors du téléchargement de la mise à jour."
 msgstr ""
 
-#: app/ui/main_window.py:259
+#: app/ui/main_window.py:278
 msgid "Erreur lors du téléchargement."
 msgstr ""
 
-#: app/ui/main_window.py:1571
+#: app/ui/main_window.py:1832
 msgid "Erreur yt-dlp"
 msgstr ""
 
@@ -808,7 +878,7 @@ msgstr ""
 msgid "Extension"
 msgstr ""
 
-#: app/ui/main_window.py:598
+#: app/ui/main_window.py:810
 msgid "Extraction &guidée...\tCtrl+G"
 msgstr ""
 
@@ -819,12 +889,12 @@ msgstr ""
 #: app/ui/uge_dialog.py:229
 msgid ""
 "Extraction guidée ouverte. Saisissez une URL et appuyez sur Entrée pour "
-"naviguer. Lancez la vidéo dans le navigateur Chrome qui s'est ouvert. Les "
-"médias détectés apparaîtront dans cette fenêtre. Note : les contenus "
-"protégés par DRM (Netflix, Disney+, Prime Video) ne sont pas pris en charge."
+"naviguer. Lancez la vidéo dans le navigateur qui s'est ouvert. Les médias "
+"détectés apparaîtront dans cette fenêtre. Note : les contenus protégés par "
+"DRM (Netflix, Disney+, Prime Video) ne sont pas pris en charge."
 msgstr ""
 
-#: app/ui/main_window.py:904
+#: app/ui/main_window.py:1119
 msgid "Extraction guidée — Comment ça marche"
 msgstr ""
 
@@ -846,10 +916,10 @@ msgstr ""
 msgid "Fer&mer"
 msgstr ""
 
-#: app/ui/contact_dialog.py:105 app/ui/error_dialog.py:45
-#: app/ui/error_dialog.py:46 app/ui/login_dialog.py:85
-#: app/ui/main_window.py:1378 app/ui/player_dialog.py:119
-#: app/ui/report_dialog.py:117 app/ui/search_dialog.py:184
+#: app/ui/contact_dialog.py:105 app/ui/error_dialog.py:46
+#: app/ui/error_dialog.py:47 app/ui/login_dialog.py:110
+#: app/ui/main_window.py:1603 app/ui/player_dialog.py:119
+#: app/ui/report_dialog.py:123 app/ui/search_dialog.py:184
 #: app/ui/uge_dialog.py:305 app/ui/warning_dialog.py:41
 #: app/ui/warning_dialog.py:42
 msgid "Fermer"
@@ -871,11 +941,11 @@ msgstr ""
 msgid "Fichier séparé (.srt à côté de la vidéo)"
 msgstr ""
 
-#: app/core/app_updater.py:197
+#: app/core/app_updater.py:235
 msgid "Fichier téléchargé trop petit ({size} octets) — corrompu ?"
 msgstr ""
 
-#: app/ui/main_window.py:1249
+#: app/ui/main_window.py:1466
 msgid "Fichiers texte (*.txt)|*.txt|Tous les fichiers|*"
 msgstr ""
 
@@ -895,11 +965,11 @@ msgstr ""
 msgid "Format ID"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:85 app/ui/search_dialog.py:171
+#: app/ui/add_url_dialog.py:84 app/ui/search_dialog.py:171
 msgid "Format de téléchargement"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:81
+#: app/ui/add_url_dialog.py:80
 msgid "Format de téléchargement :"
 msgstr ""
 
@@ -907,7 +977,7 @@ msgstr ""
 msgid "Format des sous-titres"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:196
+#: app/ui/add_url_dialog.py:195
 msgid "Format manuel indisponible"
 msgstr ""
 
@@ -919,7 +989,7 @@ msgstr ""
 msgid "Formats"
 msgstr ""
 
-#: app/ui/main_window.py:1087
+#: app/ui/main_window.py:1304
 msgid "Formats non disponibles, téléchargement en qualité auto."
 msgstr ""
 
@@ -943,7 +1013,7 @@ msgstr ""
 msgid "Historique des téléchargements"
 msgstr ""
 
-#: app/ui/main_window.py:1181
+#: app/ui/main_window.py:1398
 msgid ""
 "Il y a {count} téléchargement(s) en cours ou en attente.\n"
 "\n"
@@ -954,7 +1024,7 @@ msgstr ""
 msgid "Illimité"
 msgstr ""
 
-#: app/ui/main_window.py:1248
+#: app/ui/main_window.py:1465
 msgid "Importer une liste d'URLs"
 msgstr ""
 
@@ -962,72 +1032,93 @@ msgstr ""
 msgid "Impossible d'extraire l'URL de streaming."
 msgstr ""
 
-#: app/ui/login_dialog.py:154 app/ui/uge_dialog.py:591
+#: app/ui/guided_login_dialog.py:124 app/ui/login_dialog.py:169
+#: app/ui/uge_dialog.py:591
 msgid ""
 "Impossible d'ouvrir le navigateur.\n"
 "\n"
 "{error}"
 msgstr ""
 
-#: app/core/app_updater.py:127
+#: app/core/app_updater.py:165
 msgid "Impossible de contacter GitHub."
 msgstr ""
 
-#: app/ui/main_window.py:1231 app/ui/main_window.py:1242
+#: app/ui/login_dialog.py:34
+msgid ""
+"Impossible de démarrer le navigateur dédié à DownAccess.\n"
+"Fermez les éventuelles fenêtres DownAccess restées ouvertes, puis réessayez."
+msgstr ""
+
+#: app/ui/main_window.py:1448 app/ui/main_window.py:1459
 msgid "Impossible de déplacer."
 msgstr ""
 
-#: app/ui/login_dialog.py:171
+#: app/ui/login_dialog.py:186
 msgid "Impossible de déterminer le domaine du site."
 msgstr ""
 
-#: app/core/app_updater.py:234
+#: app/core/app_updater.py:272
 msgid "Impossible de finaliser le fichier : {error}"
 msgstr ""
 
-#: app/core/app_updater.py:241
+#: app/core/app_updater.py:284
 msgid "Impossible de lancer l'installeur : {error}"
 msgstr ""
 
-#: app/ui/main_window.py:1260
+#: app/ui/main_window.py:1477
 msgid ""
 "Impossible de lire le fichier :\n"
 "{error}"
 msgstr ""
 
-#: app/core/app_updater.py:209
+#: app/core/downloader.py:96
+msgid ""
+"Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
+"\n"
+"Fermez complètement votre navigateur, ou connectez-vous via le menu « Se connecter à un site », puis réessayez."
+msgstr ""
+
+#: app/core/app_updater.py:247
 msgid ""
 "Impossible de récupérer la somme de contrôle (SHA-256) de la nouvelle version.\n"
 "Mise à jour annulée par sécurité — réessayez plus tard."
 msgstr ""
 
-#: app/ui/main_window.py:1073
+#: app/ui/main_window.py:1290
 msgid ""
 "Impossible de récupérer les formats :\n"
 "\n"
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:1071
+#: app/ui/main_window.py:1288
 msgid "Impossible de récupérer les formats."
 msgstr ""
 
-#: app/ui/main_window.py:1206 app/ui/main_window.py:314
+#: app/ui/guided_login_dialog.py:164
+msgid ""
+"Impossible de récupérer votre connexion.\n"
+"\n"
+"{error}"
+msgstr ""
+
+#: app/ui/main_window.py:1423 app/ui/main_window.py:342
 msgid "Impossible de réessayer : données introuvables."
 msgstr ""
 
-#: app/ui/main_window.py:1451
+#: app/ui/main_window.py:1676
 msgid ""
 "Impossible de télécharger la mise à jour :\n"
 "\n"
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:1426
+#: app/ui/main_window.py:1651
 msgid "Impossible de vérifier la mise à jour."
 msgstr ""
 
-#: app/ui/main_window.py:1430
+#: app/ui/main_window.py:1655
 msgid ""
 "Impossible de vérifier la mise à jour.\n"
 "\n"
@@ -1044,7 +1135,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:531
+#: app/core/downloader.py:596
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1052,11 +1143,11 @@ msgstr ""
 msgid "Incrustés dans l'image (ré-encode la vidéo, plus lent)"
 msgstr ""
 
-#: app/ui/main_window.py:700
+#: app/ui/main_window.py:912
 msgid "Informations sur DownAccess"
 msgstr ""
 
-#: app/ui/main_window.py:150
+#: app/ui/main_window.py:153
 msgid "Installation en cours…"
 msgstr ""
 
@@ -1076,11 +1167,15 @@ msgstr ""
 msgid "Inverser la sélection"
 msgstr ""
 
+#: app/ui/guided_login_dialog.py:75 app/ui/guided_login_dialog.py:76
+msgid "J'ai terminé"
+msgstr ""
+
 #: app/ui/history_dialog.py:145
 msgid "L'URL a été copiée dans le presse-papiers."
 msgstr ""
 
-#: app/ui/add_url_dialog.py:184
+#: app/ui/add_url_dialog.py:183
 msgid ""
 "L'URL « {url} » semble pointer vers la page d'accueil d'un site et non vers une vidéo.\n"
 "\n"
@@ -1098,7 +1193,7 @@ msgid ""
 "Cochez l'élément et utilisez « Télécharger la sélection » pour récupérer son contenu."
 msgstr ""
 
-#: app/ui/main_window.py:895
+#: app/ui/main_window.py:1110
 msgid ""
 "L'extraction guidée ouvre votre navigateur (Chrome, Edge ou Brave) à côté de DownAccess.\n"
 "\n"
@@ -1110,12 +1205,22 @@ msgid ""
 "Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video…) ne sont pas pris en charge."
 msgstr ""
 
-#: app/core/app_updater.py:246
+#: app/core/app_updater.py:289
 msgid "L'installeur s'est terminé immédiatement — fichier corrompu ?"
 msgstr ""
 
 #: app/ui/uge_dialog.py:342
 msgid "L'interception sera activée au lancement du navigateur."
+msgstr ""
+
+#: app/ui/login_dialog.py:27
+msgid ""
+"La connexion au navigateur a été perdue (la fenêtre a peut-être été fermée trop tôt).\n"
+"Réessayez, et laissez DownAccess fermer le navigateur lui-même."
+msgstr ""
+
+#: app/ui/main_window.py:446
+msgid "La connexion n'a pas suffi pour télécharger cette vidéo."
 msgstr ""
 
 #: app/ui/settings_dialog.py:541
@@ -1124,11 +1229,11 @@ msgid ""
 "appliquer le changement ?"
 msgstr ""
 
-#: app/ui/main_window.py:1175
+#: app/ui/main_window.py:1392
 msgid "La liste est déjà vide."
 msgstr ""
 
-#: app/ui/main_window.py:1570
+#: app/ui/main_window.py:1831
 msgid ""
 "La mise à jour de yt-dlp a échoué :\n"
 "\n"
@@ -1137,15 +1242,15 @@ msgid ""
 "Vérifiez votre connexion et réessayez via Aide → Mettre à jour yt-dlp."
 msgstr ""
 
-#: app/ui/main_window.py:974
+#: app/ui/main_window.py:1191
 msgid "La playlist"
 msgstr ""
 
-#: app/ui/main_window.py:974
+#: app/ui/main_window.py:1191
 msgid "La vidéo"
 msgstr ""
 
-#: app/ui/report_dialog.py:85 app/ui/report_dialog.py:86
+#: app/ui/report_dialog.py:91 app/ui/report_dialog.py:92
 msgid "Lancer le diagnostic et envoyer"
 msgstr ""
 
@@ -1195,26 +1300,41 @@ msgstr ""
 msgid "Le lecteur média n'a pas pu démarrer la lecture."
 msgstr ""
 
-#: app/ui/add_url_dialog.py:195
+#: app/ui/add_url_dialog.py:194
 msgid ""
 "Le mode 'Choisir le format manuellement' n'est disponible que pour une seule URL à la fois.\n"
 "\n"
 "Continuer en mode 'Meilleure qualité automatique' ?"
 msgstr ""
 
-#: app/ui/login_dialog.py:136
-msgid "Le navigateur"
+#: app/ui/login_dialog.py:153
+msgid ""
+"Le navigateur DownAccess est ouvert sur : {title}\n"
+"\n"
+"Connectez-vous, puis fermez cette fenêtre. Si vous êtes déjà connecté,\n"
+"il n'y a rien à faire. Vos cookies sont conservés pour les prochains téléchargements."
 msgstr ""
 
-#: app/ui/main_window.py:1273
+#: app/ui/login_dialog.py:160
+msgid ""
+"Le navigateur DownAccess est ouvert. Connectez-vous puis fermez cette "
+"fenêtre."
+msgstr ""
+
+#: app/ui/main_window.py:1490
 msgid "Le texte déposé ne contient aucune URL valide."
 msgstr ""
 
-#: app/ui/main_window.py:365
+#: app/ui/main_window.py:267
 msgid ""
-"Le téléchargement avec cookies a réussi pour {host}.\n"
-"\n"
-"Voulez-vous toujours utiliser les cookies du navigateur pour ce site ?"
+"Le téléchargement a finalement réussi : le fichier est dans votre dossier de"
+" téléchargements."
+msgstr ""
+
+#: app/ui/main_window.py:269
+msgid ""
+"Le téléchargement a finalement réussi. Le fichier est dans votre dossier de "
+"téléchargements."
 msgstr ""
 
 #: app/ui/player_dialog.py:80 app/ui/player_dialog.py:86
@@ -1236,12 +1356,6 @@ msgstr ""
 
 #: app/ui/player_dialog.py:203 app/ui/player_dialog.py:236
 msgid "Lecture."
-msgstr ""
-
-#: app/ui/settings_dialog.py:325
-msgid ""
-"Les sites sont ajoutés automatiquement quand vous utilisez \"Réessayer avec "
-"les cookies\" après une erreur."
 msgstr ""
 
 #: app/ui/settings_dialog.py:312
@@ -1268,11 +1382,11 @@ msgstr ""
 msgid "Liste effacée."
 msgstr ""
 
-#: app/ui/main_window.py:1196 app/ui/main_window.py:1197
+#: app/ui/main_window.py:1413 app/ui/main_window.py:1414
 msgid "Liste vidée."
 msgstr ""
 
-#: app/ui/add_url_dialog.py:29
+#: app/ui/add_url_dialog.py:28
 msgid "Meilleure qualité automatique"
 msgstr ""
 
@@ -1284,35 +1398,43 @@ msgstr ""
 msgid "Message :"
 msgstr ""
 
-#: app/core/error_reporter.py:159
+#: app/core/error_reporter.py:211
 msgid "Message envoyé. Merci pour votre retour !"
 msgstr ""
 
-#: app/ui/main_window.py:638
+#: app/ui/main_window.py:850
 msgid "Mettre en pause ou reprendre le téléchargement sélectionné"
 msgstr ""
 
-#: app/ui/main_window.py:686
+#: app/ui/main_window.py:898
 msgid "Mettre à jour &DownAccess"
 msgstr ""
 
-#: app/ui/main_window.py:682
+#: app/ui/main_window.py:894
 msgid "Mettre à jour &yt-dlp"
 msgstr ""
 
-#: app/ui/update_dialog.py:85 app/ui/update_dialog.py:86
+#: app/ui/update_dialog.py:86 app/ui/update_dialog.py:87
 msgid "Mettre à jour maintenant"
 msgstr ""
 
-#: app/ui/main_window.py:1423
+#: app/ui/main_window.py:1648
 msgid "Mise à jour DownAccess {version} reportée."
 msgstr ""
 
-#: app/ui/update_dialog.py:42
+#: app/ui/update_dialog.py:43
 msgid "Mise à jour disponible — DownAccess {version}"
 msgstr ""
 
-#: app/ui/main_window.py:655
+#: app/ui/main_window.py:531
+msgid "Mise à jour requise"
+msgstr ""
+
+#: app/ui/main_window.py:521
+msgid "Mise à jour requise avant d'envoyer un rapport."
+msgstr ""
+
+#: app/ui/main_window.py:867
 msgid "Mo&nter dans la file\tAlt+Up"
 msgstr ""
 
@@ -1340,10 +1462,6 @@ msgstr ""
 msgid "Médias détectés :"
 msgstr ""
 
-#: app/ui/main_window.py:366
-msgid "Mémoriser les cookies pour ce site"
-msgstr ""
-
 #: app/ui/playlist_dialog.py:74
 msgid "Ne pas numéroter"
 msgstr ""
@@ -1364,11 +1482,11 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
-#: app/ui/update_dialog.py:77
+#: app/ui/update_dialog.py:78
 msgid "Notes de version"
 msgstr ""
 
-#: app/ui/update_dialog.py:69
+#: app/ui/update_dialog.py:70
 msgid "Notes de version :"
 msgstr ""
 
@@ -1408,19 +1526,19 @@ msgstr ""
 msgid "Original (sans conversion)"
 msgstr ""
 
-#: app/ui/login_dialog.py:109
+#: app/ui/guided_login_dialog.py:102 app/ui/login_dialog.py:134
 msgid "Ouverture du navigateur…"
 msgstr ""
 
-#: app/ui/login_dialog.py:59
+#: app/ui/login_dialog.py:83
 msgid "Ouvrir"
 msgstr ""
 
-#: app/ui/login_dialog.py:59
+#: app/ui/login_dialog.py:83
 msgid "Ouvrir dans le navigateur"
 msgstr ""
 
-#: app/ui/main_window.py:695
+#: app/ui/main_window.py:907
 msgid "Ouvrir la page GitHub de DownAccess dans le navigateur"
 msgstr ""
 
@@ -1436,26 +1554,26 @@ msgstr ""
 msgid "Ouvrir le dossier de destination quand tout est terminé"
 msgstr ""
 
-#: app/ui/main_window.py:616
+#: app/ui/main_window.py:828
 msgid "Ouvrir le dossier de téléchargement dans l'Explorateur"
 msgstr ""
 
-#: app/ui/main_window.py:599
+#: app/ui/main_window.py:811
 msgid ""
 "Ouvrir le navigateur intégré pour détecter les médias sur n'importe quelle "
 "page"
 msgstr ""
 
-#: app/ui/main_window.py:621
+#: app/ui/main_window.py:833
 msgid "Ouvrir les préférences"
 msgstr ""
 
-#: app/ui/main_window.py:603
+#: app/ui/main_window.py:815
 msgid ""
 "Ouvrir un navigateur pour se connecter à un site et sauvegarder les cookies"
 msgstr ""
 
-#: app/ui/main_window.py:694
+#: app/ui/main_window.py:906
 msgid "Page &GitHub du projet"
 msgstr ""
 
@@ -1473,7 +1591,7 @@ msgstr ""
 msgid "Parcourir…"
 msgstr ""
 
-#: app/ui/main_window.py:711 app/ui/player_dialog.py:200
+#: app/ui/main_window.py:923 app/ui/player_dialog.py:200
 #: app/ui/player_dialog.py:234
 msgid "Pause"
 msgstr ""
@@ -1482,7 +1600,7 @@ msgstr ""
 msgid "Pause."
 msgstr ""
 
-#: app/ui/main_window.py:711
+#: app/ui/main_window.py:923
 msgid "Pause/Reprendre (Espace)"
 msgstr ""
 
@@ -1494,7 +1612,7 @@ msgstr ""
 msgid "Playlist"
 msgstr ""
 
-#: app/ui/main_window.py:508
+#: app/ui/main_window.py:720
 msgid "Playlist détectée : {title}. {count} vidéos."
 msgstr ""
 
@@ -1502,7 +1620,7 @@ msgstr ""
 msgid "Playlist — {title}"
 msgstr ""
 
-#: app/ui/update_dialog.py:90
+#: app/ui/update_dialog.py:91
 msgid "Plus tard"
 msgstr ""
 
@@ -1514,7 +1632,7 @@ msgstr ""
 msgid "Position de lecture"
 msgstr ""
 
-#: app/ui/report_dialog.py:48
+#: app/ui/report_dialog.py:54
 msgid ""
 "Pour générer un rapport complet, DownAccess va relancer le téléchargement en mode diagnostic afin de capturer les logs détaillés de yt-dlp.\n"
 "\n"
@@ -1526,11 +1644,11 @@ msgstr ""
 msgid "Progression"
 msgstr ""
 
-#: app/ui/main_window.py:126
+#: app/ui/main_window.py:129
 msgid "Progression du téléchargement"
 msgstr ""
 
-#: app/ui/main_window.py:744
+#: app/ui/main_window.py:960
 msgid "Progression du téléchargement actif"
 msgstr ""
 
@@ -1550,7 +1668,7 @@ msgstr ""
 msgid "Proxy SOCKS4/5 :"
 msgstr ""
 
-#: app/ui/main_window.py:1107
+#: app/ui/main_window.py:1324
 msgid "Préférences enregistrées."
 msgstr ""
 
@@ -1562,7 +1680,7 @@ msgstr ""
 msgid "Préparation de la lecture…"
 msgstr ""
 
-#: app/ui/main_window.py:759
+#: app/ui/main_window.py:975
 msgid "Prêt"
 msgstr ""
 
@@ -1570,27 +1688,27 @@ msgstr ""
 msgid "Question générale"
 msgstr ""
 
-#: app/ui/main_window.py:626
+#: app/ui/main_window.py:838
 msgid "Quitter DownAccess"
 msgstr ""
 
-#: app/ui/main_window.py:677
+#: app/ui/main_window.py:889
 msgid "Raccourcis &clavier"
 msgstr ""
 
-#: app/ui/main_window.py:1374
+#: app/ui/main_window.py:1599
 msgid "Raccourcis clavier"
 msgstr ""
 
-#: app/ui/main_window.py:487
+#: app/ui/main_window.py:699
 msgid "Rapport d'erreur envoyé."
 msgstr ""
 
-#: app/ui/report_dialog.py:34
+#: app/ui/report_dialog.py:40
 msgid "Rapport d'erreur. URL : {url}. Site : {site}."
 msgstr ""
 
-#: app/core/error_reporter.py:117
+#: app/core/error_reporter.py:168
 msgid "Rapport envoyé avec succès."
 msgstr ""
 
@@ -1598,15 +1716,15 @@ msgstr ""
 msgid "Recherche :"
 msgstr ""
 
-#: app/ui/main_window.py:863
+#: app/ui/main_window.py:1078
 msgid "Recherche annulée."
 msgstr ""
 
-#: app/ui/main_window.py:815
+#: app/ui/main_window.py:1031
 msgid "Recherche en cours : {query}…"
 msgstr ""
 
-#: app/ui/main_window.py:816
+#: app/ui/main_window.py:1032
 msgid "Recherche sur {site}…"
 msgstr ""
 
@@ -1614,7 +1732,7 @@ msgstr ""
 msgid "Rechercher des médias"
 msgstr ""
 
-#: app/ui/main_window.py:607
+#: app/ui/main_window.py:819
 msgid "Rechercher des vidéos ou musiques sur YouTube, SoundCloud, etc."
 msgstr ""
 
@@ -1630,35 +1748,35 @@ msgstr ""
 msgid "Redémarrer DownAccess ?"
 msgstr ""
 
-#: app/ui/main_window.py:347
-msgid "Relance avec les cookies du navigateur."
-msgstr ""
-
-#: app/ui/main_window.py:346
-msgid "Relance avec les cookies du navigateur..."
-msgstr ""
-
-#: app/ui/update_dialog.py:91
+#: app/ui/update_dialog.py:92
 msgid "Reporter la mise à jour"
+msgstr ""
+
+#: app/ui/main_window.py:374
+msgid "Reprise du téléchargement après connexion..."
+msgstr ""
+
+#: app/ui/main_window.py:375
+msgid "Reprise du téléchargement."
 msgstr ""
 
 #: app/ui/search_dialog.py:47
 msgid "Requête de recherche"
 msgstr ""
 
-#: app/ui/main_window.py:1050
+#: app/ui/guided_login_dialog.py:138
+msgid "Récupération de votre connexion…"
+msgstr ""
+
+#: app/ui/main_window.py:1267
 msgid "Récupération des formats disponibles."
 msgstr ""
 
-#: app/ui/main_window.py:1049
+#: app/ui/main_window.py:1266
 msgid "Récupération des formats disponibles…"
 msgstr ""
 
-#: app/ui/error_dialog.py:48 app/ui/error_dialog.py:49
-msgid "Réessayer avec les cookies du navigateur"
-msgstr ""
-
-#: app/ui/main_window.py:651
+#: app/ui/main_window.py:863
 msgid "Réessayer le téléchargement échoué sélectionné"
 msgstr ""
 
@@ -1666,7 +1784,7 @@ msgstr ""
 msgid "Réinitialiser tous les avertissements"
 msgstr ""
 
-#: app/core/app_updater.py:104
+#: app/core/app_updater.py:140
 msgid "Réponse GitHub invalide."
 msgstr ""
 
@@ -1702,11 +1820,15 @@ msgstr ""
 msgid "SRT"
 msgstr ""
 
-#: app/ui/main_window.py:602
+#: app/ui/main_window.py:814
 msgid "Se &connecter à un site..."
 msgstr ""
 
-#: app/ui/login_dialog.py:28
+#: app/ui/login_required_dialog.py:54 app/ui/login_required_dialog.py:55
+msgid "Se connecter et télécharger"
+msgstr ""
+
+#: app/ui/login_dialog.py:52
 msgid "Se connecter à un site — DownAccess"
 msgstr ""
 
@@ -1730,16 +1852,22 @@ msgstr ""
 msgid "Sites avec cookies"
 msgstr ""
 
+#: app/ui/settings_dialog.py:325
+msgid ""
+"Sites où vous vous êtes connecté. Ils sont ajoutés automatiquement après une"
+" connexion, et vos identifiants y sont réutilisés pour les téléchargements."
+msgstr ""
+
 #: app/ui/settings_dialog.py:319
 msgid "Sites utilisant les cookies du navigateur :"
 msgstr ""
 
-#: app/ui/history_dialog.py:187 app/ui/main_window.py:1031
+#: app/ui/history_dialog.py:187 app/ui/main_window.py:1248
 #: app/ui/settings_dialog.py:118
 msgid "Sous-titres"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:33
+#: app/ui/add_url_dialog.py:32
 msgid "Sous-titres uniquement"
 msgstr ""
 
@@ -1755,38 +1883,38 @@ msgstr ""
 msgid "Supprimer le site sélectionné"
 msgstr ""
 
-#: app/ui/main_window.py:642
+#: app/ui/main_window.py:854
 msgid "Supprimer le téléchargement sélectionné"
 msgstr ""
 
-#: app/ui/login_dialog.py:81
+#: app/ui/login_dialog.py:106
 msgid "Supprimer les cookies du site"
 msgstr ""
 
-#: app/ui/login_dialog.py:82
+#: app/ui/login_dialog.py:107
 msgid "Supprimer les cookies du site actuellement ouvert"
 msgstr ""
 
-#: app/ui/login_dialog.py:177
+#: app/ui/login_dialog.py:192
 msgid ""
 "Supprimer tous les cookies de {domain} ?\n"
 "\n"
 "Vous serez déconnecté de ce site."
 msgstr ""
 
-#: app/ui/main_window.py:1170
+#: app/ui/main_window.py:1387
 msgid "Supprimé."
 msgstr ""
 
-#: app/ui/main_window.py:1331 app/ui/main_window.py:1332
+#: app/ui/main_window.py:1556 app/ui/main_window.py:1557
 msgid "Surveillance du presse-papiers activée."
 msgstr ""
 
-#: app/ui/main_window.py:1335 app/ui/main_window.py:1336
+#: app/ui/main_window.py:1560 app/ui/main_window.py:1561
 msgid "Surveillance du presse-papiers désactivée."
 msgstr ""
 
-#: app/ui/main_window.py:664
+#: app/ui/main_window.py:876
 msgid "Surveiller le &presse-papiers\tCtrl+Shift+V"
 msgstr ""
 
@@ -1794,7 +1922,7 @@ msgstr ""
 msgid "Sélection"
 msgstr ""
 
-#: app/ui/main_window.py:1096
+#: app/ui/main_window.py:1313
 msgid "Sélection de format annulée."
 msgstr ""
 
@@ -1879,23 +2007,23 @@ msgstr ""
 msgid "Type de message :"
 msgstr ""
 
-#: app/ui/main_window.py:105
+#: app/ui/main_window.py:108
 msgid "Téléchargement de DownAccess {version}"
 msgstr ""
 
-#: app/ui/main_window.py:121
+#: app/ui/main_window.py:124
 msgid "Téléchargement de DownAccess {version}…"
 msgstr ""
 
-#: app/ui/main_window.py:1440
+#: app/ui/main_window.py:1665
 msgid "Téléchargement de la mise à jour… {percent} %"
 msgstr ""
 
-#: app/ui/main_window.py:520
+#: app/ui/main_window.py:732
 msgid "Téléchargement de playlist annulé."
 msgstr ""
 
-#: app/ui/main_window.py:223
+#: app/ui/main_window.py:226
 msgid "Téléchargement démarré : {title}."
 msgstr ""
 
@@ -1903,19 +2031,19 @@ msgstr ""
 msgid "Téléchargement en cours…"
 msgstr ""
 
-#: app/ui/main_window.py:1149 app/ui/main_window.py:1150
+#: app/ui/main_window.py:1366 app/ui/main_window.py:1367
 msgid "Téléchargement mis en pause."
 msgstr ""
 
-#: app/ui/main_window.py:1220
+#: app/ui/main_window.py:1437
 msgid "Téléchargement relancé."
 msgstr ""
 
-#: app/ui/main_window.py:1144 app/ui/main_window.py:1145
+#: app/ui/main_window.py:1361 app/ui/main_window.py:1362
 msgid "Téléchargement repris."
 msgstr ""
 
-#: app/ui/main_window.py:1169
+#: app/ui/main_window.py:1386
 msgid "Téléchargement supprimé de la liste."
 msgstr ""
 
@@ -1923,15 +2051,15 @@ msgstr ""
 msgid "Téléchargement terminé : {filename} ({size_mb:.1f} Mo)"
 msgstr ""
 
-#: app/ui/main_window.py:378 app/ui/main_window.py:379
+#: app/ui/main_window.py:492 app/ui/main_window.py:493
 msgid "Téléchargement terminé avec avertissement."
 msgstr ""
 
-#: app/ui/main_window.py:243 app/ui/main_window.py:244
+#: app/ui/main_window.py:246 app/ui/main_window.py:247
 msgid "Téléchargement terminé."
 msgstr ""
 
-#: app/ui/main_window.py:151
+#: app/ui/main_window.py:154
 msgid "Téléchargement terminé. Installation en cours."
 msgstr ""
 
@@ -1939,11 +2067,11 @@ msgstr ""
 msgid "Téléchargement volumineux"
 msgstr ""
 
-#: app/core/app_updater.py:186
+#: app/core/app_updater.py:224
 msgid "Téléchargement échoué : {error}"
 msgstr ""
 
-#: app/ui/main_window.py:1507
+#: app/ui/main_window.py:1768
 msgid "Téléchargements en cours — DownAccess"
 msgstr ""
 
@@ -1963,7 +2091,7 @@ msgstr ""
 msgid "Télécharger ce format"
 msgstr ""
 
-#: app/ui/main_window.py:683
+#: app/ui/main_window.py:895
 msgid "Télécharger et installer la dernière version de yt-dlp"
 msgstr ""
 
@@ -1971,7 +2099,7 @@ msgstr ""
 msgid "Télécharger la sélection"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:101 app/ui/add_url_dialog.py:102
+#: app/ui/add_url_dialog.py:100 app/ui/add_url_dialog.py:101
 msgid "Télécharger les sous-titres avec ce média"
 msgstr ""
 
@@ -1979,11 +2107,11 @@ msgstr ""
 msgid "URL"
 msgstr ""
 
-#: app/ui/main_window.py:1043
+#: app/ui/main_window.py:1260
 msgid "URL ajoutée : {url}"
 msgstr ""
 
-#: app/ui/main_window.py:1018
+#: app/ui/main_window.py:1235
 msgid ""
 "URL ajoutée. Le téléchargement démarrera après la mise à jour de yt-dlp."
 msgstr ""
@@ -1992,36 +2120,45 @@ msgstr ""
 msgid "URL copiée"
 msgstr ""
 
-#: app/ui/main_window.py:1351
+#: app/ui/main_window.py:1576
 msgid "URL détectée et ajoutée : {url}"
 msgstr ""
 
-#: app/ui/main_window.py:1016
+#: app/ui/main_window.py:1233
 msgid "URL en file d'attente — mise à jour yt-dlp en cours…"
 msgstr ""
 
-#: app/ui/main_window.py:1311
+#: app/ui/main_window.py:1536
 msgid "URL ignorée (domaine seul) : {url}"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:185
+#: app/ui/add_url_dialog.py:184
 msgid "URL invalide"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:170
+#: app/ui/add_url_dialog.py:169
 msgid "URL manquante"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:71
+#: app/ui/add_url_dialog.py:70
 msgid "URL(s) à télécharger (une par ligne) :"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:76
+#: app/ui/add_url_dialog.py:75
 msgid "URLs"
 msgstr ""
 
-#: app/ui/error_dialog.py:36
+#: app/ui/error_dialog.py:37
 msgid "Une erreur s'est produite :"
+msgstr ""
+
+#: app/ui/main_window.py:524
+msgid ""
+"Une version plus récente de DownAccess est disponible (version {version}).\n"
+"\n"
+"Votre problème est peut-être déjà corrigé. Merci de mettre à jour l'application, puis de réessayer si le problème persiste.\n"
+"\n"
+"Voulez-vous mettre à jour maintenant ?"
 msgstr ""
 
 #: app/ui/settings_dialog.py:306
@@ -2058,8 +2195,17 @@ msgstr ""
 msgid "Veuillez entrer votre adresse email."
 msgstr ""
 
-#: app/ui/add_url_dialog.py:169
+#: app/ui/add_url_dialog.py:168
 msgid "Veuillez saisir au moins une URL."
+msgstr ""
+
+#: app/ui/report_dialog.py:151
+msgid ""
+"Veuillez saisir une adresse email valide pour que nous puissions vous répondre.\n"
+"\n"
+"Sans adresse, nous ne pouvons pas vous aider sur ce problème.\n"
+"\n"
+"Exemple : prenom@exemple.com"
 msgstr ""
 
 #: app/ui/search_dialog.py:81
@@ -2078,7 +2224,7 @@ msgstr ""
 msgid "Vider tout l'historique ? Cette action est irréversible."
 msgstr ""
 
-#: app/ui/main_window.py:1185
+#: app/ui/main_window.py:1402
 msgid "Vider toute la liste ?"
 msgstr ""
 
@@ -2086,11 +2232,11 @@ msgstr ""
 msgid "Vidéo"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:30 app/ui/settings_dialog.py:31
+#: app/ui/add_url_dialog.py:29 app/ui/settings_dialog.py:31
 msgid "Vidéo MP4 (H.264)"
 msgstr ""
 
-#: app/ui/main_window.py:971
+#: app/ui/main_window.py:1188
 msgid "Vidéo ou playlist ?"
 msgstr ""
 
@@ -2114,8 +2260,8 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/ui/report_dialog.py:61
-msgid "Votre email (optionnel, pour qu'on puisse vous répondre) :"
+#: app/ui/report_dialog.py:67
+msgid "Votre email (obligatoire, pour qu'on puisse vous répondre) :"
 msgstr ""
 
 #: app/ui/search_dialog.py:337
@@ -2125,37 +2271,58 @@ msgid ""
 "Le téléchargement peut prendre beaucoup de temps et d'espace disque. Continuer ?"
 msgstr ""
 
-#: app/ui/main_window.py:1402
+#: app/ui/main_window.py:1627
 msgid ""
 "Vous utilisez déjà la dernière version de DownAccess.\n"
 "\n"
 "Version actuelle : {version}"
 msgstr ""
 
-#: app/core/app_updater.py:223
+#: app/ui/main_window.py:449
+msgid ""
+"Vous êtes connecté, mais cette vidéo {site} n'a pas pu être téléchargée.\n"
+"\n"
+"Soit vous n'êtes pas connecté au bon compte, soit ce contenu nécessite un abonnement ou des droits que votre compte n'a pas.\n"
+"\n"
+"Voulez-vous réessayer de vous connecter ?"
+msgstr ""
+
+#: app/core/app_updater.py:261
 msgid ""
 "Vérification d'intégrité échouée : le fichier téléchargé ne correspond pas\n"
 "à la somme de contrôle officielle. Mise à jour annulée par sécurité."
 msgstr ""
 
-#: app/ui/main_window.py:1389
+#: app/ui/main_window.py:1614
 msgid "Vérification de la mise à jour DownAccess…"
 msgstr ""
 
-#: app/ui/main_window.py:1390
+#: app/ui/main_window.py:1615
 msgid "Vérification de la mise à jour."
 msgstr ""
 
-#: app/ui/main_window.py:1463
+#: app/ui/main_window.py:1724
 msgid "Vérification de la version yt-dlp…"
 msgstr ""
 
-#: app/ui/main_window.py:1464
+#: app/ui/main_window.py:507
+msgid "Vérification de la version."
+msgstr ""
+
+#: app/ui/main_window.py:506
+msgid "Vérification de la version…"
+msgstr ""
+
+#: app/ui/main_window.py:1725
 msgid "Vérification en cours."
 msgstr ""
 
-#: app/ui/main_window.py:687
+#: app/ui/main_window.py:899
 msgid "Vérifier et installer la dernière version de DownAccess"
+msgstr ""
+
+#: app/ui/main_window.py:398
+msgid "ce site"
 msgstr ""
 
 #: app/ui/search_dialog.py:237
@@ -2193,11 +2360,11 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/ui/report_dialog.py:36
+#: app/ui/report_dialog.py:42
 msgid "inconnu"
 msgstr ""
 
-#: app/ui/report_dialog.py:35
+#: app/ui/report_dialog.py:41
 msgid "inconnue"
 msgstr ""
 
@@ -2221,56 +2388,56 @@ msgstr ""
 msgid "une playlist complète"
 msgstr ""
 
-#: app/ui/main_window.py:1562
+#: app/ui/main_window.py:1823
 msgid ""
 "yt-dlp a été installé avec succès.\n"
 "\n"
 "Version : {version}"
 msgstr ""
 
-#: app/ui/main_window.py:1554
+#: app/ui/main_window.py:1815
 msgid ""
 "yt-dlp a été mis à jour avec succès.\n"
 "\n"
 "Nouvelle version : {version}"
 msgstr ""
 
-#: app/ui/main_window.py:1546
+#: app/ui/main_window.py:1807
 msgid ""
 "yt-dlp est déjà à jour.\n"
 "\n"
 "Version actuelle : {version}"
 msgstr ""
 
-#: app/ui/main_window.py:1544
+#: app/ui/main_window.py:1805
 msgid "yt-dlp est à jour. Version {version}."
 msgstr ""
 
-#: app/ui/main_window.py:1563
+#: app/ui/main_window.py:1824
 msgid "yt-dlp installé"
 msgstr ""
 
-#: app/ui/main_window.py:1560
+#: app/ui/main_window.py:1821
 msgid "yt-dlp installé. Version {version}."
 msgstr ""
 
-#: app/ui/main_window.py:1555
+#: app/ui/main_window.py:1816
 msgid "yt-dlp mis à jour"
 msgstr ""
 
-#: app/ui/main_window.py:1552
+#: app/ui/main_window.py:1813
 msgid "yt-dlp mis à jour. Version {version}."
 msgstr ""
 
-#: app/ui/main_window.py:1547
+#: app/ui/main_window.py:1808
 msgid "yt-dlp à jour"
 msgstr ""
 
-#: app/ui/main_window.py:1318
+#: app/ui/main_window.py:1543
 msgid "{count} URL ajoutée depuis le presse-papiers."
 msgstr ""
 
-#: app/ui/main_window.py:1316
+#: app/ui/main_window.py:1541
 msgid "{count} URLs ajoutées depuis le presse-papiers."
 msgstr ""
 
@@ -2290,7 +2457,7 @@ msgstr ""
 msgid "{count} médias détectés."
 msgstr ""
 
-#: app/ui/main_window.py:887
+#: app/ui/main_window.py:1102
 msgid "{count} résultat ajouté à la file."
 msgstr ""
 
@@ -2298,7 +2465,7 @@ msgstr ""
 msgid "{count} résultat trouvé."
 msgstr ""
 
-#: app/ui/main_window.py:885
+#: app/ui/main_window.py:1100
 msgid "{count} résultats ajoutés à la file."
 msgstr ""
 
@@ -2322,11 +2489,11 @@ msgstr ""
 msgid "{count} sélectionnés."
 msgstr ""
 
-#: app/ui/main_window.py:1598
+#: app/ui/main_window.py:1859
 msgid "{count} téléchargement(s)"
 msgstr ""
 
-#: app/ui/main_window.py:1506
+#: app/ui/main_window.py:1767
 msgid ""
 "{count} téléchargement(s) en cours.\n"
 "\n"
@@ -2335,7 +2502,7 @@ msgid ""
 "Voulez-vous vraiment quitter ?"
 msgstr ""
 
-#: app/ui/main_window.py:544
+#: app/ui/main_window.py:756
 msgid "{count} vidéos ajoutées à la file."
 msgstr ""
 
@@ -2349,18 +2516,6 @@ msgstr ""
 
 #: app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
-msgstr ""
-
-#: app/ui/login_dialog.py:138
-msgid ""
-"{name} est ouvert sur : {title}\n"
-"\n"
-"Connectez-vous dans {name}, puis fermez cette fenêtre.\n"
-"Vos cookies seront conservés pour les prochains téléchargements."
-msgstr ""
-
-#: app/ui/login_dialog.py:147
-msgid "{name} est ouvert. Connectez-vous puis fermez cette fenêtre."
 msgstr ""
 
 #: app/ui/settings_dialog.py:506
@@ -2383,11 +2538,11 @@ msgstr ""
 msgid "{state}. {title}. {count_msg}"
 msgstr ""
 
-#: app/ui/main_window.py:699
+#: app/ui/main_window.py:911
 msgid "À &propos de DownAccess"
 msgstr ""
 
-#: app/ui/main_window.py:1498
+#: app/ui/main_window.py:1759
 msgid "À propos de DownAccess"
 msgstr ""
 
@@ -2395,14 +2550,14 @@ msgstr ""
 msgid "Échec"
 msgstr ""
 
-#: app/ui/main_window.py:489
+#: app/ui/main_window.py:701
 msgid "Échec de l'envoi du rapport."
 msgstr ""
 
-#: app/ui/main_window.py:1568
+#: app/ui/main_window.py:1829
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr ""
 
-#: app/ui/add_url_dialog.py:109
+#: app/ui/add_url_dialog.py:108
 msgid "⚠ Mode manuel disponible pour une seule URL à la fois."
 msgstr ""

@@ -322,7 +322,7 @@ class SettingsDialog(wx.Dialog):
                                            name=_("Sites avec cookies"))
         lbl_cookies_hint = wx.StaticText(
             page,
-            label=_("Les sites sont ajoutés automatiquement quand vous utilisez \"Réessayer avec les cookies\" après une erreur."),
+            label=_("Sites où vous vous êtes connecté. Ils sont ajoutés automatiquement après une connexion, et vos identifiants y sont réutilisés pour les téléchargements."),
         )
         lbl_cookies_hint.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
         self.btn_remove_cookie_site = wx.Button(page, label=_("Supprimer le site sélectionné"),

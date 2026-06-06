@@ -1,25 +1,49 @@
 """
 Dialogue de connexion à un site.
-Ouvre le navigateur Chrome avec le vrai profil de l'utilisateur
-(via DrissionPage) pour que les cookies soient conservés.
-yt-dlp y a accès via cookiesfrombrowser.
+Ouvre un navigateur dans un profil dédié à DownAccess (via DrissionPage)
+pour que les cookies soient conservés et réutilisés par yt-dlp.
+Profil isolé = aucun conflit avec le navigateur habituel de l'utilisateur,
+qu'il soit déjà ouvert ou non. La connexion ne se fait qu'une fois.
 """
 import logging
 import threading
+from urllib.parse import urlparse
 
 import wx
 
 from app.core import speech
-from app.core.browser import find_browser, browser_name
+from app.core.browser import harvest_cookies, open_dedicated_browser
+from app.core.cookies import jar_path_for, write_cookie_jar_from_dicts
 
 _log = logging.getLogger("downaccess.login")
 
 
+def friendly_browser_error(exc: Exception) -> str:
+    """Convertit une erreur technique (souvent un message DrissionPage en
+    chinois) en message clair. Partagé par les dialogues de connexion."""
+    msg = str(exc)
+    # Connexion à la page perdue (fenêtre fermée trop tôt).
+    if "断开" in msg or "disconnect" in msg.lower():
+        return _(
+            "La connexion au navigateur a été perdue (la fenêtre a peut-être "
+            "été fermée trop tôt).\n"
+            "Réessayez, et laissez DownAccess fermer le navigateur lui-même."
+        )
+    if any(s in msg for s in ("127.0.0.1", "9222", "连接", "浏览器")) \
+            or "Connect" in type(exc).__name__:
+        return _(
+            "Impossible de démarrer le navigateur dédié à DownAccess.\n"
+            "Fermez les éventuelles fenêtres DownAccess restées ouvertes, "
+            "puis réessayez."
+        )
+    return msg
+
+
 class LoginDialog(wx.Dialog):
     """
-    Dialogue de connexion. Ouvre Chrome avec le vrai profil utilisateur,
-    l'utilisateur se connecte, puis ferme ce dialogue.
-    Les cookies restent dans le profil Chrome → yt-dlp y accède.
+    Dialogue de connexion. Ouvre un navigateur dans le profil dédié à
+    DownAccess, l'utilisateur se connecte, puis ferme ce dialogue.
+    Les cookies restent dans ce profil → yt-dlp y accède.
     """
 
     def __init__(self, parent):
@@ -37,8 +61,8 @@ class LoginDialog(wx.Dialog):
         speech.speak(
             _(
                 "Connexion à un site. "
-                "Saisissez l'adresse et connectez-vous dans le navigateur. "
-                "Vos cookies seront conservés pour les prochains téléchargements. "
+                "Saisissez l'adresse : un navigateur dédié à DownAccess s'ouvrira. "
+                "Connectez-vous une fois ; vos cookies seront conservés pour les prochains téléchargements. "
                 "Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video) ne sont pas pris en charge."
             ),
         )
@@ -66,9 +90,10 @@ class LoginDialog(wx.Dialog):
         self.lbl_status = wx.StaticText(
             panel,
             label=_(
-                "Entrez l'adresse du site et connectez-vous dans le navigateur.\n"
-                "Votre vrai profil Chrome est utilisé : vos cookies seront conservés\n"
-                "et réutilisés automatiquement pour les téléchargements.\n\n"
+                "Entrez l'adresse du site et connectez-vous dans le navigateur dédié à\n"
+                "DownAccess qui va s'ouvrir. C'est un navigateur séparé de votre navigation\n"
+                "habituelle : vous restez connecté une fois pour toutes, et vos cookies sont\n"
+                "réutilisés automatiquement pour les téléchargements.\n\n"
                 "Note : les contenus protégés par DRM ne sont pas pris en charge."
             ),
         )
@@ -111,41 +136,31 @@ class LoginDialog(wx.Dialog):
 
         def open_browser():
             try:
-                bp = find_browser()
-                if not bp:
-                    wx.CallAfter(self._on_browser_error,
-                                 _("Aucun navigateur compatible trouvé.\nInstallez Google Chrome, Microsoft Edge ou Brave."))
-                    return
                 if self._page is None:
-                    from DrissionPage import ChromiumPage, ChromiumOptions
-                    co = ChromiumOptions()
-                    co.set_browser_path(bp)
-                    co.use_system_user_path()
-                    self._page = ChromiumPage(co)
-                    self._browser_name = browser_name(bp)
-                self._page.get(url)
+                    self._page = open_dedicated_browser(url)
+                else:
+                    self._page.get(url)
                 title = self._page.title
                 wx.CallAfter(self._on_browser_ready, title)
             except Exception as exc:
                 _log.error("Impossible d'ouvrir le navigateur : %s", exc)
-                wx.CallAfter(self._on_browser_error, str(exc))
+                wx.CallAfter(self._on_browser_error, friendly_browser_error(exc))
 
         threading.Thread(target=open_browser, daemon=True).start()
 
     def _on_browser_ready(self, title: str) -> None:
-        name = getattr(self, "_browser_name", _("Le navigateur"))
         self.lbl_status.SetLabel(
             _(
-                "{name} est ouvert sur : {title}\n\n"
-                "Connectez-vous dans {name}, puis fermez cette fenêtre.\n"
-                "Vos cookies seront conservés pour les prochains téléchargements."
-            ).format(name=name, title=title)
+                "Le navigateur DownAccess est ouvert sur : {title}\n\n"
+                "Connectez-vous, puis fermez cette fenêtre. Si vous êtes déjà connecté,\n"
+                "il n'y a rien à faire. Vos cookies sont conservés pour les prochains téléchargements."
+            ).format(title=title)
+        )
+        speech.speak(
+            _("Le navigateur DownAccess est ouvert. Connectez-vous puis fermez cette fenêtre.")
         )
         self.btn_go.Enable()
         self.btn_clear_cookies.Enable()
-        speech.speak(
-            _("{name} est ouvert. Connectez-vous puis fermez cette fenêtre.").format(name=name)
-        )
 
     def _on_browser_error(self, error: str) -> None:
         self.btn_go.Enable()
@@ -209,9 +224,40 @@ class LoginDialog(wx.Dialog):
 
     def _on_close(self, event) -> None:
         if self._page:
+            # Récolter les cookies de la session AVANT de fermer le navigateur :
+            # ils sont déjà déchiffrés ici (CDP), ce qui contourne le chiffrement
+            # App-Bound de Chrome 127+ que yt-dlp ne sait pas lire.
+            self._save_session_cookies()
             try:
                 self._page.quit()
             except Exception:
                 pass
             self._page = None
         event.Skip()
+
+    def _save_session_cookies(self) -> None:
+        """Écrit les cookies du site ouvert dans un jar persistant et mémorise
+        le site, pour que yt-dlp les réutilise aux prochains téléchargements."""
+        try:
+            current_url = self._page.url or ""
+            domain = (urlparse(current_url).hostname or "").lower()
+            if not domain:
+                return
+            cookies = harvest_cookies(self._page)
+            n = write_cookie_jar_from_dicts(cookies, jar_path_for(current_url))
+            if n <= 0:
+                return
+            # Mémoriser le site dans les préférences (réutilise le dict en mémoire
+            # de la fenêtre principale pour rester cohérent).
+            parent = self.GetParent()
+            settings = getattr(parent, "settings", None)
+            if settings is not None:
+                norm = domain[4:] if domain.startswith("www.") else domain
+                sites = settings.setdefault("cookie_sites", [])
+                if norm not in sites:
+                    sites.append(norm)
+                    from app.core import settings as cfg
+                    cfg.save(settings)
+            _log.info("Cookies du site %s récoltés (%d) à la connexion manuelle", domain, n)
+        except Exception as exc:
+            _log.error("Récolte des cookies impossible : %s", exc)

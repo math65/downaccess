@@ -6,7 +6,7 @@ import tempfile
 import time
 import threading
 from dataclasses import dataclass, field
-from typing import Callable
+from collections.abc import Callable
 from urllib.parse import urlparse
 
 import yt_dlp
@@ -60,6 +60,64 @@ class DownloadProgress:
 OnInfoCallback      = Callable[[DownloadInfo], None]
 OnProgressCallback  = Callable[[DownloadProgress], None]
 OnErrorCallback     = Callable[[str, str], None]   # (download_id, message)
+
+
+# Marqueurs (dans les messages yt-dlp) indiquant qu'une connexion au site
+# règlerait le problème : contenu réservé aux adultes/membres/privé, ou
+# suggestion explicite de yt-dlp d'utiliser des cookies/identifiants.
+_LOGIN_REQUIRED_PATTERNS = (
+    "confirm your age", "age-restricted", "sign in to confirm",
+    "login_required", "this video is private", "private video",
+    "members-only", "join this channel",
+    "cookies-from-browser", "for the authentication", "use --cookies",
+    "sign in to", "log in to",
+)
+
+
+def _is_login_required(msg: str) -> bool:
+    """Vrai si l'erreur yt-dlp indique qu'une connexion au site aiderait."""
+    low = msg.lower()
+    return any(p in low for p in _LOGIN_REQUIRED_PATTERNS)
+
+
+def _humanize_error(msg: str) -> str:
+    """Traduit certaines erreurs yt-dlp cryptiques en messages clairs et
+    actionnables pour le grand public.
+
+    Le texte d'origine reste disponible dans le log diagnostic ; ici on ne
+    remplace que le message affiché à l'utilisateur dans le dialogue d'erreur.
+    """
+    low = msg.lower()
+
+    # Navigateur ouvert → base de cookies verrouillée (yt-dlp issue #7271).
+    # Avec le parcours de connexion guidée (navigateur dédié), ce cas ne
+    # devrait plus survenir, mais on garde un message clair en repli.
+    if "cookie database" in low and ("could not copy" in low or "permission" in low):
+        return _(
+            "Impossible de lire les cookies de votre navigateur car il est "
+            "actuellement ouvert.\n\n"
+            "Fermez complètement votre navigateur, ou connectez-vous via le "
+            "menu « Se connecter à un site », puis réessayez."
+        )
+
+    # Connexion requise : message court (le parcours de connexion guidée
+    # affiche son propre dialogue détaillé ; ce texte sert de repli).
+    if _is_login_required(msg):
+        return _(
+            "Ce contenu nécessite que vous soyez connecté au site "
+            "(vidéo réservée aux adultes, privée ou réservée aux membres)."
+        )
+
+    return msg
+
+
+def _raise_download_error(raw_msg: str, cause: Exception) -> None:
+    """Lève l'erreur du bon type : LoginRequiredError si une connexion
+    aiderait, sinon DownloadError. Le message est reformulé pour l'utilisateur."""
+    friendly = _humanize_error(raw_msg)
+    if _is_login_required(raw_msg):
+        raise LoginRequiredError(friendly) from cause
+    raise DownloadError(friendly) from cause
 
 
 def _domain_from_url(url: str) -> str:
@@ -135,7 +193,7 @@ class Downloader:
         # Cookies depuis le navigateur de l'utilisateur (si pas de cookies UGE)
         if not cookies and (use_cookies or _should_use_cookies(self._settings, url)):
             from app.core.cookies import apply_cookies
-            apply_cookies(flat_opts)
+            apply_cookies(flat_opts, url)
 
         try:
             with yt_dlp.YoutubeDL(flat_opts) as ydl:
@@ -174,9 +232,9 @@ class Downloader:
                 raw_formats=info.get("formats") or [],
             )
         except yt_dlp.utils.DownloadError as exc:
-            raise DownloadError(str(exc)) from exc
+            _raise_download_error(str(exc), exc)
         except Exception as exc:
-            raise DownloadError(str(exc)) from exc
+            _raise_download_error(str(exc), exc)
         finally:
             if cookie_jar_path:
                 try:
@@ -248,6 +306,13 @@ class Downloader:
             "progress_hooks": [self._make_hook(download_id, on_progress, stop_event, pause_event)],
             "js_runtimes":    {"node": {}},
             "concurrent_fragment_downloads": fragments if fragments > 1 else 1,
+            # Résilience réseau : sur une connexion instable, un stall doit durer
+            # 30 s avant de compter comme timeout, et yt-dlp reprend (depuis le
+            # .part) jusqu'à 20 fois avant d'abandonner. Évite qu'un « Read timed
+            # out » transitoire remonte comme un échec fatal.
+            "socket_timeout":   30,
+            "retries":          20,
+            "fragment_retries": 20,
         }
 
         if verbose and log_buf is not None:
@@ -283,7 +348,7 @@ class Downloader:
         # Cookies depuis le navigateur de l'utilisateur (si pas de cookies UGE)
         if not cookies and (use_cookies or _should_use_cookies(self._settings, url)):
             from app.core.cookies import apply_cookies
-            apply_cookies(opts)
+            apply_cookies(opts, url)
 
         # Override des sous-titres pour ce téléchargement
         eff_settings = dict(self._settings)
@@ -341,16 +406,16 @@ class Downloader:
                             ydl.download([url])
                         subtitle_warning = err_msg
                     except yt_dlp.utils.DownloadError as exc2:
-                        raise DownloadError(str(exc2)) from exc2
+                        _raise_download_error(str(exc2), exc2)
                     except Exception as exc2:
-                        raise DownloadError(str(exc2)) from exc2
+                        _raise_download_error(str(exc2), exc2)
                 else:
-                    raise DownloadError(err_msg) from exc
+                    _raise_download_error(err_msg, exc)
             except Exception as exc:
                 if log_buf is not None and on_verbose_log is not None:
                     on_verbose_log(log_buf.getvalue())
                 _log.error("Erreur inattendue id=%s url=%s — %s", download_id, url, exc)
-                raise DownloadError(str(exc)) from exc
+                _raise_download_error(str(exc), exc)
         finally:
             if cookie_jar_path:
                 try:
@@ -559,6 +624,12 @@ def _sanitize_dirname(name: str) -> str:
 
 
 class DownloadError(Exception):
+    pass
+
+
+class LoginRequiredError(DownloadError):
+    """Échec parce que le site exige une connexion (adulte, privé, membres…).
+    Déclenche le parcours de connexion guidée côté UI."""
     pass
 
 

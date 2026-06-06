@@ -26,6 +26,7 @@ def main():
         )
     )
     frame.check_app_update_at_startup()
+    frame.check_announcement_at_startup()
 
     app.MainLoop()
 

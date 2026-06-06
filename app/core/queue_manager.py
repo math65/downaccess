@@ -2,9 +2,11 @@ import logging
 import threading
 import uuid
 from dataclasses import dataclass, field
-from typing import Callable
+from collections.abc import Callable
 
-from app.core.downloader import Downloader, DownloadError, DownloadInfo, DownloadProgress
+from app.core.downloader import (
+    Downloader, DownloadError, DownloadInfo, DownloadProgress, LoginRequiredError,
+)
 
 _log = logging.getLogger("downaccess.queue")
 
@@ -30,7 +32,7 @@ class QueueItem:
 OnInfoReady     = Callable[[DownloadInfo], None]
 OnProgress      = Callable[[DownloadProgress], None]
 OnComplete      = Callable[[str], None]           # download_id
-OnError         = Callable[[str, str], None]      # download_id, message
+OnError         = Callable[[str, str, bool], None]  # download_id, message, login_required
 OnPlaylist      = Callable[[DownloadInfo], None]  # info avec is_playlist=True
 OnWarning       = Callable[[str, str], None]      # download_id, message
 PostToUI        = Callable[..., None]             # ex: wx.CallAfter
@@ -225,7 +227,8 @@ class QueueManager:
                 self._post(self._on_info, info)
             except DownloadError as exc:
                 _log.error("Erreur fetch_info id=%s — %s", dl_id, exc)
-                self._post(self._on_error, dl_id, str(exc))
+                self._post(self._on_error, dl_id, str(exc),
+                           isinstance(exc, LoginRequiredError))
                 self._finish(dl_id)
                 return
 
@@ -258,7 +261,8 @@ class QueueManager:
         except DownloadError as exc:
             if not item.stop_event.is_set():
                 _log.error("Échec téléchargement id=%s — %s", dl_id, exc)
-                self._post(self._on_error, dl_id, str(exc))
+                self._post(self._on_error, dl_id, str(exc),
+                           isinstance(exc, LoginRequiredError))
             else:
                 _log.info("Annulé pendant téléchargement id=%s", dl_id)
 

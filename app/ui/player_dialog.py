@@ -70,7 +70,7 @@ class PlayerDialog(wx.Dialog):
         self._lbl_status = wx.StaticText(self, label=_("Chargement…"))
         sizer.Add(self._lbl_status, 0, wx.LEFT | wx.RIGHT, 10)
 
-        # MediaCtrl (audio seul → 1×1 px, pas affiché). Backend WMP10 pour
+        # MediaCtrl (audio seul → 1x1 px, pas affiché). Backend WMP10 pour
         # streaming HTTP fiable sur Windows ; fallback automatique sinon.
         try:
             self._media = wx.media.MediaCtrl(

@@ -17,6 +17,7 @@ Sécurités :
 """
 import hashlib
 import os
+import re
 import subprocess
 import tempfile
 import threading
@@ -26,6 +27,7 @@ import urllib.error
 import json
 
 from app.version import __version__
+from app.core import i18n
 from app.core.i18n import _translate as _
 
 GITHUB_API   = "https://api.github.com/repos/math65/downaccess/releases/latest"
@@ -75,6 +77,40 @@ def _parse_version(tag: str) -> tuple[int, ...]:
 
 
 # ---------------------------------------------------------------------------
+# Selection de la langue des notes de version
+# ---------------------------------------------------------------------------
+
+_NOTES_MARKER = re.compile(r"<!--\s*notes:([a-z]{2})\s*-->", re.IGNORECASE)
+
+
+def _select_notes_for_language(body: str, lang: str) -> str:
+    """
+    Le corps d'une release GitHub contient les notes dans toutes les langues,
+    chaque section precedee d'un marqueur invisible '<!-- notes:fr -->'.
+    Retourne uniquement la section correspondant a `lang` (repli : en, puis fr,
+    puis premiere section). Si le corps n'est pas balise (anciennes releases),
+    retourne le corps entier tel quel.
+    """
+    if not body:
+        return ""
+    markers = list(_NOTES_MARKER.finditer(body))
+    if not markers:
+        return body.strip()
+    sections: dict[str, str] = {}
+    for i, m in enumerate(markers):
+        code = m.group(1).lower()
+        start = m.end()
+        end = markers[i + 1].start() if i + 1 < len(markers) else len(body)
+        sections[code] = body[start:end].strip()
+    return (
+        sections.get(lang)
+        or sections.get("en")
+        or sections.get("fr")
+        or next(iter(sections.values()), "")
+    )
+
+
+# ---------------------------------------------------------------------------
 # Vérification
 # ---------------------------------------------------------------------------
 
@@ -117,7 +153,9 @@ def check_for_update(on_done) -> None:
                 )
                 return
 
-            release_notes = data.get("body", "") or ""
+            release_notes = _select_notes_for_language(
+                data.get("body", "") or "", i18n.get_current_language_code()
+            )
 
             if _parse_version(new_ver) > _parse_version(__version__):
                 on_done("update_available", new_ver, release_notes)
@@ -252,9 +290,14 @@ def download_and_install(new_version: str, on_progress, on_error,
             on_error(_("Impossible de finaliser le fichier : {error}").format(error=exc))
             return
 
-        # Lancer l'installeur
+        # Lancer l'installeur en mode silencieux :
+        #   /SILENT  → barre de progression seule, pas d'assistant Suivant/Suivant
+        #   /NORESTART → ne jamais redemarrer Windows
+        # Le dossier, la langue et les raccourcis existent deja (mise a jour, pas
+        # premiere install) → inutile de repasser par l'assistant. L'installeur
+        # relance l'app automatiquement (voir [Run] skipifnotsilent dans le .iss).
         try:
-            proc = subprocess.Popen([dest_path])
+            proc = subprocess.Popen([dest_path, "/SILENT", "/NORESTART"])
         except Exception as exc:
             on_error(_("Impossible de lancer l'installeur : {error}").format(error=exc))
             return

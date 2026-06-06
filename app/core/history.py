@@ -40,7 +40,7 @@ def _history_file() -> Path:
 
 def load() -> list[HistoryEntry]:
     try:
-        with open(_history_file(), "r", encoding="utf-8") as f:
+        with open(_history_file(), encoding="utf-8") as f:
             raw = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError, OSError):
         return []

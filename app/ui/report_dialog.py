@@ -3,8 +3,14 @@ Dialogue de rapport d'erreur DownAccess.
 Explique le processus de diagnostic, collecte un commentaire utilisateur,
 affiche la progression et le résultat de l'envoi.
 """
+import re
+
 import wx
 from app.core import speech
+
+# Validation simple : un local, un @, un domaine avec au moins un point,
+# sans espace. Suffisant pour écarter les champs vides ou manifestement faux.
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class ReportDialog(wx.Dialog):
@@ -58,7 +64,7 @@ class ReportDialog(wx.Dialog):
 
         # Champ email
         lbl_email = wx.StaticText(
-            self, label=_("Votre email (optionnel, pour qu'on puisse vous répondre) :")
+            self, label=_("Votre email (obligatoire, pour qu'on puisse vous répondre) :")
         )
         self._sizer.Add(lbl_email, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
         self.txt_email = wx.TextCtrl(self, name=_("Adresse email"), value=self._saved_email)
@@ -136,9 +142,24 @@ class ReportDialog(wx.Dialog):
     # ------------------------------------------------------------------
 
     def _on_send(self, _event) -> None:
-        """Lance le diagnostic : désactive l'UI et appelle le callback."""
+        """Valide l'email (obligatoire), lance le diagnostic et appelle le callback."""
         comment = self.get_comment()
         email   = self.get_email()
+        if not _EMAIL_RE.match(email):
+            dlg = wx.MessageDialog(
+                self,
+                _("Veuillez saisir une adresse email valide pour que nous "
+                  "puissions vous répondre.\n\n"
+                  "Sans adresse, nous ne pouvons pas vous aider sur ce "
+                  "problème.\n\n"
+                  "Exemple : prenom@exemple.com"),
+                _("Adresse email requise"),
+                wx.OK | wx.ICON_WARNING,
+            )
+            dlg.ShowModal()
+            dlg.Destroy()
+            self.txt_email.SetFocus()
+            return
         self.set_running()
         if self._on_confirmed:
             self._on_confirmed(comment, email)

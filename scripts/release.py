@@ -84,13 +84,16 @@ def _generate_notes(tag: str) -> str:
         else:
             print("  WARN RELEASE_NOTES.md absent — la release sera EN uniquement.")
 
+        # Chaque langue est precedee d'un marqueur HTML invisible sur GitHub
+        # ('<!-- notes:fr -->'). L'app (app_updater._select_notes_for_language)
+        # s'en sert pour n'afficher que la section de la langue courante.
         parts = []
-        if rn_en.exists():
-            parts.append(rn_en.read_text(encoding="utf-8").strip())
         if rn_fr.exists():
-            parts.append(rn_fr.read_text(encoding="utf-8").strip())
-        notes = "\n\n---\n\n".join(parts)
-        print(f"  (source : RELEASE_NOTES.md + RELEASE_NOTES.en.md)")
+            parts.append("<!-- notes:fr -->\n" + rn_fr.read_text(encoding="utf-8").strip())
+        if rn_en.exists():
+            parts.append("<!-- notes:en -->\n" + rn_en.read_text(encoding="utf-8").strip())
+        notes = "\n\n".join(parts)
+        print("  (source : RELEASE_NOTES.md + RELEASE_NOTES.en.md)")
         return notes
 
     # Auto-generation depuis git log

@@ -10,7 +10,7 @@ Build   : ffmpeg-master-latest-win64-gpl (statique, GPL, Windows x64)
 import io
 import sys
 import zipfile
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from urllib.request import urlopen, Request
 from urllib.error import URLError
@@ -78,7 +78,7 @@ def main() -> int:
         return 1
 
     # Fichier de version
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     VERSION_FILE.write_text(
         f"source=yt-dlp/FFmpeg-Builds\n"
         f"build=ffmpeg-master-latest-win64-gpl\n"

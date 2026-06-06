@@ -110,6 +110,9 @@ final class DownAccessReportHandler
         $verboseLog   = substr($this->str($p, 'verbose_log'), 0, self::MAX_VERBOSE_LOG_BYTES);
         $userComment  = substr($this->str($p, 'user_comment'), 0, self::MAX_COMMENT_BYTES);
         $email        = substr($this->str($p, 'email'), 0, 200);
+        $systemInfo   = is_array($p['system_info'] ?? null) ? $p['system_info'] : [];
+        $preferences  = is_array($p['preferences'] ?? null) ? $p['preferences'] : [];
+        $queueState   = is_array($p['queue_state'] ?? null) ? $p['queue_state'] : [];
 
         $mailer = new PHPMailer(true);
         $mailer->isSMTP();
@@ -138,11 +141,13 @@ final class DownAccessReportHandler
         $mailer->isHTML(true);
         $mailer->Body    = $this->buildHtmlBody(
             $appVersion, $ytdlpVersion, $os, $timestamp,
-            $url, $site, $formatSpec, $errorMessage, $verboseLog, $userComment, $email
+            $url, $site, $formatSpec, $errorMessage, $verboseLog, $userComment, $email,
+            $systemInfo, $preferences, $queueState
         );
         $mailer->AltBody = $this->buildTextBody(
             $appVersion, $ytdlpVersion, $os, $timestamp,
-            $url, $site, $formatSpec, $errorMessage, $verboseLog, $userComment, $email
+            $url, $site, $formatSpec, $errorMessage, $verboseLog, $userComment, $email,
+            $systemInfo, $preferences, $queueState
         );
 
         // Joindre le fichier log si disponible
@@ -156,7 +161,8 @@ final class DownAccessReportHandler
     private function buildHtmlBody(
         string $appVersion, string $ytdlpVersion, string $os, string $timestamp,
         string $url, string $site, string $formatSpec, string $errorMessage,
-        string $verboseLog, string $userComment, string $email = ''
+        string $verboseLog, string $userComment, string $email = '',
+        array $systemInfo = [], array $preferences = [], array $queueState = []
     ): string {
         $h = fn(string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
@@ -181,6 +187,16 @@ final class DownAccessReportHandler
             );
         }
 
+        // Sections diagnostic rendues génériquement : tout champ ajouté côté
+        // app apparaît automatiquement, sans retoucher ce fichier.
+        $systemBlock = $systemInfo !== []
+            ? '<h3>Informations système</h3>' . $this->kvTableHtml($systemInfo, $h)
+            : '';
+        $prefsBlock = $preferences !== []
+            ? '<h3>Préférences</h3>' . $this->kvTableHtml($preferences, $h)
+            : '';
+        $queueBlock = $this->queueHtml($queueState, $h);
+
         $commentBlock = $userComment !== ''
             ? '<h3>Commentaire utilisateur</h3><p style="background:#fffde7;padding:8px;">' . $h($userComment) . '</p>'
             : '';
@@ -199,6 +215,10 @@ final class DownAccessReportHandler
         {$tableRows}
         </table>
 
+        {$systemBlock}
+        {$prefsBlock}
+        {$queueBlock}
+
         <h3>Message d'erreur</h3>
         <pre style="background:#fff0f0;padding:8px;color:#c00;">{$h($errorMessage)}</pre>
 
@@ -211,7 +231,8 @@ final class DownAccessReportHandler
     private function buildTextBody(
         string $appVersion, string $ytdlpVersion, string $os, string $timestamp,
         string $url, string $site, string $formatSpec, string $errorMessage,
-        string $verboseLog, string $userComment, string $email = ''
+        string $verboseLog, string $userComment, string $email = '',
+        array $systemInfo = [], array $preferences = [], array $queueState = []
     ): string {
         $lines = [
             "RAPPORT D'ERREUR DOWNACCESS",
@@ -224,10 +245,34 @@ final class DownAccessReportHandler
             "Site               : $site",
             "Format             : $formatSpec",
             "Email utilisateur  : " . ($email ?: '—'),
-            '',
-            "ERREUR :",
-            $errorMessage,
         ];
+
+        if ($systemInfo !== []) {
+            $lines[] = '';
+            $lines[] = 'INFORMATIONS SYSTÈME :';
+            foreach ($systemInfo as $key => $value) {
+                $lines[] = '  ' . $this->systemLabel((string) $key) . ' : ' . $this->scalarStr($value);
+            }
+        }
+
+        if ($preferences !== []) {
+            $lines[] = '';
+            $lines[] = 'PRÉFÉRENCES :';
+            foreach ($preferences as $key => $value) {
+                $lines[] = '  ' . $this->systemLabel((string) $key) . ' : ' . $this->scalarStr($value);
+            }
+        }
+
+        $queueText = $this->queueText($queueState);
+        if ($queueText !== '') {
+            $lines[] = '';
+            $lines[] = "FILE D'ATTENTE :";
+            $lines[] = $queueText;
+        }
+
+        $lines[] = '';
+        $lines[] = 'ERREUR :';
+        $lines[] = $errorMessage;
 
         if ($userComment !== '') {
             $lines[] = '';
@@ -248,6 +293,103 @@ final class DownAccessReportHandler
     {
         $v = $p[$key] ?? '';
         return trim(is_string($v) ? $v : (string) $v);
+    }
+
+    /** Libellé lisible pour une clé de system_info (fallback : la clé brute). */
+    private function systemLabel(string $key): string
+    {
+        static $labels = [
+            'python'           => 'Python',
+            'wxpython'         => 'wxPython',
+            'ffmpeg'           => 'FFmpeg',
+            'ram_available_mb' => 'RAM disponible (Mo)',
+            'ram_total_mb'     => 'RAM totale (Mo)',
+            'os_platform'      => 'Plateforme OS',
+            'os_edition'       => 'Édition Windows',
+            'architecture'     => 'Architecture',
+            'cpu'              => 'Processeur',
+            'cpu_count'        => 'Cœurs CPU',
+            'disk_free_gb'     => 'Disque libre (Go)',
+            'disk_total_gb'    => 'Disque total (Go)',
+            'system_locale'    => 'Locale système',
+            'app_language'     => "Langue de l'application",
+            'screen_reader'    => "Lecteur d'écran",
+            'frozen'           => 'Exécutable compilé',
+        ];
+        return $labels[$key] ?? $key;
+    }
+
+    /** Convertit une valeur scalaire (bool/int/float/string/array) en texte. */
+    private function scalarStr(mixed $v): string
+    {
+        if (is_bool($v)) {
+            return $v ? 'oui' : 'non';
+        }
+        if (is_array($v)) {
+            return json_encode($v, JSON_UNESCAPED_UNICODE) ?: '—';
+        }
+        return (string) $v;
+    }
+
+    /** Table HTML clé → valeur générique (libellés via systemLabel, valeurs via scalarStr). */
+    private function kvTableHtml(array $data, callable $h): string
+    {
+        $rows = '';
+        foreach ($data as $key => $value) {
+            $rows .= sprintf(
+                '<tr><td style="padding:4px 8px;font-weight:bold;white-space:nowrap;">%s</td>'
+                . '<td style="padding:4px 8px;word-break:break-all;">%s</td></tr>',
+                $h($this->systemLabel((string) $key)),
+                $h($this->scalarStr($value))
+            );
+        }
+        return '<table border="1" cellspacing="0" style="border-collapse:collapse;">' . $rows . '</table>';
+    }
+
+    /** Section HTML « File d'attente » (en cours + en attente). Vide si rien. */
+    private function queueHtml(array $queue, callable $h): string
+    {
+        $active  = is_array($queue['active']  ?? null) ? $queue['active']  : [];
+        $pending = is_array($queue['pending'] ?? null) ? $queue['pending'] : [];
+        if ($active === [] && $pending === []) {
+            return '';
+        }
+        $list = function (array $items) use ($h): string {
+            if ($items === []) {
+                return '<p><em>aucun</em></p>';
+            }
+            $lis = '';
+            foreach ($items as $it) {
+                $u = is_array($it) ? (string) ($it['url'] ?? '') : (string) $it;
+                $lis .= '<li>' . $h($u) . '</li>';
+            }
+            return '<ul style="margin:4px 0;">' . $lis . '</ul>';
+        };
+        return "<h3>File d'attente</h3>"
+            . '<p><strong>En cours (' . count($active) . ') :</strong></p>' . $list($active)
+            . '<p><strong>En attente (' . count($pending) . ') :</strong></p>' . $list($pending);
+    }
+
+    /** Version texte de la file d'attente. Chaîne vide si rien. */
+    private function queueText(array $queue): string
+    {
+        $active  = is_array($queue['active']  ?? null) ? $queue['active']  : [];
+        $pending = is_array($queue['pending'] ?? null) ? $queue['pending'] : [];
+        if ($active === [] && $pending === []) {
+            return '';
+        }
+        $fmt = function (array $items): array {
+            $out = [];
+            foreach ($items as $it) {
+                $out[] = '    - ' . (is_array($it) ? (string) ($it['url'] ?? '') : (string) $it);
+            }
+            return $out;
+        };
+        $lines = ['  En cours (' . count($active) . ') :'];
+        $lines = array_merge($lines, $active === [] ? ['    (aucun)'] : $fmt($active));
+        $lines[] = '  En attente (' . count($pending) . ') :';
+        $lines = array_merge($lines, $pending === [] ? ['    (aucun)'] : $fmt($pending));
+        return implode(PHP_EOL, $lines);
     }
 
     private function resolveClientIp(array $server): string

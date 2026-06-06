@@ -9,12 +9,13 @@ import re
 
 import wx
 
-from app.core import speech
 
 
 def _md_to_plain(md: str) -> str:
     """Convertit du Markdown basique en texte lisible."""
     text = md
+    # Commentaires HTML (ex. marqueurs de langue <!-- notes:fr -->) → supprimes
+    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
     # Titres : ## Titre → Titre
     text = re.sub(r'^#{1,3}\s+', '', text, flags=re.MULTILINE)
     # Gras : **texte** → texte

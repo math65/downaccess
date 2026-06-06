@@ -229,7 +229,7 @@ class UGEDialog(wx.Frame):
             _(
                 "Extraction guidée ouverte. "
                 "Saisissez une URL et appuyez sur Entrée pour naviguer. "
-                "Lancez la vidéo dans le navigateur Chrome qui s'est ouvert. "
+                "Lancez la vidéo dans le navigateur qui s'est ouvert. "
                 "Les médias détectés apparaîtront dans cette fenêtre. "
                 "Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video) ne sont pas pris en charge."
             ),

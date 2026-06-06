@@ -1,6 +1,6 @@
 [Setup]
 AppName=DownAccess
-AppVersion=0.1.14
+AppVersion=0.1.20
 AppPublisher=math65
 AppPublisherURL=https://github.com/math65/downaccess
 AppSupportURL=https://github.com/math65/downaccess/issues
@@ -59,7 +59,10 @@ Name: "{group}\{cm:UninstallShortcut}";    Filename: "{uninstallexe}"
 Name: "{userdesktop}\DownAccess";          Filename: "{app}\DownAccess.exe"; Comment: "{cm:AppComment}"; Tasks: desktopicon
 
 [Run]
+; Installation manuelle : case "Lancer DownAccess" sur la derniere page de l'assistant
 Filename: "{app}\DownAccess.exe"; Description: "{cm:LaunchApp}"; Flags: nowait postinstall skipifsilent
+; Mise a jour silencieuse (auto-update /SILENT) : relancer l'app automatiquement
+Filename: "{app}\DownAccess.exe"; Flags: nowait skipifnotsilent
 
 [UninstallDelete]
 ; Supprimer les fichiers créés au runtime (cache yt-dlp, logs…)

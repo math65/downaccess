@@ -1,6 +1,7 @@
 """
 Rapport d'erreur DownAccess.
-Construit et envoie un rapport multipart/form-data au backend PHP via HTTPS.
+Construit et envoie un rapport multipart/form-data au backend app-backend via
+HTTPS, sur la route générique /api/feedback/report (payload `app` + `sections`).
 """
 import importlib.metadata
 import io
@@ -10,19 +11,43 @@ import threading
 import urllib.error
 import urllib.request
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 from app.version import __version__
 from app.core.i18n import _translate as _
 
-REPORT_URL  = "https://mathieumartin.ovh/api/downaccess-report"
-CONTACT_URL = "https://mathieumartin.ovh/api/downaccess-contact"
+REPORT_URL  = "https://mathieumartin.ovh/api/feedback/report"
+CONTACT_URL = "https://mathieumartin.ovh/api/feedback/contact"
 _BEARER     = "a5b84358b988e5e1fecbf2bc28191bb279db2769bf95c2b0df74b4246dabd93e"
+_APP_ID     = "downaccess"
 
 _MAX_VERBOSE  = 100_000   # caractères
 _MAX_COMMENT  =   2_000
+
+# Libellés lisibles des clés system_info. La route générique /api/feedback/report
+# ne libelle rien (contrairement à l'ancien adaptateur legacy) : on relabellise
+# donc côté client. En français codé en dur — l'email part vers le développeur,
+# pas vers l'utilisateur. Identique à downAccessLabels du backend Go.
+_SYSTEM_INFO_LABELS = {
+    "python":           "Python",
+    "wxpython":         "wxPython",
+    "ffmpeg":           "FFmpeg",
+    "ram_available_mb": "RAM disponible (Mo)",
+    "ram_total_mb":     "RAM totale (Mo)",
+    "os_platform":      "Plateforme OS",
+    "os_edition":       "Édition Windows",
+    "architecture":     "Architecture",
+    "cpu":              "Processeur",
+    "cpu_count":        "Cœurs CPU",
+    "disk_free_gb":     "Disque libre (Go)",
+    "disk_total_gb":    "Disque total (Go)",
+    "system_locale":    "Locale système",
+    "app_language":     "Langue de l'application",
+    "screen_reader":    "Lecteur d'écran",
+    "frozen":           "Exécutable compilé",
+}
 
 
 def build_report(
@@ -42,21 +67,47 @@ def build_report(
     except Exception:
         ytdlp_ver = "inconnu"
 
+    now = datetime.now(UTC)
+    site_label = site or "inconnu"
+
+    # Sections de l'email, dans l'ordre d'affichage (préservé jusqu'au rendu :
+    # dict ordonné -> json.dumps -> décodeur ordonné côté backend). Le type de
+    # chaque section est déduit par la route d'après la forme des données
+    # (objet -> table clé/valeur, objet avec active/pending -> file d'attente,
+    # chaîne -> texte). Les sections vides sont ignorées par le backend.
+    sections: dict = {
+        "Informations techniques": {
+            "Version DownAccess": __version__,
+            "Version yt-dlp":     ytdlp_ver,
+            "Système":            platform.version(),
+            "Date":               now.isoformat(),
+            "URL":                url or "",
+            "Site":               site or "",
+            "Format":             format_spec or "",
+            "Email utilisateur":  email or "—",
+        },
+    }
+    if system_info:
+        sections["Informations système"] = {
+            _SYSTEM_INFO_LABELS.get(k, k): v for k, v in system_info.items()
+        }
+    if preferences:
+        sections["Préférences"] = preferences
+    if queue_state:
+        sections["File d'attente"] = queue_state
+    verbose = (verbose_log or "")[:_MAX_VERBOSE]
+    if verbose:
+        sections["Log diagnostic (yt-dlp verbose)"] = verbose
+
+    # Le message d'erreur n'est PAS mis dans `sections` : la route l'ajoute
+    # automatiquement (section « Message d'erreur » en rouge) à partir de `summary`.
     return {
-        "app_version":   __version__,
-        "ytdlp_version": ytdlp_ver,
-        "os":            platform.version(),
-        "timestamp":     datetime.now(timezone.utc).isoformat(),
-        "url":           url or "",
-        "site":          site or "",
-        "format_spec":   format_spec or "",
-        "error_message": error_message or "",
-        "verbose_log":   (verbose_log or "")[:_MAX_VERBOSE],
-        "user_comment":  (user_comment or "")[:_MAX_COMMENT],
-        "email":         (email or "")[:200],
-        "preferences":   preferences or {},
-        "queue_state":   queue_state or {},
-        "system_info":   system_info or {},
+        "app":          _APP_ID,
+        "email":        (email or "")[:200],
+        "summary":      error_message or "",
+        "subject_hint": f"Erreur — {site_label} — v{__version__} — {now.strftime('%Y-%m-%d %H:%M')}",
+        "user_comment": (user_comment or "")[:_MAX_COMMENT],
+        "sections":     sections,
     }
 
 
@@ -141,6 +192,7 @@ def send_contact(
     on_done(success, message) est appelé dans le thread — utiliser wx.CallAfter côté UI.
     """
     payload = {
+        "app": _APP_ID,
         "app_version": __version__,
         "contact_type": contact_type,
         "email": email,

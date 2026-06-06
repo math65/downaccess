@@ -1,0 +1,43 @@
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+# `_` est injecté dans builtins par i18n.install_language() au démarrage.
+# Les modules ui/ y accèdent directement sans import.
+builtins = ["_"]
+extend-exclude = [
+    "venv",
+    "build",
+    "dist",
+    "installer_output",
+    "locales",
+    ".claude",
+]
+
+[tool.ruff.lint]
+# Conservateur : on attrape les vraies erreurs (pyflakes + erreurs pycodestyle),
+# pas le style. Le code a un style align ("tag = "v", GITHUB_API   = "...")
+# que ruff format casserait — on n'utilise PAS le formatter.
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes (unused imports, undefined names, etc.)
+    "W",    # pycodestyle warnings
+    "B",    # flake8-bugbear (mutable defaults, except sans type, etc.)
+    "C4",   # flake8-comprehensions
+    "A",    # flake8-builtins (ne pas masquer list, id, type)
+    "RET",  # flake8-return (return inconsistants)
+    "UP",   # pyupgrade (modernisation Python 3.14)
+    "RUF",  # règles ruff (incl. RUF003 = caractères Unicode ambigus)
+]
+ignore = [
+    "E501",   # line too long (line-length à 120 déjà tolérant)
+    "E731",   # lambda assignment (utilisé pour identity translation dans i18n)
+    "E741",   # ambiguous variable name (l, I, O)
+    "E402",   # module-level import not at top (souvent intentionnel : i18n avant MainWindow)
+    "RUF005", # [a] + b -> [a, *b] (style)
+    "RUF001", # caractères ambigus dans les strings (accents français = faux positifs)
+    "RUF002", # idem dans les docstrings
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Les scripts tournent en cp1252 sur Windows — pas d'auto-fix qui casserait le print
+"scripts/*.py" = ["F541"]  # f-string without placeholders (présents intentionnellement)

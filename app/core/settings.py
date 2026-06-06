@@ -27,6 +27,8 @@ DEFAULTS: dict = {
     "intercept_use_page_title": True,
     "suppressed_warnings": [],     # clés des avertissements masqués
     "language": "auto",            # auto | fr | en
+    "install_id": "",              # identifiant anonyme d'installation (généré au 1er lancement)
+    "seen_announcements": [],      # ids des annonces "once" déjà affichées
 }
 
 
@@ -44,7 +46,7 @@ def _config_file() -> Path:
 def load() -> dict:
     cfg = dict(DEFAULTS)
     try:
-        with open(_config_file(), "r", encoding="utf-8") as f:
+        with open(_config_file(), encoding="utf-8") as f:
             saved = json.load(f)
         cfg.update({k: v for k, v in saved.items() if k in DEFAULTS})
     except FileNotFoundError:
