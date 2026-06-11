@@ -294,12 +294,22 @@ class Downloader:
         else:
             outtmpl = f"{dest}/{name_part}"
 
+        # Garde-fou Windows MAX_PATH (260 caracteres) : certains titres sont
+        # si longs (ex. podcasts Radio France dont le site duplique le titre)
+        # que le chemin complet depasse la limite et yt-dlp echoue avec
+        # "No such file or directory". On borne la longueur du nom de fichier
+        # pour que le chemin reste sous la limite, quelle que soit la
+        # profondeur du dossier de telechargement.
+        _dir_prefix = outtmpl.rsplit("/", 1)[0].replace("%(extractor_key)s", "x" * 30)
+        _trim_len = max(50, 240 - len(_dir_prefix) - len("/.m4a.part") - 4)
+
         log_buf = io.StringIO() if verbose else None
 
         fragments = self._settings.get("concurrent_fragments", 1)
 
         opts = {
             "outtmpl":        outtmpl,
+            "trim_file_name": _trim_len,
             "quiet":          not verbose,
             "no_warnings":    not verbose,
             "verbose":        verbose,

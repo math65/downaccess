@@ -1,8 +1,8 @@
-## DownAccess 0.1.20
+## DownAccess 0.1.22
 
-### Améliorations
+### Corrections
 
-- Mise à jour interne.
+- Correction d'un échec de téléchargement pour les contenus dont le titre est très long (certains podcasts et émissions de radio, par exemple). Le fichier se crée désormais correctement.
 
 ### Note
 

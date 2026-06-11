@@ -90,31 +90,72 @@ def check_and_update(on_done=None) -> None:
         # Installation ou mise à jour nécessaire
         target.mkdir(parents=True, exist_ok=True)
         try:
-            result = subprocess.run(
-                [
-                    sys.executable, "-m", "pip", "install", "-U", "yt-dlp",
-                    "--target", str(target),
-                    "--quiet", "--no-warn-script-location",
-                ],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode == 0:
-                _inject_path(target)
-                _cleanup_old_dist_info(target, latest)
-                new_ver = latest
-                status = "installed" if first_install else "updated"
-                if on_done:
-                    on_done(status, new_ver)
+            if getattr(sys, "frozen", False):
+                # En frozen (PyInstaller), sys.executable == DownAccess.exe :
+                # lancer "DownAccess.exe -m pip ..." ne lance PAS pip, ça relance
+                # l'application (boucle de demarrage + instances multiples). On
+                # telecharge et extrait directement le wheel yt-dlp (zip pur Python).
+                _install_wheel(target, latest)
             else:
-                msg = result.stderr.strip() or _("Erreur inconnue.")
-                if on_done:
-                    on_done("error", msg)
+                result = subprocess.run(
+                    [
+                        sys.executable, "-m", "pip", "install", "-U", "yt-dlp",
+                        "--target", str(target),
+                        "--quiet", "--no-warn-script-location",
+                    ],
+                    capture_output=True,
+                    text=True,
+                )
+                if result.returncode != 0:
+                    raise RuntimeError(result.stderr.strip() or _("Erreur inconnue."))
+            _inject_path(target)
+            _cleanup_old_dist_info(target, latest)
+            status = "installed" if first_install else "updated"
+            if on_done:
+                on_done(status, latest)
         except Exception as exc:
             if on_done:
                 on_done("error", str(exc))
 
     threading.Thread(target=_run, daemon=True).start()
+
+
+def _install_wheel(target: Path, version: str) -> None:
+    """Telecharge le wheel yt-dlp depuis PyPI et l'extrait dans `target`.
+
+    Utilise en frozen (PyInstaller) ou pip n'est pas disponible : un wheel est
+    un simple zip dont l'extraction reproduit le resultat de
+    `pip install --target` (paquet yt_dlp/ + yt_dlp-<version>.dist-info/).
+    """
+    import io
+    import zipfile
+
+    url = f"https://pypi.org/pypi/yt-dlp/{version}/json"
+    req = urllib.request.Request(url, headers={"User-Agent": "DownAccess-Updater"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = json.loads(r.read())
+
+    wheel_url = None
+    for entry in data.get("urls", []):
+        fn = entry.get("filename", "")
+        if entry.get("packagetype") == "bdist_wheel" and fn.endswith(".whl"):
+            wheel_url = entry["url"]
+            break
+    if not wheel_url:
+        raise RuntimeError(_("Wheel yt-dlp introuvable sur PyPI."))
+
+    wreq = urllib.request.Request(wheel_url, headers={"User-Agent": "DownAccess-Updater"})
+    with urllib.request.urlopen(wreq, timeout=120) as r:
+        payload = r.read()
+
+    # Nettoyer l'ancienne extraction du paquet pour ne pas laisser de fichiers
+    # obsoletes (l'extraction de zip ecrase mais ne supprime pas les disparus).
+    pkg_dir = target / "yt_dlp"
+    if pkg_dir.exists():
+        shutil.rmtree(pkg_dir, ignore_errors=True)
+
+    with zipfile.ZipFile(io.BytesIO(payload)) as zf:
+        zf.extractall(target)
 
 
 def _cleanup_old_dist_info(ytdlp_dir: Path, keep_version: str) -> None:

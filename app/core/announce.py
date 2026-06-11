@@ -11,6 +11,7 @@ import urllib.error
 import urllib.request
 from collections.abc import Callable
 
+from app.core import i18n
 from app.core.error_reporter import _APP_ID, _BEARER
 from app.core.i18n import _translate as _  # noqa: F401  (cohérence app/core)
 
@@ -38,7 +39,9 @@ def check_announcement(install_id: str, on_done: Callable[[dict | None], None]) 
     """
     def _run() -> None:
         try:
-            body = _post(CHECK_URL, {"app": _APP_ID, "install_id": install_id}, timeout=8)
+            lang = i18n.get_current_language_code()
+            payload = {"app": _APP_ID, "install_id": install_id, "lang": lang}
+            body = _post(CHECK_URL, payload, timeout=8)
             ann = body.get("announcement")
             on_done(ann if isinstance(ann, dict) else None)
         except (urllib.error.URLError, OSError, ValueError) as exc:

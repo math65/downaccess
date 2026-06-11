@@ -234,7 +234,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:448 app/core/downloader.py:451
+#: app/core/downloader.py:458 app/core/downloader.py:461
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -834,7 +834,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:608
+#: app/core/downloader.py:618
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1135,7 +1135,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:596
+#: app/core/downloader.py:606
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -2319,6 +2319,10 @@ msgstr ""
 
 #: app/ui/main_window.py:899
 msgid "Vérifier et installer la dernière version de DownAccess"
+msgstr ""
+
+#: app/core/updater.py:145
+msgid "Wheel yt-dlp introuvable sur PyPI."
 msgstr ""
 
 #: app/ui/main_window.py:398
