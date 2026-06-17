@@ -174,14 +174,22 @@ def check_for_update(on_done) -> None:
 # ---------------------------------------------------------------------------
 
 def download_and_install(new_version: str, on_progress, on_error,
-                         on_quit=None) -> None:
+                         on_cancel=None, on_quit=None):
     """
     Télécharge l'installeur et le lance.
 
     on_progress(percent: float)  — progression 0-100
     on_error(message: str)       — appelé si échec ; l'app NE se ferme PAS
+    on_cancel()                  — appelé si l'utilisateur annule pendant le
+                                   téléchargement (le fichier partiel est supprimé)
     on_quit()                    — appelé pour fermer l'app après lancement installeur
+
+    Retourne une fonction sans argument à appeler (depuis le thread UI) pour
+    demander l'annulation. L'annulation n'a d'effet que pendant le téléchargement ;
+    une fois l'installeur lancé, elle est sans effet.
     """
+    cancel_event = threading.Event()
+
     def _run():
         tmp_path  = os.path.join(tempfile.gettempdir(), ASSET_NAME + ".tmp")
         dest_path = os.path.join(tempfile.gettempdir(), ASSET_NAME)
@@ -204,6 +212,8 @@ def download_and_install(new_version: str, on_progress, on_error,
                 last_pct   = -1
                 with open(tmp_path, "wb") as f:
                     while True:
+                        if cancel_event.is_set():
+                            break
                         buf = resp.read(chunk_size)
                         if not buf:
                             break
@@ -222,6 +232,18 @@ def download_and_install(new_version: str, on_progress, on_error,
             except OSError:
                 pass
             on_error(_("Téléchargement échoué : {error}").format(error=exc))
+            return
+
+        # Annulation demandée pendant le téléchargement : les gestionnaires de
+        # contexte ont déjà fermé la connexion et le fichier -> on nettoie le
+        # fichier partiel et on s'arrête sans lancer l'installeur.
+        if cancel_event.is_set():
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+            if on_cancel:
+                on_cancel()
             return
 
         # Vérifier que le fichier n'est pas vide
@@ -294,3 +316,4 @@ def download_and_install(new_version: str, on_progress, on_error,
             on_quit()
 
     threading.Thread(target=_run, daemon=True).start()
+    return cancel_event.set

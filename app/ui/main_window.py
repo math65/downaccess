@@ -127,10 +127,16 @@ class _AppDownloadDialog(wx.Frame):
                 wx.DEFAULT_FRAME_STYLE
                 & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX)
             ) | wx.STAY_ON_TOP,
-            size=(420, 130),
+            size=(420, 160),
         )
+        # Fonction à appeler pour demander l'annulation (fournie par le caller
+        # une fois le téléchargement lancé) ; voir set_cancel_handler.
+        self._cancel_handler = None
+        self._cancelling = False
         self._build_ui(version)
         self.CentreOnParent()
+        # La croix / Alt+F4 doit annuler proprement, pas tuer le thread en cours.
+        self.Bind(wx.EVT_CLOSE, self._on_close)
 
     def _build_ui(self, version: str) -> None:
         panel = wx.Panel(self)
@@ -146,10 +152,13 @@ class _AppDownloadDialog(wx.Frame):
             name=_("Progression du téléchargement"),
         )
         self._lbl_pct = wx.StaticText(panel, label="0 %")
+        self._btn_cancel = wx.Button(panel, label=_("&Annuler"))
+        self._btn_cancel.Bind(wx.EVT_BUTTON, self._on_cancel_btn)
 
-        sizer.Add(self._lbl,     0, wx.ALL,             12)
-        sizer.Add(self._gauge,   0, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
-        sizer.Add(self._lbl_pct, 0, wx.LEFT | wx.TOP,   12)
+        sizer.Add(self._lbl,       0, wx.ALL,                        12)
+        sizer.Add(self._gauge,     0, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        sizer.Add(self._lbl_pct,   0, wx.LEFT | wx.TOP,              12)
+        sizer.Add(self._btn_cancel, 0, wx.ALL | wx.ALIGN_RIGHT,       12)
         panel.SetSizer(sizer)
 
         # Frame sizer pour que le panel remplisse correctement la frame
@@ -157,6 +166,10 @@ class _AppDownloadDialog(wx.Frame):
         frame_sizer.Add(panel, 1, wx.EXPAND)
         self.SetSizer(frame_sizer)
         self.Layout()
+
+    def set_cancel_handler(self, handler) -> None:
+        """Enregistre la fonction à appeler pour demander l'annulation."""
+        self._cancel_handler = handler
 
     def focus_gauge(self) -> None:
         """Donne le focus à la gauge pour que NVDA suive la progression."""
@@ -169,6 +182,30 @@ class _AppDownloadDialog(wx.Frame):
         if pct >= 100:
             self._lbl.SetLabel(_("Installation en cours…"))
             speech.speak(_("Téléchargement terminé. Installation en cours."))
+            # Trop tard pour annuler une fois l'installation lancée.
+            self._btn_cancel.Enable(False)
+
+    def _request_cancel(self) -> bool:
+        """Demande l'annulation du téléchargement. Ne détruit pas la fenêtre :
+        la fermeture effective vient du rappel on_cancel (cf. _on_app_dl_cancelled)
+        une fois que le thread a bien arrêté et nettoyé le fichier partiel."""
+        if self._cancelling or not self._cancel_handler:
+            return False
+        self._cancelling = True
+        self._btn_cancel.Enable(False)
+        self._lbl.SetLabel(_("Annulation en cours…"))
+        self._cancel_handler()
+        return True
+
+    def _on_cancel_btn(self, _event) -> None:
+        self._request_cancel()
+
+    def _on_close(self, event) -> None:
+        # Tant que le téléchargement tourne, la croix / Alt+F4 = Annuler.
+        if self._request_cancel():
+            event.Veto()  # on attend l'accusé de réception (on_cancel)
+        else:
+            event.Skip()
 
 
 class _URLDropTarget(wx.TextDropTarget):
@@ -1839,12 +1876,14 @@ class MainWindow(wx.Frame):
                 self._app_dl_progress_dlg.Raise()
                 self._app_dl_progress_dlg.focus_gauge()
                 update_started = True
-                app_updater.download_and_install(
+                cancel_handler = app_updater.download_and_install(
                     new_version=info,
                     on_progress=lambda pct: wx.CallAfter(self._on_app_dl_progress, pct),
                     on_error=lambda msg: wx.CallAfter(self._on_app_dl_error, msg),
+                    on_cancel=lambda: wx.CallAfter(self._on_app_dl_cancelled),
                     on_quit=lambda: wx.CallAfter(self.Close),
                 )
+                self._app_dl_progress_dlg.set_cancel_handler(cancel_handler)
             else:
                 self.set_status(_("Mise à jour DownAccess {version} reportée.").format(version=info))
             dlg.Destroy()
@@ -1877,6 +1916,18 @@ class MainWindow(wx.Frame):
             _("Impossible de télécharger la mise à jour :\n\n{error}").format(error=message),
             _("Erreur de mise à jour"), wx.OK | wx.ICON_ERROR, self,
         )
+
+    def _on_app_dl_cancelled(self) -> None:
+        """Le téléchargement de la mise à jour a été annulé par l'utilisateur :
+        le thread a arrêté et nettoyé le fichier partiel. On ferme le dialogue
+        de progression et on réactive l'option de mise à jour du menu."""
+        self.mi_update_app.Enable(True)
+        if hasattr(self, "_app_dl_progress_dlg") and self._app_dl_progress_dlg:
+            self._app_dl_progress_dlg.Destroy()
+            self._app_dl_progress_dlg = None
+        self.set_status(_("Mise à jour annulée."))
+        speech.speak(_("Mise à jour annulée."))
+        wx.CallAfter(self.download_list.SetFocus)
 
     def check_app_update_at_startup(self) -> None:
         """Vérification silencieuse au démarrage — annonce seulement si mise à jour dispo."""
