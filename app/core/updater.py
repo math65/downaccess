@@ -59,12 +59,29 @@ def get_installed_version() -> str | None:
 
 
 def get_latest_version() -> str | None:
+    """Derniere version yt-dlp du canal NIGHTLY.
+
+    yt-dlp publie ses builds nightly sur PyPI comme pre-releases (versions
+    suffixees `.devN`, ex. '2026.6.30.234726.dev0'). Le canal stable
+    (`info.version`) est volontairement ignore : DownAccess suit le nightly pour
+    recuperer au plus vite les correctifs d'extracteurs (sites qui cassent).
+    On retient la plus recente version nightly disposant d'un wheel non retire ;
+    a defaut (aucun nightly), on retombe sur le stable annonce."""
     try:
         url = "https://pypi.org/pypi/yt-dlp/json"
         req = urllib.request.Request(url, headers={"User-Agent": "DownAccess-Updater"})
         with urllib.request.urlopen(req, timeout=10) as r:
             data = json.loads(r.read())
-        return data["info"]["version"]
+        nightly = [
+            ver for ver, files in data.get("releases", {}).items()
+            if ".dev" in ver and any(
+                f.get("packagetype") == "bdist_wheel" and not f.get("yanked")
+                for f in files
+            )
+        ]
+        if nightly:
+            return max(nightly, key=_version_key)
+        return data.get("info", {}).get("version")
     except Exception:
         return None
 
@@ -96,7 +113,11 @@ def check_and_update(on_done=None) -> None:
                     on_done("error", _("Impossible de vérifier la version (connexion indisponible)."))
             return
 
-        if not first_install and current == latest:
+        # Comparaison numerique (pas lexicographique) : les versions nightly
+        # '2026.6.30.234726.dev0' doivent se comparer composant par composant,
+        # et une eventuelle difference de forme (zero-padding) ne doit pas
+        # declencher un re-telechargement en boucle.
+        if not first_install and current and _version_key(current) >= _version_key(latest):
             if on_done:
                 on_done("up_to_date", current)
             return
@@ -111,9 +132,12 @@ def check_and_update(on_done=None) -> None:
                 # telecharge et extrait directement le wheel yt-dlp (zip pur Python).
                 _install_wheel(target, latest)
             else:
+                # --pre + version exacte : force le nightly (pip sans --pre
+                # installerait le stable et bouclerait a chaque demarrage).
                 result = subprocess.run(
                     [
-                        sys.executable, "-m", "pip", "install", "-U", "yt-dlp",
+                        sys.executable, "-m", "pip", "install", "--pre",
+                        f"yt-dlp=={latest}",
                         "--target", str(target),
                         "--quiet", "--no-warn-script-location",
                     ],

@@ -313,7 +313,7 @@ requires-dist = [
     { name = "polib", specifier = ">=1.2.0" },
     { name = "psutil", specifier = ">=5.9.0" },
     { name = "wxpython", specifier = ">=4.2.0" },
-    { name = "yt-dlp", specifier = ">=2024.1.1" },
+    { name = "yt-dlp", specifier = ">=2026.6.30.234726.dev0" },
     { name = "yt-dlp-ejs", specifier = ">=0.8.0" },
 ]
 
@@ -962,11 +962,11 @@ wheels = [
 
 [[package]]
 name = "yt-dlp"
-version = "2026.6.9"
+version = "2026.6.30.234726.dev0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/88/a4/1b0979d28f87774bb67fbbc66bce44f9dd1aa0e547a99e22985fac945c33/yt_dlp-2026.6.9.tar.gz", hash = "sha256:d50fcb95f48d61bedde33e408c1881d4c279e51c31354a599ce09e96ba0f4b86", size = 3030590, upload-time = "2026-06-09T23:27:14.831Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/52/ae0151afae3b7629fa29ee64bf5844e09e0b1138b02dd2b01378ecb89c2e/yt_dlp-2026.6.30.234726.dev0.tar.gz", hash = "sha256:89a4f73f936ad2da69699c6948f523e3288a5f5a00f1f8780919edeeea147838", size = 3037560, upload-time = "2026-06-30T23:51:34.653Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/ee/188a3dadf9dfdac713243521f919feca1cd091d4358c9ea7e8ebb710a7cc/yt_dlp-2026.6.9-py3-none-any.whl", hash = "sha256:442ba4c75724b9496144c8434b617962ee08d0ee7c26ec663848fe9b78d5a3e4", size = 3169035, upload-time = "2026-06-09T23:27:12.58Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/ba/019d69748518f16a240bd3bad53a58a839fa7620f010f5b2f7d490ed69ac/yt_dlp-2026.6.30.234726.dev0-py3-none-any.whl", hash = "sha256:d4f57410378e9edbe8f28ce434d05155f02962c2045aaee934caebcc8c24a360", size = 3173553, upload-time = "2026-06-30T23:51:32.622Z" },
 ]
 
 [[package]]
