@@ -1,16 +1,10 @@
-## DownAccess 0.1.30
-
-### Nouveautés
-
-- **Ouvrez vos téléchargements dans Access Media Converter.** DownAccess fait désormais équipe avec Access Media Converter, l'application gratuite et accessible de conversion audio et vidéo. Deux façons de s'en servir :
-  - Au moment d'ajouter un lien, choisissez dans la liste des formats « Ouvrir avec Access Media Converter — vidéo » ou « — audio seul » : DownAccess télécharge le fichier d'origine (sans aucune perte de qualité), puis l'ouvre directement dans Access Media Converter pour le convertir comme vous le souhaitez.
-  - Sur un téléchargement déjà terminé, faites un clic droit (ou la touche Menu) et choisissez « Ouvrir dans Access Media Converter ».
-
-  Si Access Media Converter n'est pas installé, DownAccess vous propose d'ouvrir sa page de téléchargement.
+## DownAccess 0.1.31
 
 ### Améliorations
 
-- **Le format par défaut s'applique partout.** Lorsque vous ajoutez un lien rapidement (Ctrl+V, ou surveillance du presse-papiers), DownAccess respecte maintenant le format choisi dans les Préférences, au lieu de toujours prendre « meilleure qualité ». Vous pouvez ainsi, par exemple, tout récupérer automatiquement en audio.
+- **Téléchargements plus fiables.** DownAccess s'appuie désormais sur la toute dernière version de son moteur de téléchargement, mise à jour chaque jour. L'application suit ainsi plus vite les changements des sites (YouTube, Arte, france.tv, etc.) et corrige plus rapidement les erreurs quand un site évolue. Les outils internes de traitement audio et vidéo ont également été mis à jour.
+
+- **Mise à jour de l'application plus claire.** Quand DownAccess se met à jour, la fenêtre de téléchargement affiche maintenant le temps restant estimé. Et si vous cliquez sur « Annuler », une confirmation vous est demandée, pour éviter d'interrompre la mise à jour par erreur.
 
 ### Note
 
