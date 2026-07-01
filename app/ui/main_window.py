@@ -134,7 +134,7 @@ class _AppDownloadDialog(wx.Frame):
                 wx.DEFAULT_FRAME_STYLE
                 & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX)
             ) | wx.STAY_ON_TOP,
-            size=(420, 160),
+            size=(420, 200),
         )
         # Fonction à appeler pour demander l'annulation (fournie par le caller
         # une fois le téléchargement lancé) ; voir set_cancel_handler.
@@ -159,12 +159,15 @@ class _AppDownloadDialog(wx.Frame):
             name=_("Progression du téléchargement"),
         )
         self._lbl_pct = wx.StaticText(panel, label="0 %")
+        self._lbl_eta = wx.StaticText(
+            panel, label=_("Temps restant estimé : calcul en cours…"))
         self._btn_cancel = wx.Button(panel, label=_("&Annuler"))
         self._btn_cancel.Bind(wx.EVT_BUTTON, self._on_cancel_btn)
 
         sizer.Add(self._lbl,       0, wx.ALL,                        12)
         sizer.Add(self._gauge,     0, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
         sizer.Add(self._lbl_pct,   0, wx.LEFT | wx.TOP,              12)
+        sizer.Add(self._lbl_eta,   0, wx.LEFT | wx.TOP,              12)
         sizer.Add(self._btn_cancel, 0, wx.ALL | wx.ALIGN_RIGHT,       12)
         panel.SetSizer(sizer)
 
@@ -188,9 +191,37 @@ class _AppDownloadDialog(wx.Frame):
         self._lbl_pct.SetLabel(f"{pct} %")
         if pct >= 100:
             self._lbl.SetLabel(_("Installation en cours…"))
+            self._lbl_eta.SetLabel("")
             speech.speak(_("Téléchargement terminé. Installation en cours."))
             # Trop tard pour annuler une fois l'installation lancée.
             self._btn_cancel.Enable(False)
+
+    def set_eta(self, eta_seconds: int | None) -> None:
+        """Met à jour l'affichage du temps restant estimé."""
+        if eta_seconds is None:
+            self._lbl_eta.SetLabel(_("Temps restant estimé : calcul en cours…"))
+            return
+        total = max(int(eta_seconds), 0)
+        minutes, seconds = divmod(total, 60)
+        hours, minutes = divmod(minutes, 60)
+        if hours:
+            duree = _("{hours} h {minutes} min").format(hours=hours, minutes=minutes)
+        elif minutes:
+            duree = _("{minutes} min {seconds} s").format(minutes=minutes, seconds=seconds)
+        else:
+            duree = _("{seconds} s").format(seconds=seconds)
+        self._lbl_eta.SetLabel(_("Temps restant estimé : {duree}").format(duree=duree))
+
+    def _confirm_cancel(self) -> bool:
+        """Demande confirmation avant d'annuler une mise à jour en cours.
+        Retourne True si l'utilisateur confirme l'annulation."""
+        with wx.MessageDialog(
+            self,
+            _("Voulez-vous vraiment annuler la mise à jour en cours ?"),
+            _("Annuler la mise à jour"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+        ) as dlg:
+            return dlg.ShowModal() == wx.ID_YES
 
     def _request_cancel(self) -> bool:
         """Demande l'annulation du téléchargement. Ne détruit pas la fenêtre :
@@ -205,12 +236,20 @@ class _AppDownloadDialog(wx.Frame):
         return True
 
     def _on_cancel_btn(self, _event) -> None:
-        self._request_cancel()
+        if self._confirm_cancel():
+            self._request_cancel()
 
     def _on_close(self, event) -> None:
-        # Tant que le téléchargement tourne, la croix / Alt+F4 = Annuler.
-        if self._request_cancel():
-            event.Veto()  # on attend l'accusé de réception (on_cancel)
+        # Annulation déjà en cours : on attend l'accusé de réception (on_cancel).
+        if self._cancelling:
+            event.Veto()
+            return
+        # Tant que le téléchargement tourne, la croix / Alt+F4 = Annuler,
+        # avec confirmation. Un refus garde la fenêtre et le téléchargement.
+        if self._cancel_handler:
+            if self._confirm_cancel():
+                self._request_cancel()
+            event.Veto()
         else:
             event.Skip()
 
@@ -2173,7 +2212,7 @@ class MainWindow(wx.Frame):
                 update_started = True
                 cancel_handler = app_updater.download_and_install(
                     new_version=info,
-                    on_progress=lambda pct: wx.CallAfter(self._on_app_dl_progress, pct),
+                    on_progress=lambda pct, eta=None: wx.CallAfter(self._on_app_dl_progress, pct, eta),
                     on_error=lambda msg: wx.CallAfter(self._on_app_dl_error, msg),
                     on_cancel=lambda: wx.CallAfter(self._on_app_dl_cancelled),
                     on_quit=lambda: wx.CallAfter(self.Close),
@@ -2196,10 +2235,11 @@ class MainWindow(wx.Frame):
         if not update_started:
             wx.CallAfter(self.download_list.SetFocus)
 
-    def _on_app_dl_progress(self, percent: float) -> None:
+    def _on_app_dl_progress(self, percent: float, eta_seconds: int | None = None) -> None:
         self.set_status(_("Téléchargement de la mise à jour… {percent} %").format(percent=int(percent)))
         if hasattr(self, "_app_dl_progress_dlg") and self._app_dl_progress_dlg:
             self._app_dl_progress_dlg.update(percent)
+            self._app_dl_progress_dlg.set_eta(eta_seconds)
 
     def _on_app_dl_error(self, message: str) -> None:
         self.mi_update_app.Enable(True)

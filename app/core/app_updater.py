@@ -21,6 +21,7 @@ import re
 import subprocess
 import tempfile
 import threading
+import time
 import urllib.request
 import urllib.error
 import json
@@ -173,12 +174,25 @@ def check_for_update(on_done) -> None:
 # Téléchargement et installation
 # ---------------------------------------------------------------------------
 
+def _estimate_eta(downloaded: int, total: int, start_time: float) -> int | None:
+    """Temps restant estimé (secondes) d'après le débit moyen depuis le début.
+    Retourne None tant qu'aucun débit fiable n'est mesurable."""
+    elapsed = time.monotonic() - start_time
+    if downloaded <= 0 or elapsed <= 0:
+        return None
+    speed = downloaded / elapsed  # octets/s
+    remaining = max(total - downloaded, 0)
+    return int(remaining / speed) if speed > 0 else None
+
+
 def download_and_install(new_version: str, on_progress, on_error,
                          on_cancel=None, on_quit=None):
     """
     Télécharge l'installeur et le lance.
 
-    on_progress(percent: float)  — progression 0-100
+    on_progress(percent: float, eta_seconds: int | None)
+                                 — progression 0-100 et temps restant estimé
+                                   en secondes (None tant qu'il est incalculable)
     on_error(message: str)       — appelé si échec ; l'app NE se ferme PAS
     on_cancel()                  — appelé si l'utilisateur annule pendant le
                                    téléchargement (le fichier partiel est supprimé)
@@ -193,6 +207,7 @@ def download_and_install(new_version: str, on_progress, on_error,
     def _run():
         tmp_path  = os.path.join(tempfile.gettempdir(), ASSET_NAME + ".tmp")
         dest_path = os.path.join(tempfile.gettempdir(), ASSET_NAME)
+        start_time = time.monotonic()
 
         # Nettoyer un éventuel résidu de téléchargement précédent
         for path in (tmp_path, dest_path):
@@ -222,7 +237,8 @@ def download_and_install(new_version: str, on_progress, on_error,
                         if total > 0:
                             pct = int(downloaded / total * 100)
                             if pct != last_pct:
-                                on_progress(pct)
+                                on_progress(pct, _estimate_eta(
+                                    downloaded, total, start_time))
                                 last_pct = pct
 
         except Exception as exc:
