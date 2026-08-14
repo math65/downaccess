@@ -35,6 +35,9 @@ DEFAULTS: dict = {
     "intercept_use_page_title": True,
     "browser_choice": "auto",      # navigateur pour l'extraction guidée et la
                                    # connexion : auto | chrome | edge | brave
+    "results_paging": "pages",     # parcours des résultats de recherche :
+                                   # pages = boutons Page précédente/suivante
+                                   # continuous = la suite se charge en bas de liste
     "suppressed_warnings": [],     # clés des avertissements masqués
     "language": "auto",            # auto | fr | en
     "install_id": "",              # identifiant anonyme d'installation (généré au 1er lancement)

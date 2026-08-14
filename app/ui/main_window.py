@@ -63,7 +63,7 @@ from app.ui.format_dialog import FormatDialog
 from app.ui.audio_track_dialog import AudioTrackDialog
 from app.core.custom_sites import is_custom_site_url, detect_audio_tracks
 from app.ui.playlist_dialog import PlaylistDialog
-from app.ui.search_dialog import SearchDialog, SearchResultsDialog
+from app.ui.search_dialog import RESULT_BACK, SearchDialog, SearchResultsDialog
 from app.ui.settings_dialog import SettingsDialog
 from app.ui.uge_dialog import UGEDialog
 from app.ui.login_dialog import LoginDialog
@@ -308,6 +308,11 @@ class MainWindow(wx.Frame):
         # Mise à jour yt-dlp en cours au démarrage → bloquer les téléchargements
         self._updater_running: bool = True
         self._pending_downloads: list[tuple[str, str, str | None, str | None]] = []
+        # Etat de la derniere recherche (contexte + page affichee) et URL de
+        # playlist qui en proviennent : permet de revenir aux resultats depuis
+        # la selection des videos d'une playlist.
+        self._search_snapshot: dict | None = None
+        self._search_playlist_urls: set[str] = set()
         self._queue = QueueManager(
             settings=self.settings,
             post_to_ui=wx.CallAfter,
@@ -1121,10 +1126,24 @@ class MainWindow(wx.Frame):
         from app.ui.playlist_dialog import NUMBER_ORIGINAL, NUMBER_SEQUENTIAL
         from app.core import settings as cfg
 
+        # « Retour aux résultats » n'a de sens que si cette playlist vient d'une
+        # recherche dont on a garde l'etat : sinon le bouton n'aurait nulle part
+        # ou revenir.
+        can_go_back = bool(self._search_snapshot) and info.url in self._search_playlist_urls
+
         default_num = self.settings.get("playlist_numbering", NUMBER_ORIGINAL)
         with PlaylistDialog(self, info.title, info.playlist_entries,
-                            default_numbering=default_num) as dlg:
-            if dlg.ShowModal() != wx.ID_OK:
+                            default_numbering=default_num,
+                            allow_back=can_go_back) as dlg:
+            code = dlg.ShowModal()
+            if code == RESULT_BACK:
+                snapshot = self._search_snapshot
+                self._search_playlist_urls.discard(info.url)
+                self.set_status(_("Retour aux résultats de recherche."))
+                wx.CallAfter(self._show_search_results,
+                             snapshot["ctx"], snapshot["result"])
+                return
+            if code != wx.ID_OK:
                 self.set_status(_("Téléchargement de playlist annulé."))
                 return
             selected = dlg.get_selected_entries()
@@ -1426,64 +1445,97 @@ class MainWindow(wx.Frame):
         with SearchDialog(self) as dlg:
             if dlg.ShowModal() != wx.ID_OK:
                 return
-            query        = dlg.get_query()
-            site_prefix  = dlg.get_site_prefix()
-            site_label   = dlg.get_site_label()
-            search_type  = dlg.get_search_type()
-            n            = dlg.get_n()
+            ctx = {
+                "query":       dlg.get_query(),
+                "category":    dlg.get_category(),
+                "cat_label":   dlg.get_category_label(),
+                "site_prefix": dlg.get_site_prefix(),
+                "site_label":  dlg.get_site_label(),
+                "search_type": dlg.get_search_type(),
+                "n":           dlg.get_n(),
+            }
+        self._start_search(ctx, page=1)
 
-        self.set_status(_("Recherche en cours : {query}…").format(query=query))
-        speech.speak(_("Recherche sur {site}…").format(site=site_label))
+    def _start_search(self, ctx: dict, page: int) -> None:
+        """Lance la récupération d'une page de résultats en arrière-plan."""
+        if ctx["category"]:
+            self.set_status(_("Chargement de la catégorie {category}…").format(
+                category=ctx["cat_label"]))
+            speech.speak(_("Chargement de {category} sur {site}…").format(
+                category=ctx["cat_label"], site=ctx["site_label"]))
+        else:
+            self.set_status(_("Recherche en cours : {query}…").format(query=ctx["query"]))
+            speech.speak(_("Recherche sur {site}…").format(site=ctx["site_label"]))
 
         import threading
 
-        result = {}
-
-        # france.tv / Arte : API HTTP dédiée (pas de préfixe de recherche yt-dlp).
-        if site_prefix in ("francetv", "arte"):
-            def fetch():
-                try:
-                    from app.core import i18n, site_search
-                    result["entries"] = site_search.search(
-                        site_prefix, query, n, i18n.get_current_language_code())
-                except Exception as exc:
-                    result["error"] = str(exc)
-                wx.CallAfter(self._on_search_done, site_label, site_prefix, result)
-            threading.Thread(target=fetch, daemon=True).start()
-            return
-
-        if site_prefix == "ytsearch" and search_type in _YT_SEARCH_SP:
-            # Filtre par type via la page de résultats YouTube (paramètre `sp`).
-            import urllib.parse
-            search_url = "https://www.youtube.com/results?" + urllib.parse.urlencode(
-                {"search_query": query, "sp": _YT_SEARCH_SP[search_type]})
-        else:
-            search_url = f"{site_prefix}{n}:{query}"
-
         def fetch():
             try:
-                import yt_dlp
-                opts = {
-                    "quiet": True,
-                    "no_warnings": True,
-                    "extract_flat": True,
-                    "skip_download": True,
-                    "playlistend": n,
-                }
-                with yt_dlp.YoutubeDL(opts) as ydl:
-                    info = ydl.extract_info(search_url, download=False)
-                entries = [e for e in (info.get("entries") or []) if e] if info else []
-                for e in entries:
-                    e["_dl_type"] = _classify_search_entry(e, site_prefix)
-                entries.sort(key=lambda e: _SEARCH_TYPE_ORDER.get(e.get("_dl_type", ""), 3))
-                result["entries"] = entries
+                result = self._fetch_results(ctx, page)
             except Exception as exc:
-                result["error"] = str(exc)
-            wx.CallAfter(self._on_search_done, site_label, site_prefix, result)
+                result = {"error": str(exc)}
+            wx.CallAfter(self._on_search_done, ctx, result)
 
         threading.Thread(target=fetch, daemon=True).start()
 
-    def _on_search_done(self, site_label: str, site_prefix: str, result: dict) -> None:
+    def _fetch_results(self, ctx: dict, page: int) -> dict:
+        """Récupère une page de résultats.
+
+        APPELE DEPUIS UN THREAD DE TRAVAIL : aucun appel wx ici. Retourne
+        ``{"entries", "page", "total_pages", "total_count"}``.
+        """
+        site = ctx["site_prefix"]
+        n = ctx["n"]
+
+        # france.tv / Arte : API HTTP dédiée (pas de préfixe de recherche yt-dlp).
+        if site in ("francetv", "arte"):
+            from app.core import i18n, site_search
+            lang = i18n.get_current_language_code()
+            if ctx["category"]:
+                return site_search.browse(site, ctx["category"], n, lang, page)
+            return site_search.search(site, ctx["query"], n, lang, page)
+
+        # yt-dlp : pas de pagination native sur les recherches. On demande
+        # n * page resultats et on ne garde que la tranche voulue. Le surcout
+        # reste modere (extract_flat) et evite de dependre d'un curseur que
+        # l'extracteur n'expose pas.
+        wanted = n * page
+        query = ctx["query"]
+        if site == "ytsearch" and ctx["search_type"] in _YT_SEARCH_SP:
+            # Filtre par type via la page de résultats YouTube (paramètre `sp`).
+            import urllib.parse
+            search_url = "https://www.youtube.com/results?" + urllib.parse.urlencode(
+                {"search_query": query, "sp": _YT_SEARCH_SP[ctx["search_type"]]})
+        else:
+            search_url = f"{site}{wanted}:{query}"
+
+        import yt_dlp
+        opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "extract_flat": True,
+            "skip_download": True,
+            "playlistend": wanted,
+        }
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(search_url, download=False)
+        entries = [e for e in (info.get("entries") or []) if e] if info else []
+        for e in entries:
+            e["_dl_type"] = _classify_search_entry(e, site)
+        entries.sort(key=lambda e: _SEARCH_TYPE_ORDER.get(e.get("_dl_type", ""), 3))
+
+        # Une page pleine laisse supposer qu'il en reste : on annonce une page
+        # de plus que celle atteinte, sans pretendre connaitre le total (les
+        # extracteurs ne le donnent pas).
+        has_more = len(entries) >= wanted
+        return {
+            "entries": entries[(page - 1) * n:page * n],
+            "page": page,
+            "total_pages": page + 1 if has_more else page,
+            "total_count": 0,
+        }
+
+    def _on_search_done(self, ctx: dict, result: dict) -> None:
         if "error" in result:
             self.set_status(_("Erreur lors de la recherche."))
             wx.MessageBox(
@@ -1492,20 +1544,46 @@ class MainWindow(wx.Frame):
             )
             return
 
-        entries = result.get("entries", [])
-        if not entries:
+        if not result.get("entries"):
             self.set_status(_("Aucun résultat trouvé."))
             speech.speak(_("Aucun résultat trouvé."))
             return
 
-        with SearchResultsDialog(self, site_label, entries,
-                                  settings=self.settings) as dlg:
-            if dlg.ShowModal() != wx.ID_OK:
+        self._show_search_results(ctx, result)
+
+    def _show_search_results(self, ctx: dict, result: dict) -> None:
+        """Ouvre les résultats et traite le retour (bouton Retour → recherche)."""
+        site_label = ctx["site_label"]
+        if ctx["category"]:
+            site_label = _("{site} — {category}").format(
+                site=site_label, category=ctx["cat_label"])
+
+        with SearchResultsDialog(
+            self, site_label, result["entries"],
+            settings=self.settings,
+            fetch_page=lambda p: self._fetch_results(ctx, p),
+            page=result.get("page", 1),
+            total_pages=result.get("total_pages", 1),
+            total_count=result.get("total_count", 0),
+            allow_back=True,
+            paging_mode=self.settings.get("results_paging", "pages"),
+        ) as dlg:
+            code = dlg.ShowModal()
+            if code == RESULT_BACK:
+                # Retour au formulaire de recherche, sans rien enfiler.
+                wx.CallAfter(self._on_search, None)
+                return
+            if code != wx.ID_OK:
                 self.set_status(_("Recherche annulée."))
+                self._search_snapshot = None
                 return
             selected = dlg.get_selected_entries()
             fmt      = dlg.get_format()
+            # Memorise l'etat exact pour pouvoir revenir ici depuis la
+            # selection des videos d'une playlist.
+            self._search_snapshot = {"ctx": ctx, "result": dlg.get_page_state()}
 
+        site_prefix = ctx["site_prefix"]
         is_custom = site_prefix in ("francetv", "arte")
         enqueued = 0
         for entry in selected:
@@ -1520,6 +1598,11 @@ class MainWindow(wx.Frame):
                     url = ""
             if not url:
                 continue
+            # Retenir les URL de playlist/chaîne issues de CETTE recherche : ce
+            # sont les seules pour lesquelles « Retour aux résultats » a un sens
+            # dans le dialogue de sélection des vidéos.
+            if entry.get("_dl_type") in ("playlist", "channel"):
+                self._search_playlist_urls.add(url)
             # Sites personnalisés : une vidéo unique passe par le choix de piste
             # audio (français / audiodescription) ; les collections (playlists)
             # suivent le flux normal (yt-dlp les développe en épisodes).

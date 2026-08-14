@@ -16,6 +16,7 @@ SUBTITLE_MODE_CHOICES = ["separate", "embed", "burn"]
 LANGUAGE_CHOICES = ["auto", "fr", "en"]
 ANNOUNCE_CHOICES = ["always", "foreground", "never"]
 AD_MODE_CHOICES = ["ask", "ad_only", "original_and_ad", "original_only"]
+PAGING_CHOICES = ["pages", "continuous"]
 
 # Limiteur de vitesse : valeurs en octets/sec. 0 = illimité.
 RATELIMIT_VALUES = [
@@ -231,6 +232,20 @@ class SettingsDialog(wx.Dialog):
         )
         lbl_announce_hint.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
 
+        # Résultats de recherche
+        lbl_results = wx.StaticText(page, label=_("Résultats de recherche :"))
+        self.radio_paging = wx.RadioBox(
+            page,
+            label=_("Parcours des résultats"),
+            choices=[
+                _("Par pages (boutons Page précédente / Page suivante)"),
+                _("En continu (la suite se charge en arrivant en bas de la liste)"),
+            ],
+            majorDimension=1,
+            style=wx.RA_SPECIFY_COLS,
+            name=_("Parcours des résultats"),
+        )
+
         # Extraction guidée
         lbl_uge = wx.StaticText(page, label=_("Extraction guidée :"))
         lbl_browser = wx.StaticText(page, label=_("Navigateur à utiliser :"))
@@ -270,6 +285,8 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(self.chk_organize_playlist, 0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.radio_announce,        0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_announce_hint,          0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
+        sizer.Add(lbl_results,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        sizer.Add(self.radio_paging,          0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_uge,                    0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_browser,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.choice_browser,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
@@ -482,6 +499,9 @@ class SettingsDialog(wx.Dialog):
         self.chk_open_folder.SetValue(s.get("open_folder_when_done", False))
         self.chk_organize.SetValue(s.get("organize_by_site", False))
         self.chk_organize_playlist.SetValue(s.get("organize_by_playlist", False))
+        self.radio_paging.SetSelection(
+            PAGING_CHOICES.index(s.get("results_paging", "pages"))
+            if s.get("results_paging", "pages") in PAGING_CHOICES else 0)
         browser = s.get("browser_choice", "auto")
         self.choice_browser.SetSelection(
             self._browser_codes.index(browser) if browser in self._browser_codes else 0)
@@ -540,6 +560,7 @@ class SettingsDialog(wx.Dialog):
         s["open_folder_when_done"]    = self.chk_open_folder.GetValue()
         s["organize_by_site"]         = self.chk_organize.GetValue()
         s["organize_by_playlist"]     = self.chk_organize_playlist.GetValue()
+        s["results_paging"] = PAGING_CHOICES[max(0, self.radio_paging.GetSelection())]
         s["browser_choice"] = self._browser_codes[max(0, self.choice_browser.GetSelection())]
         s["intercept_use_page_title"] = self.chk_intercept_title.GetValue()
         s["download_announcements"]   = ANNOUNCE_CHOICES[self.radio_announce.GetSelection()]
