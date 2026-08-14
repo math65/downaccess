@@ -43,7 +43,9 @@ from app.core import updater
 from app.core import app_updater
 from app.core import announce
 from app.core import amc_integration
+from app.core import browser
 from app.core.downloader import DownloadInfo, DownloadProgress
+from app.core.ffmpeg_utils import get_ffmpeg_path
 from app.core.queue_manager import QueueManager
 from app.ui.add_url_dialog import AddUrlDialog, FORMAT_MANUAL
 from app.ui.announcement_dialog import AnnouncementDialog
@@ -849,10 +851,16 @@ class MainWindow(wx.Frame):
 
                 # Infos système étendues
                 def _ffmpeg_ver() -> str:
+                    # get_ffmpeg_path() : meme resolution que les telechargements
+                    # (binaire embarque dans _internal). Interroger directement
+                    # le reglage `ffmpeg_path` remontait "indisponible" chez tout
+                    # le monde, puisqu'il vaut "ffmpeg" par defaut et que ffmpeg
+                    # n'est pas dans le PATH -> diagnostic trompeur.
                     try:
                         r = _sp.run(
-                            [self.settings.get("ffmpeg_path", "ffmpeg"), "-version"],
+                            [get_ffmpeg_path(self.settings), "-version"],
                             capture_output=True, text=True, timeout=3,
+                            creationflags=getattr(_sp, "CREATE_NO_WINDOW", 0),
                         )
                         return r.stdout.splitlines()[0] if r.returncode == 0 else "indisponible"
                     except Exception:
@@ -1874,6 +1882,7 @@ class MainWindow(wx.Frame):
                 self.settings = dlg.get_settings()
                 cfg.save(self.settings)
                 self._queue._settings = self.settings
+                browser.set_preferred_browser(self.settings.get("browser_choice", "auto"))
                 speech.speak(_("Préférences enregistrées."))
                 if dlg.restart_requested():
                     self._restart_app()

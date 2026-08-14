@@ -33,6 +33,8 @@ DEFAULTS: dict = {
     "user_email": "",
     "cookie_sites": [],
     "intercept_use_page_title": True,
+    "browser_choice": "auto",      # navigateur pour l'extraction guidée et la
+                                   # connexion : auto | chrome | edge | brave
     "suppressed_warnings": [],     # clés des avertissements masqués
     "language": "auto",            # auto | fr | en
     "install_id": "",              # identifiant anonyme d'installation (généré au 1er lancement)

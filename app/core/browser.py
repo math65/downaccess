@@ -24,26 +24,66 @@ def _free_port() -> int:
 
 
 
-# Chemins classiques Windows (Chrome → Edge → Brave)
-_CANDIDATES = [
-    # Chrome
-    os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
-    os.path.expandvars(r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
-    os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
-    # Edge (présent sur tout Windows 10/11)
-    os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
-    os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
-    # Brave
-    os.path.expandvars(r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe"),
-    os.path.expandvars(r"%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe"),
-]
+# Chemins classiques Windows, par navigateur. L'ordre des cles = ordre de
+# preference en mode automatique (Chrome -> Edge -> Brave).
+_BROWSER_PATHS: dict[str, list[str]] = {
+    "chrome": [
+        os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
+    ],
+    # Edge est présent sur tout Windows 10/11
+    "edge": [
+        os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+        os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+    ],
+    "brave": [
+        os.path.expandvars(r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+        os.path.expandvars(r"%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+    ],
+}
+
+_BROWSER_LABELS = {"chrome": "Chrome", "edge": "Edge", "brave": "Brave"}
+
+# Preference utilisateur (réglage `browser_choice`), lue au moment de lancer le
+# navigateur. Positionnee par l'UI au demarrage et a chaque changement de
+# preference : `app/core/browser.py` ne doit pas dependre des settings (aucun
+# import wx ni cycle d'import).
+_preferred: str = "auto"
 
 
-def find_browser() -> str | None:
-    """Retourne le chemin du premier navigateur Chromium trouvé, ou None."""
-    for path in _CANDIDATES:
-        if os.path.isfile(path):
-            return path
+def set_preferred_browser(choice: str | None) -> None:
+    """Definit le navigateur a utiliser : 'auto', 'chrome', 'edge' ou 'brave'."""
+    global _preferred
+    _preferred = (choice or "auto").lower()
+
+
+def available_browsers() -> list[tuple[str, str]]:
+    """Navigateurs Chromium reellement installes : [(code, libelle), ...]."""
+    found = []
+    for code, paths in _BROWSER_PATHS.items():
+        if any(os.path.isfile(p) for p in paths):
+            found.append((code, _BROWSER_LABELS[code]))
+    return found
+
+
+def find_browser(choice: str | None = None) -> str | None:
+    """Retourne le chemin du navigateur Chromium a utiliser, ou None.
+
+    `choice` (ou la preference enregistree) vaut 'auto' / 'chrome' / 'edge' /
+    'brave'. Un navigateur demande mais absent retombe sur la detection
+    automatique, pour ne jamais bloquer l'utilisateur sur un reglage obsolete
+    (navigateur desinstalle depuis).
+    """
+    wanted = (choice or _preferred or "auto").lower()
+    if wanted in _BROWSER_PATHS:
+        for path in _BROWSER_PATHS[wanted]:
+            if os.path.isfile(path):
+                return path
+    for paths in _BROWSER_PATHS.values():
+        for path in paths:
+            if os.path.isfile(path):
+                return path
     return None
 
 
@@ -71,6 +111,40 @@ def downaccess_profile_dir() -> str:
     return os.path.join(appdata, "DownAccess", "BrowserProfile")
 
 
+def require_browser() -> str:
+    """Chemin du navigateur a utiliser, ou RuntimeError traduite si aucun."""
+    bp = find_browser()
+    if not bp:
+        raise RuntimeError(_translate(
+            "Aucun navigateur compatible trouvé.\n"
+            "Installez Google Chrome, Microsoft Edge ou Brave."
+        ))
+    return bp
+
+
+def build_options(browser_path: str, headless: bool = False):
+    """Options DrissionPage communes : profil dédié PERSISTANT + port libre.
+
+    Point de passage OBLIGATOIRE pour tout lancement de navigateur : c'est ce
+    qui garantit que l'utilisateur reste connecté d'une fois sur l'autre.
+
+    NE PAS remplacer par auto_port() : il écrase set_user_data_path() par un
+    dossier temporaire qu'il supprime à la déconnexion (cf. DrissionPage
+    handle_options / _on_disconnect) -> le profil dédié ne persisterait jamais
+    et l'utilisateur devrait se reconnecter à chaque fois. On choisit donc un
+    port libre nous-mêmes + un user-data-path fixe ; le port distinct permet de
+    coexister avec le navigateur habituel de l'utilisateur.
+    """
+    from DrissionPage import ChromiumOptions
+    co = ChromiumOptions()
+    co.set_browser_path(browser_path)
+    co.set_user_data_path(downaccess_profile_dir())
+    co.set_local_port(_free_port())
+    if headless:
+        co.headless()
+    return co
+
+
 def open_dedicated_browser(url: str):
     """Lance le navigateur dédié à DownAccess (profil isolé persistant) et
     navigue vers `url`. Retourne l'objet ChromiumPage de DrissionPage.
@@ -79,24 +153,8 @@ def open_dedicated_browser(url: str):
     Le profil dédié n'entre jamais en conflit avec le navigateur habituel de
     l'utilisateur, qu'il soit ouvert ou non.
     """
-    bp = find_browser()
-    if not bp:
-        raise RuntimeError(_translate(
-            "Aucun navigateur compatible trouvé.\n"
-            "Installez Google Chrome, Microsoft Edge ou Brave."
-        ))
-    from DrissionPage import ChromiumOptions, ChromiumPage
-    co = ChromiumOptions()
-    co.set_browser_path(bp)
-    # Profil dédié et PERSISTANT (l'utilisateur reste connecté d'une fois sur
-    # l'autre). NE PAS utiliser auto_port() : il écrase set_user_data_path() par
-    # un dossier temporaire qu'il supprime à la déconnexion (cf. DrissionPage
-    # handle_options / _on_disconnect) -> le profil dédié ne persisterait jamais.
-    # On choisit donc un port libre nous-mêmes + un user-data-path fixe ; le port
-    # distinct permet de coexister avec le navigateur habituel de l'utilisateur.
-    co.set_user_data_path(downaccess_profile_dir())
-    co.set_local_port(_free_port())
-    page = ChromiumPage(co)
+    from DrissionPage import ChromiumPage
+    page = ChromiumPage(build_options(require_browser()))
     page.get(url)
     return page
 
@@ -119,19 +177,8 @@ def harvest_cookies_headless() -> list[dict]:
     le profil dédié est persistant, la connexion y est conservée. À n'appeler
     qu'une fois la fenêtre visible fermée (un seul accès au profil à la fois).
     """
-    bp = find_browser()
-    if not bp:
-        raise RuntimeError(_translate(
-            "Aucun navigateur compatible trouvé.\n"
-            "Installez Google Chrome, Microsoft Edge ou Brave."
-        ))
-    from DrissionPage import ChromiumOptions, ChromiumPage
-    co = ChromiumOptions()
-    co.set_browser_path(bp)
-    co.set_user_data_path(downaccess_profile_dir())
-    co.set_local_port(_free_port())
-    co.headless()
-    page = ChromiumPage(co)
+    from DrissionPage import ChromiumPage
+    page = ChromiumPage(build_options(require_browser(), headless=True))
     try:
         return harvest_cookies(page)
     finally:
@@ -188,18 +235,8 @@ def harvest_youtube_playlist(
     Retourne une liste ordonnée de dicts {id, title, url} (format compatible
     PlaylistDialog et la remise en file).
     """
-    bp = find_browser()
-    if not bp:
-        raise RuntimeError(_translate(
-            "Aucun navigateur compatible trouvé.\n"
-            "Installez Google Chrome, Microsoft Edge ou Brave."
-        ))
-    from DrissionPage import ChromiumOptions, ChromiumPage
-    co = ChromiumOptions()
-    co.set_browser_path(bp)
-    co.set_user_data_path(downaccess_profile_dir())
-    co.set_local_port(_free_port())
-    co.headless()
+    from DrissionPage import ChromiumPage
+    co = build_options(require_browser(), headless=True)
     co.set_argument("--mute-audio")
     page = ChromiumPage(co)
     try:

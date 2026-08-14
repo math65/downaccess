@@ -5,6 +5,7 @@ import wx
 from app.core import settings as cfg
 from app.core import speech
 from app.core import i18n
+from app.core.browser import available_browsers
 from app.core.ffmpeg_utils import get_ffmpeg_path
 
 # Cles internes (jamais traduites). Memes codes que add_url_dialog (format par
@@ -232,6 +233,17 @@ class SettingsDialog(wx.Dialog):
 
         # Extraction guidée
         lbl_uge = wx.StaticText(page, label=_("Extraction guidée :"))
+        lbl_browser = wx.StaticText(page, label=_("Navigateur à utiliser :"))
+        installed = available_browsers()
+        self._browser_codes = ["auto"] + [code for code, _n in installed]
+        self.choice_browser = wx.Choice(
+            page,
+            choices=[_("Automatique")] + [name for _c, name in installed],
+            name=_("Navigateur à utiliser"))
+        lbl_browser_hint = wx.StaticText(page, label=_(
+            "DownAccess ouvre le navigateur dans un profil séparé de votre "
+            "navigation habituelle. Vous vous connectez aux sites une seule "
+            "fois : la connexion est conservée pour les fois suivantes."))
         self.chk_intercept_title = wx.CheckBox(page,
             label=_("Utiliser le titre de la page comme nom de fichier (interception)"),
             name=_("Utiliser le titre de la page comme nom de fichier"))
@@ -259,6 +271,9 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(self.radio_announce,        0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_announce_hint,          0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(lbl_uge,                    0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        sizer.Add(lbl_browser,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(self.choice_browser,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(lbl_browser_hint,           0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.chk_intercept_title,   0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_warn,                   0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.btn_reset_warnings,    0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
@@ -467,6 +482,9 @@ class SettingsDialog(wx.Dialog):
         self.chk_open_folder.SetValue(s.get("open_folder_when_done", False))
         self.chk_organize.SetValue(s.get("organize_by_site", False))
         self.chk_organize_playlist.SetValue(s.get("organize_by_playlist", False))
+        browser = s.get("browser_choice", "auto")
+        self.choice_browser.SetSelection(
+            self._browser_codes.index(browser) if browser in self._browser_codes else 0)
         self.chk_intercept_title.SetValue(s.get("intercept_use_page_title", True))
         announce = s.get("download_announcements", "always")
         ann_idx = ANNOUNCE_CHOICES.index(announce) if announce in ANNOUNCE_CHOICES else 0
@@ -522,6 +540,7 @@ class SettingsDialog(wx.Dialog):
         s["open_folder_when_done"]    = self.chk_open_folder.GetValue()
         s["organize_by_site"]         = self.chk_organize.GetValue()
         s["organize_by_playlist"]     = self.chk_organize_playlist.GetValue()
+        s["browser_choice"] = self._browser_codes[max(0, self.choice_browser.GetSelection())]
         s["intercept_use_page_title"] = self.chk_intercept_title.GetValue()
         s["download_announcements"]   = ANNOUNCE_CHOICES[self.radio_announce.GetSelection()]
 

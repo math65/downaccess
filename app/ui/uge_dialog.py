@@ -17,7 +17,7 @@ import urllib.request
 import wx
 
 from app.core import speech
-from app.core.browser import find_browser, browser_name
+from app.core.browser import build_options, find_browser, browser_name
 
 _log = logging.getLogger("downaccess.uge")
 
@@ -574,11 +574,12 @@ class UGEDialog(wx.Frame):
             return False
 
         try:
-            from DrissionPage import ChromiumPage, ChromiumOptions
-            co = ChromiumOptions()
-            co.set_browser_path(browser_path)
-            co.auto_port()
-            self._page = ChromiumPage(co)
+            from DrissionPage import ChromiumPage
+            # Profil dédié PERSISTANT (cf. browser.build_options) : l'utilisateur
+            # reste connecté aux sites d'une extraction à l'autre. Avant, cet
+            # appel utilisait auto_port(), qui repart d'un profil temporaire
+            # supprimé à la fermeture -> reconnexion obligatoire à chaque fois.
+            self._page = ChromiumPage(build_options(browser_path))
             self._browser_name = browser_name(browser_path)
             # Écouter toutes les requêtes réseau (filtrage côté Python)
             self._page.listen.start('')
