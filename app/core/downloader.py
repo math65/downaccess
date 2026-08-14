@@ -157,6 +157,13 @@ _TRANSIENT_ERROR_PATTERNS = (
     "http error 403", "forbidden",
     "unable to download video data",
     "http error 500", "http error 502", "http error 503",
+    # Flux coupe en cours de route : le serveur ferme la connexion avant la fin
+    # ("N bytes read, M more expected"). Les 20 reessais internes de yt-dlp
+    # retapent la MEME URL signee, deja perimee -> ils echouent tous. Seule une
+    # nouvelle extraction regenere une URL acceptee.
+    # ("incompleteread" sans espace : c'est le nom de la classe d'exception
+    # http.client telle qu'elle apparait dans le message.)
+    "more expected", "incompleteread", "content too short",
 )
 
 
@@ -389,25 +396,18 @@ class Downloader:
         by_site     = self._settings.get("organize_by_site", False)
         by_playlist = self._settings.get("organize_by_playlist", False) and playlist_title
 
-        if playlist_number:
-            name_part = f"{playlist_number:02d} - %(title)s.%(ext)s"
-        else:
-            name_part = "%(title)s.%(ext)s"
-
-        # outtmpl RELATIF (sans prefixe dest) : le dossier final est passe via
-        # paths['home'] ci-dessous. Cela permet d'isoler les fichiers
-        # intermediaires (.part, fragments, .ytdl) dans paths['temp'] sans que le
-        # fichier final n'y aille.
+        # Sous-dossier relatif. L'outtmpl reste RELATIF (sans prefixe dest) : le
+        # dossier final est passe via paths['home'] ci-dessous, ce qui permet
+        # d'isoler les fichiers intermediaires (.part, fragments, .ytdl) dans
+        # paths['temp'] sans que le fichier final n'y aille.
         if by_site and by_playlist:
-            pl_safe = _sanitize_dirname(playlist_title)
-            outtmpl = f"%(extractor_key)s/{pl_safe}/{name_part}"
+            _rel_dir = f"%(extractor_key)s/{_sanitize_dirname(playlist_title)}"
         elif by_site:
-            outtmpl = f"%(extractor_key)s/{name_part}"
+            _rel_dir = "%(extractor_key)s"
         elif by_playlist:
-            pl_safe = _sanitize_dirname(playlist_title)
-            outtmpl = f"{pl_safe}/{name_part}"
+            _rel_dir = _sanitize_dirname(playlist_title)
         else:
-            outtmpl = name_part
+            _rel_dir = ""
 
         # Fichiers intermediaires isoles dans un dossier temp dedie a CE
         # telechargement, dans le dossier de destination (meme disque -> le
@@ -415,17 +415,28 @@ class Downloader:
         # traitement (succes, erreur OU annulation) : plus de .part orphelins.
         temp_dir = os.path.join(dest, ".da-tmp", download_id[:8])
 
-        # Garde-fou Windows MAX_PATH (260 caracteres) : certains titres sont
-        # si longs (ex. podcasts Radio France dont le site duplique le titre)
-        # que le chemin complet depasse la limite et yt-dlp echoue avec
-        # "No such file or directory". On borne la longueur du nom de fichier
-        # pour que le chemin reste sous la limite, quelle que soit la
-        # profondeur du dossier de telechargement.
-        _rel_dir = outtmpl.rsplit("/", 1)[0] if "/" in outtmpl else ""
+        # Garde-fou Windows MAX_PATH (260 caracteres) : certains titres sont si
+        # longs (podcasts Radio France dont le site duplique le titre,
+        # descriptions completes de reels Facebook) que le chemin depasse la
+        # limite et l'ecriture echoue ("Invalid argument" / Errno 22).
+        #
+        # On borne le TITRE directement dans l'outtmpl (`%(title).Ns`). NE PAS
+        # se reposer sur la seule option `trim_file_name` de yt-dlp : elle
+        # decoupe le nom avec `filename.rsplit('.', 2)` et prend donc tout ce
+        # qui suit un point du titre pour une extension, qu'elle laisse
+        # intacte. Un titre contenant un point (frequent : "...juste pour te.
+        # #hashtag #hashtag...") n'etait donc pas tronque du tout.
         _final_prefix = os.path.join(dest, _rel_dir).replace("%(extractor_key)s", "x" * 30)
         # Le .part vit dans temp_dir : on borne selon le plus long des deux chemins.
         _eff_prefix = max(_final_prefix, temp_dir, key=len)
-        _trim_len = max(50, 240 - len(_eff_prefix) - len("/.m4a.part") - 4)
+        _num_prefix = f"{playlist_number:02d} - " if playlist_number else ""
+        _trim_len = max(
+            50,
+            240 - len(_eff_prefix) - len(_num_prefix) - len("/.m4a.part") - 4,
+        )
+
+        name_part = f"{_num_prefix}%(title).{_trim_len}s.%(ext)s"
+        outtmpl = f"{_rel_dir}/{name_part}" if _rel_dir else name_part
 
         log_buf = io.StringIO() if verbose else None
 
