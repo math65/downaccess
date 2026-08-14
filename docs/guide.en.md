@@ -185,12 +185,26 @@ This window has several settings:
    - **SoundCloud**
    - **france.tv**
    - **Arte**
-3. **Type**: for YouTube only, you can narrow the search to a result type — **All types**, **Videos**, **Playlists** or **Channels**. For the other sites, this setting has no effect.
-4. **Results**: specify how many results to display, from 1 to 25. The default value is **8**.
+3. **Category to browse**: for **france.tv** and **Arte** only. See the next section.
+4. **Type**: for YouTube only, you can narrow the search to a result type — **All types**, **Videos**, **Playlists** or **Channels**. For the other sites, this setting has no effect.
+5. **Results per page**: specify how many results to display at a time, from 1 to 50. The default value is **8**.
 
 Confirm with the **OK** button, or simply press **Enter** from the search field.
 
 > Accessibility note: when the window opens, your screen reader announces its role and reminds you of the settings. The focus starts directly in the input field, so you can type right away.
+
+### Browsing a catalogue without searching (france.tv, Arte)
+
+You do not always have a specific title in mind. On **france.tv** and **Arte**, you can simply browse the catalogue:
+
+1. Choose **france.tv** or **Arte** from the **Site** list.
+2. **Leave the Search field empty.**
+3. Choose a **Category to browse**: Documentaries, Films, Series & fiction, Science, History, Sport... The categories offered depend on the site.
+4. Confirm with **OK**.
+
+The programmes in that category appear like ordinary search results: you check them and download them the same way.
+
+> If you type anything in the Search field, the search takes priority and the category is ignored. To browse, make sure the field is empty.
 
 ### Browsing and choosing results
 
@@ -207,6 +221,23 @@ To select the media you want to download:
 A counter always shows you how many items are currently checked.
 
 > Accessibility note: each time you check or uncheck an item, the screen reader announces the new state, the title concerned and the total number of selections, so you can keep track without looking at the screen.
+
+### Reading a programme's summary
+
+Below the list, a **Summary** area shows the description of the result you are currently on. It updates every time you move through the list.
+
+Press **Tab** from the list to reach it and have your screen reader read it out, then **Shift+Tab** to go back to the list. This is handy for finding out what a programme is about before downloading it.
+
+> Not every site provides a summary. When there is none, the area shows "(no summary available)".
+
+### Seeing more results
+
+When there are more results than the page shows, two behaviours are possible, depending on your setting under **Preferences → General → Search results**:
+
+- **By pages** (default): the **Previous page** and **Next page** buttons move you from one page to the next. An indicator shows "Page 2 of 7".
+- **Continuous**: there are no buttons. When you reach the **last row** of the list with the down arrow, the next batch loads by itself and is appended below. Your screen reader announces how many results were added, and the focus moves to the first new one.
+
+> Your ticked boxes are **kept when you change page**. So you can tick two titles on page 1, three more on page 3, and download them all at once.
 
 ### Choosing the format and starting the download
 
@@ -423,6 +454,8 @@ When the address you add points to a playlist, DownAccess detects it automatical
 4. Confirm with the **Download selection** button, or give up with **Cancel**.
 
 Your numbering choice is remembered and offered by default next time. The selected videos are then added to the queue one by one and download like any other item.
+
+> **Playlist opened from a search**: if you reached this window from search results, a **Back to results** button takes you back to them exactly as you left them — same page, same ticked boxes. Handy when you discover the playlist's contents are not what you wanted: you do not have to run your search again.
 
 #### An address containing both a video and a playlist
 

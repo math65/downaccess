@@ -185,12 +185,26 @@ Cette fenêtre comporte plusieurs réglages :
    - **SoundCloud**
    - **france.tv**
    - **Arte**
-3. **Type** : pour YouTube uniquement, vous pouvez restreindre la recherche à un type de résultat — **Tous types**, **Vidéos**, **Playlists** ou **Chaînes**. Pour les autres sites, ce réglage n'a pas d'effet.
-4. **Résultats** : indiquez combien de résultats afficher, de 1 à 25. La valeur par défaut est **8**.
+3. **Catégorie à parcourir** : pour **france.tv** et **Arte** uniquement. Voir la section suivante.
+4. **Type** : pour YouTube uniquement, vous pouvez restreindre la recherche à un type de résultat — **Tous types**, **Vidéos**, **Playlists** ou **Chaînes**. Pour les autres sites, ce réglage n'a pas d'effet.
+5. **Résultats par page** : indiquez combien de résultats afficher à la fois, de 1 à 50. La valeur par défaut est **8**.
 
 Validez avec le bouton **OK**, ou appuyez simplement sur **Entrée** depuis le champ de recherche.
 
 > Note d'accessibilité : à l'ouverture, votre lecteur d'écran annonce le rôle de la fenêtre et vous rappelle les réglages. Le focus démarre directement dans le champ de saisie, vous pouvez taper aussitôt.
+
+### Parcourir un catalogue sans rien chercher (france.tv, Arte)
+
+Vous n'avez pas toujours un titre précis en tête. Sur **france.tv** et **Arte**, vous pouvez simplement parcourir le catalogue :
+
+1. Choisissez **france.tv** ou **Arte** dans la liste **Site**.
+2. **Laissez le champ Recherche vide.**
+3. Choisissez une **Catégorie à parcourir** : Documentaires, Films, Séries et fictions, Sciences, Histoire, Sport... Les catégories proposées dépendent du site.
+4. Validez avec **OK**.
+
+Les programmes de la catégorie s'affichent comme des résultats de recherche ordinaires : vous les cochez et les téléchargez de la même façon.
+
+> Si vous saisissez quelque chose dans le champ Recherche, c'est la recherche qui l'emporte et la catégorie est ignorée. Pour parcourir, laissez bien le champ vide.
 
 ### Parcourir et choisir les résultats
 
@@ -207,6 +221,23 @@ Pour sélectionner les médias à télécharger :
 Un compteur vous indique en permanence combien d'éléments sont actuellement cochés.
 
 > Note d'accessibilité : à chaque coche ou décoche, le lecteur d'écran annonce le nouvel état, le titre concerné et le nombre total de sélections, pour que vous gardiez le fil sans regarder l'écran.
+
+### Lire le résumé d'un programme
+
+Sous la liste, une zone **Résumé** affiche la description du résultat sur lequel vous êtes positionné. Elle se met à jour à chaque déplacement dans la liste.
+
+Appuyez sur **Tabulation** depuis la liste pour y accéder et la faire lire par votre lecteur d'écran, puis **Maj+Tabulation** pour revenir à la liste. C'est utile pour savoir de quoi parle une émission avant de la télécharger.
+
+> Tous les sites ne fournissent pas de résumé. Quand il n'y en a pas, la zone indique « (pas de résumé disponible) ».
+
+### Voir plus de résultats
+
+Quand il existe plus de résultats que ce que la page affiche, deux comportements sont possibles, selon votre réglage dans **Préférences → Général → Résultats de recherche** :
+
+- **Par pages** (réglage par défaut) : les boutons **Page précédente** et **Page suivante** vous font passer d'une page à l'autre. Un indicateur affiche « Page 2 sur 7 ».
+- **En continu** : il n'y a pas de boutons. Quand vous arrivez sur la **dernière ligne** de la liste avec la flèche bas, la suite se charge toute seule et vient s'ajouter en dessous. Votre lecteur d'écran vous annonce combien de résultats ont été ajoutés, et le focus se place sur le premier nouveau.
+
+> Vos cases cochées sont **conservées quand vous changez de page**. Vous pouvez donc cocher deux titres page 1, trois autres page 3, et tout télécharger d'un coup.
 
 ### Choisir le format et lancer le téléchargement
 
@@ -423,6 +454,8 @@ Quand l'adresse que vous ajoutez pointe vers une playlist, DownAccess la détect
 4. Validez avec le bouton **Télécharger la sélection**, ou abandonnez avec **Annuler**.
 
 Votre choix de numérotation est mémorisé et proposé par défaut la prochaine fois. Les vidéos sélectionnées sont ensuite ajoutées une à une à la file et se téléchargent comme n'importe quel autre élément.
+
+> **Playlist ouverte depuis une recherche** : si vous êtes arrivé sur cette fenêtre depuis les résultats d'une recherche, un bouton **Retour aux résultats** vous y ramène tel que vous les aviez laissés — même page, mêmes cases cochées. Pratique quand vous découvrez que le contenu de la playlist ne vous convient pas : vous n'avez pas à refaire votre recherche.
 
 #### Une adresse contenant à la fois une vidéo et une playlist
 
