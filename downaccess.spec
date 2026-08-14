@@ -41,6 +41,16 @@ if not DOC_DATAS:
         "Lance d'abord : python scripts/build_docs.py"
     )
 
+# Version de yt-dlp embarquee dans ce build. Les metadonnees des paquets ne
+# sont pas incluses dans le bundle : sans ce tampon, le runtime ne peut pas
+# savoir quelle version il embarque, et donc pas decider si la copie AppData
+# (canal nightly) est plus recente. Cf. app/core/updater.py:get_reference_version.
+import importlib.metadata
+YTDLP_STAMP = Path('build') / 'ytdlp_bundled.txt'
+YTDLP_STAMP.parent.mkdir(parents=True, exist_ok=True)
+YTDLP_STAMP.write_text(importlib.metadata.version('yt-dlp'), encoding='utf-8')
+STAMP_DATAS = [(str(YTDLP_STAMP), '.')]   # -> _internal/ytdlp_bundled.txt
+
 a = Analysis(
     ['main.py'],
     pathex=['.'],
@@ -48,7 +58,7 @@ a = Analysis(
         (str(FFMPEG_EXE), '.'),   # → _internal/ffmpeg.exe dans le bundle
         (str(QJS_EXE), '.'),      # → _internal/qjs.exe dans le bundle
     ],
-    datas=LOCALE_DATAS + DOC_DATAS,
+    datas=LOCALE_DATAS + DOC_DATAS + STAMP_DATAS,
     hiddenimports=[
         # wxPython
         'wx',

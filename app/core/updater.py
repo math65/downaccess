@@ -1,4 +1,6 @@
+import importlib.machinery
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -8,6 +10,8 @@ import urllib.request
 from pathlib import Path
 
 from app.core.i18n import _translate as _
+
+_log = logging.getLogger("downaccess.updater")
 
 
 def get_ytdlp_dir() -> Path:
@@ -228,13 +232,127 @@ def _inject_path(ytdlp_dir: Path) -> None:
         sys.path.insert(0, path_str)
 
 
+# --- Priorite d'import de yt-dlp --------------------------------------------
+#
+# L'app embarque une copie de yt-dlp (PyInstaller) ET en installe une plus
+# recente dans %APPDATA%\DownAccess\yt-dlp (canal nightly). Faire gagner la
+# seconde ne peut PAS se faire avec sys.path seul : en frozen, l'importeur de
+# PyInstaller siege dans sys.meta_path et repond AVANT que sys.path ne soit
+# consulte. La copie embarquee gagnait donc systematiquement, et les mises a
+# jour nightly n'atteignaient jamais l'utilisateur : l'app annoncait la version
+# AppData (lue dans le dist-info) tout en executant celle figee au build.
+# On installe donc un finder en TETE de sys.meta_path, avant tout import de
+# yt_dlp -> voir l'appel dans main.py.
+
+_MANAGED_ROOTS = ("yt_dlp",)
+
+_activated = False
+
+
+class _AppDataYtDlpFinder:
+    """Finder `sys.meta_path` qui resout yt_dlp depuis le dossier AppData.
+
+    Ne repond que pour le paquet yt_dlp (et ses sous-modules) : tout le reste
+    est laisse aux finders suivants, dont celui de PyInstaller.
+    """
+
+    def __init__(self, ytdlp_dir: Path):
+        self._paths = [str(ytdlp_dir)]
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split(".", 1)[0] not in _MANAGED_ROOTS:
+            return None
+        # Sous-module : `path` est le __path__ du paquet parent, deja resolu
+        # dans AppData. Module racine : on cherche dans le dossier AppData.
+        search = list(path) if path is not None else self._paths
+        return importlib.machinery.PathFinder.find_spec(fullname, search, target)
+
+
+def get_reference_version() -> str | None:
+    """Version de yt-dlp disponible SANS la copie AppData.
+
+    Sert de plancher : on n'active AppData que si elle est plus recente.
+    - En frozen : la version embarquee au build, ecrite par downaccess.spec
+      dans `_internal/ytdlp_bundled.txt` (les metadonnees du paquet ne sont pas
+      embarquees, on ne peut donc pas interroger importlib.metadata).
+    - En dev : la version installee dans le venv.
+    """
+    if getattr(sys, "frozen", False):
+        try:
+            stamp = Path(getattr(sys, "_MEIPASS", "")) / "ytdlp_bundled.txt"
+            return stamp.read_text(encoding="utf-8").strip() or None
+        except Exception:
+            return None
+    try:
+        import importlib.metadata
+
+        return importlib.metadata.version("yt-dlp")
+    except Exception:
+        return None
+
+
+def activate_appdata_ytdlp() -> str | None:
+    """Fait pointer `import yt_dlp` vers la copie AppData quand elle est plus
+    recente que celle embarquee. Retourne la version activee, sinon None.
+
+    DOIT etre appele avant le premier `import yt_dlp` du processus.
+    """
+    global _activated
+    if _activated:
+        return None
+
+    ytdlp_dir = get_ytdlp_dir()
+    if not (ytdlp_dir / "yt_dlp" / "__init__.py").is_file():
+        return None  # rien d'installe (ou installation incomplete)
+
+    installed = get_installed_version()
+    reference = get_reference_version()
+    if installed and reference and _version_key(installed) <= _version_key(reference):
+        # La copie embarquee est aussi recente : rien a faire (cas d'une
+        # nouvelle version de l'app installee alors que la machine est hors
+        # ligne depuis un moment).
+        return None
+
+    if "yt_dlp" in sys.modules:
+        # Trop tard : un import a deja eu lieu. Ne devrait pas arriver, mais on
+        # le trace plutot que d'echouer silencieusement comme avant.
+        _log.warning(
+            "yt_dlp deja importe avant activate_appdata_ytdlp() : "
+            "la version %s d'AppData ne sera pas utilisee.", installed
+        )
+        return None
+
+    sys.meta_path.insert(0, _AppDataYtDlpFinder(ytdlp_dir))
+    _inject_path(ytdlp_dir)  # coherence pour les outils qui lisent sys.path
+    _activated = True
+    _log.info("yt-dlp %s (AppData) prioritaire sur %s (embarque).",
+              installed, reference or "?")
+    return installed
+
+
 def bootstrap(on_update_done=None) -> None:
     """
     Appelé au démarrage :
-    - Injecte la version AppData dans sys.path si elle existe.
+    - S'assure que la copie AppData de yt-dlp est prioritaire si elle est plus
+      recente (normalement deja fait par main.py, avant tout import de yt_dlp).
     - Lance toujours une vérification de mise à jour en arrière-plan.
     """
-    ytdlp_dir = get_ytdlp_dir()
-    if ytdlp_dir.exists():
-        _inject_path(ytdlp_dir)
+    activate_appdata_ytdlp()
+    _log_effective_ytdlp()
     check_and_update(on_done=on_update_done)
+
+
+def _log_effective_ytdlp() -> None:
+    """Trace la copie de yt-dlp REELLEMENT chargee (version + emplacement).
+
+    Sans cette trace, l'app annoncait la version d'AppData tout en executant
+    celle du bundle : l'ecart est passe inapercu pendant six semaines, et les
+    rapports d'erreur eux-memes affichaient les deux valeurs sans qu'on les
+    rapproche. On la garde pour que le cas soit immediatement visible.
+    """
+    try:
+        import yt_dlp
+        _log.info("yt-dlp effectif : %s (%s)",
+                  yt_dlp.version.__version__, yt_dlp.__file__)
+    except Exception as exc:
+        _log.warning("yt-dlp introuvable : %s", exc)

@@ -3,6 +3,7 @@ from app.core import logger as _logger
 from app.core import settings as cfg
 from app.core import i18n
 from app.core import updater
+from app.core import browser
 
 
 def main():
@@ -13,6 +14,14 @@ def main():
     # dans builtins. MainWindow et ses imports declenchent ce chargement.
     settings = cfg.load()
     i18n.install_language(settings.get("language", "auto"))
+    browser.set_preferred_browser(settings.get("browser_choice", "auto"))
+
+    # Rend la copie AppData de yt-dlp (canal nightly) prioritaire sur celle
+    # embarquee au build. IMPERATIF ici : l'import de MainWindow declenche
+    # `import yt_dlp` (downloader, lecteur), et un module deja charge ne peut
+    # plus etre remplace. Sans cela, les mises a jour nightly etaient
+    # telechargees mais jamais executees.
+    updater.activate_appdata_ytdlp()
 
     from app.ui.main_window import MainWindow
 
