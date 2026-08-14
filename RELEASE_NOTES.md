@@ -1,10 +1,22 @@
-## DownAccess 0.1.31
+## DownAccess 0.1.32
 
-### Améliorations
+Cette version corrige plusieurs problèmes signalés par les utilisateurs. Merci à Romain, Véronique et Théo pour leurs retours.
 
-- **Téléchargements plus fiables.** DownAccess s'appuie désormais sur la toute dernière version de son moteur de téléchargement, mise à jour chaque jour. L'application suit ainsi plus vite les changements des sites (YouTube, Arte, france.tv, etc.) et corrige plus rapidement les erreurs quand un site évolue. Les outils internes de traitement audio et vidéo ont également été mis à jour.
+### Corrections
 
-- **Mise à jour de l'application plus claire.** Quand DownAccess se met à jour, la fenêtre de téléchargement affiche maintenant le temps restant estimé. Et si vous cliquez sur « Annuler », une confirmation vous est demandée, pour éviter d'interrompre la mise à jour par erreur.
+- **Les mises à jour du moteur de téléchargement s'appliquent enfin.** DownAccess télécharge chaque jour la dernière version de son moteur, mais continuait en réalité à utiliser celle livrée avec l'application. Résultat : les correctifs publiés après votre installation ne vous parvenaient jamais. C'est corrigé — vous bénéficiez maintenant réellement des mises à jour quotidiennes, et donc des correctifs dès qu'un site change.
+
+- **Vidéos au titre très long.** Certaines vidéos, notamment sur Facebook, ont un titre de plusieurs centaines de caractères. Le téléchargement échouait alors avec un message d'erreur incompréhensible. Ces titres sont désormais raccourcis correctement.
+
+- **Extraction guidée : plus besoin de se reconnecter à chaque fois.** L'extraction guidée repartait d'un navigateur vierge à chaque utilisation, obligeant à ressaisir ses identifiants. Vos connexions sont maintenant conservées d'une extraction à l'autre, comme c'était déjà le cas ailleurs dans l'application.
+
+- **Téléchargements interrompus en cours de route.** Quand un site coupait l'envoi avant la fin, DownAccess insistait sur un lien déjà périmé et finissait par abandonner. Il repart désormais d'un lien neuf et reprend le téléchargement là où il s'était arrêté.
+
+- **Rapport d'erreur plus juste.** Le rapport indiquait « FFmpeg indisponible » alors que tout fonctionnait normalement.
+
+### Nouveauté
+
+- **Choix du navigateur.** Dans Préférences → Général, vous pouvez maintenant indiquer quel navigateur DownAccess doit utiliser pour l'extraction guidée et la connexion aux sites : automatique, Chrome, Edge ou Brave. Seuls les navigateurs installés sur votre ordinateur sont proposés.
 
 ### Note
 
