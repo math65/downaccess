@@ -1,22 +1,16 @@
-## DownAccess 0.1.32
+## DownAccess 0.1.33
 
-Cette version corrige plusieurs problèmes signalés par les utilisateurs. Merci à Romain, Véronique et Théo pour leurs retours.
+Cette version améliore la recherche, à partir des suggestions de Romain et Véronique. Merci à eux.
 
-### Corrections
+### Nouveautés
 
-- **Les mises à jour du moteur de téléchargement s'appliquent enfin.** DownAccess télécharge chaque jour la dernière version de son moteur, mais continuait en réalité à utiliser celle livrée avec l'application. Résultat : les correctifs publiés après votre installation ne vous parvenaient jamais. C'est corrigé — vous bénéficiez maintenant réellement des mises à jour quotidiennes, et donc des correctifs dès qu'un site change.
+- **Parcourir france.tv et Arte sans rien chercher.** Vous n'avez pas toujours un titre précis en tête. Choisissez france.tv ou Arte, laissez le champ de recherche vide, et sélectionnez une catégorie : Documentaires, Films, Séries, Sciences, Histoire, Sport... Le catalogue s'affiche comme des résultats ordinaires.
 
-- **Vidéos au titre très long.** Certaines vidéos, notamment sur Facebook, ont un titre de plusieurs centaines de caractères. Le téléchargement échouait alors avec un message d'erreur incompréhensible. Ces titres sont désormais raccourcis correctement.
+- **Le résumé des programmes.** Sous la liste des résultats, une zone **Résumé** décrit le programme sur lequel vous êtes positionné, et se met à jour à mesure que vous vous déplacez. Appuyez sur Tabulation depuis la liste pour la faire lire par votre lecteur d'écran. Vous savez enfin de quoi parle une émission avant de la télécharger.
 
-- **Extraction guidée : plus besoin de se reconnecter à chaque fois.** L'extraction guidée repartait d'un navigateur vierge à chaque utilisation, obligeant à ressaisir ses identifiants. Vos connexions sont maintenant conservées d'une extraction à l'autre, comme c'était déjà le cas ailleurs dans l'application.
+- **Voir plus de résultats.** La recherche ne s'arrête plus au premier lot. Deux façons de continuer, au choix dans Préférences → Général : des boutons **Page précédente** et **Page suivante**, ou un défilement **en continu** où la suite se charge toute seule quand vous arrivez en bas de la liste. Vos cases cochées sont conservées d'une page à l'autre.
 
-- **Téléchargements interrompus en cours de route.** Quand un site coupait l'envoi avant la fin, DownAccess insistait sur un lien déjà périmé et finissait par abandonner. Il repart désormais d'un lien neuf et reprend le téléchargement là où il s'était arrêté.
-
-- **Rapport d'erreur plus juste.** Le rapport indiquait « FFmpeg indisponible » alors que tout fonctionnait normalement.
-
-### Nouveauté
-
-- **Choix du navigateur.** Dans Préférences → Général, vous pouvez maintenant indiquer quel navigateur DownAccess doit utiliser pour l'extraction guidée et la connexion aux sites : automatique, Chrome, Edge ou Brave. Seuls les navigateurs installés sur votre ordinateur sont proposés.
+- **Retour aux résultats depuis une playlist.** Quand vous ouvrez une playlist depuis une recherche et que son contenu ne vous convient pas, un bouton **Retour aux résultats** vous y ramène tels que vous les aviez laissés. Plus besoin de refaire toute la recherche.
 
 ### Note
 

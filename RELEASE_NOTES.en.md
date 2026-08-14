@@ -1,22 +1,16 @@
-## DownAccess 0.1.32
+## DownAccess 0.1.33
 
-This release fixes several issues reported by users. Thanks to Romain, Véronique and Théo for their feedback.
+This release improves search, based on suggestions from Romain and Véronique. Many thanks to them.
 
-### Fixes
+### What's new
 
-- **Download engine updates now actually take effect.** DownAccess downloads the latest version of its engine every day, but was in fact still running the one shipped with the application. As a result, fixes released after your installation never reached you. This is now fixed — you genuinely benefit from the daily updates, and therefore from fixes as soon as a site changes.
+- **Browse france.tv and Arte without searching.** You do not always have a specific title in mind. Choose france.tv or Arte, leave the search field empty, and pick a category: Documentaries, Films, Series, Science, History, Sport... The catalogue appears just like ordinary results.
 
-- **Videos with very long titles.** Some videos, particularly on Facebook, have titles hundreds of characters long. Downloading them failed with a confusing error message. Such titles are now shortened correctly.
+- **Programme summaries.** Below the results list, a **Summary** area describes the programme you are currently on, and updates as you move around. Press Tab from the list to have your screen reader read it out. You can finally tell what a programme is about before downloading it.
 
-- **Guided extraction: no more signing in every time.** Guided extraction started from a blank browser on every use, forcing you to enter your credentials again. Your sessions are now kept from one extraction to the next, as was already the case elsewhere in the application.
+- **See more results.** Search no longer stops at the first batch. Two ways to continue, your choice under Preferences → General: **Previous page** and **Next page** buttons, or **continuous** scrolling where the next batch loads by itself as you reach the bottom of the list. Your ticked boxes are kept from one page to the next.
 
-- **Downloads cut off partway through.** When a site stopped sending data before the end, DownAccess kept retrying an already-expired link and eventually gave up. It now fetches a fresh link and resumes the download where it left off.
-
-- **More accurate error reports.** Reports stated "FFmpeg unavailable" even though everything was working normally.
-
-### New
-
-- **Browser choice.** Under Preferences → General, you can now choose which browser DownAccess should use for guided extraction and for signing in to sites: automatic, Chrome, Edge or Brave. Only browsers installed on your computer are offered.
+- **Back to results from a playlist.** When you open a playlist from a search and its contents are not what you wanted, a **Back to results** button takes you straight back to them as you left them. No need to run your search again.
 
 ### Note
 
