@@ -1,6 +1,7 @@
 import wx
 
 from app.core import speech
+from app.ui.search_dialog import RESULT_BACK
 
 # Modes de numérotation des fichiers
 NUMBER_ORIGINAL   = 0  # Numéro de la vidéo dans la playlist
@@ -16,7 +17,8 @@ class PlaylistDialog(wx.Dialog):
     """
 
     def __init__(self, parent, playlist_title: str, entries: list[dict],
-                 default_numbering: int = NUMBER_ORIGINAL):
+                 default_numbering: int = NUMBER_ORIGINAL,
+                 allow_back: bool = False):
         super().__init__(
             parent,
             title=_("Playlist — {title}").format(title=playlist_title),
@@ -24,6 +26,10 @@ class PlaylistDialog(wx.Dialog):
         )
         self._entries = entries
         self._default_numbering = default_numbering
+        # `allow_back` : la playlist a ete ouverte depuis les resultats de
+        # recherche. Sans ce bouton, decouvrir que la playlist ne convient pas
+        # obligeait a refaire toute la recherche (retour utilisateur).
+        self._allow_back = allow_back
         self._build_ui(entries)
         self._bind_events()
         self.SetMinSize((560, 420))
@@ -84,13 +90,19 @@ class PlaylistDialog(wx.Dialog):
             label=self._count_label(len(entries)))
 
         # OK / Annuler
-        btn_sizer = wx.StdDialogButtonSizer()
+        btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_back = None
+        if self._allow_back:
+            self.btn_back = wx.Button(panel, RESULT_BACK,
+                                      label=_("Retour aux résultats"),
+                                      name=_("Retour aux résultats"))
+            btn_sizer.Add(self.btn_back, 0, wx.RIGHT, 6)
+        btn_sizer.AddStretchSpacer()
         self.btn_ok     = wx.Button(panel, wx.ID_OK,     label=_("Télécharger la sélection"))
         self.btn_cancel = wx.Button(panel, wx.ID_CANCEL, label=_("Annuler"))
         self.btn_ok.SetDefault()
-        btn_sizer.AddButton(self.btn_ok)
-        btn_sizer.AddButton(self.btn_cancel)
-        btn_sizer.Realize()
+        btn_sizer.Add(self.btn_ok, 0, wx.RIGHT, 6)
+        btn_sizer.Add(self.btn_cancel, 0)
 
         main_sizer.Add(lbl,            0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         main_sizer.Add(self.lst,       1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
@@ -106,7 +118,11 @@ class PlaylistDialog(wx.Dialog):
         self.btn_none.MoveAfterInTabOrder(self.btn_all)
         self.btn_invert.MoveAfterInTabOrder(self.btn_none)
         self.radio_number.MoveAfterInTabOrder(self.btn_invert)
-        self.btn_ok.MoveAfterInTabOrder(self.radio_number)
+        if self.btn_back is not None:
+            self.btn_back.MoveAfterInTabOrder(self.radio_number)
+            self.btn_ok.MoveAfterInTabOrder(self.btn_back)
+        else:
+            self.btn_ok.MoveAfterInTabOrder(self.radio_number)
         self.btn_cancel.MoveAfterInTabOrder(self.btn_ok)
 
         self.lst.SetFocus()
@@ -116,6 +132,8 @@ class PlaylistDialog(wx.Dialog):
         self.btn_none.Bind(wx.EVT_BUTTON,            self._on_none)
         self.btn_invert.Bind(wx.EVT_BUTTON,          self._on_invert)
         self.btn_ok.Bind(wx.EVT_BUTTON,              self._on_ok)
+        if self.btn_back is not None:
+            self.btn_back.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(RESULT_BACK))
         self.lst.Bind(wx.EVT_LIST_ITEM_CHECKED,      self._on_check_change)
         self.lst.Bind(wx.EVT_LIST_ITEM_UNCHECKED,    self._on_check_change)
 
