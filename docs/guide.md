@@ -676,7 +676,7 @@ Le bouton **Réinitialiser tous les avertissements** réaffiche les messages d'a
 
 ### Onglet Formats
 
-Cet onglet contient deux réglages.
+Cet onglet contient trois réglages.
 
 **Format par défaut** — le format dans lequel vos téléchargements seront convertis. Quatre choix sont proposés :
 
@@ -695,6 +695,8 @@ Ce format est appliqué par défaut à chaque nouveau téléchargement ; vous po
 - **Version originale seule** : prend automatiquement la piste normale, sans audiodescription.
 
 Avec l'un des trois modes automatiques, vous n'êtes plus interrogé : la ou les pistes sont choisies pour vous.
+
+**Renseigner les informations du fichier** — case **cochée** par défaut. DownAccess inscrit dans chaque fichier téléchargé son titre, son auteur, sa date, la pochette de la vidéo et, quand la vidéo en propose, ses chapitres. Votre lecteur audio peut alors annoncer le titre et l'auteur au lieu du seul nom de fichier, et votre bibliothèque peut classer et regrouper vos fichiers correctement. Décochez cette case si vous préférez des fichiers totalement bruts.
 
 ### Onglet Sous-titres
 

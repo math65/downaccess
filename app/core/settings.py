@@ -21,6 +21,8 @@ DEFAULTS: dict = {
     "subtitle_mode": "separate",    # separate | embed | burn
     "audio_description_mode": "ask",    # sur france.tv/arte, que faire des pistes :
                                         # ask | ad_only | original_and_ad | original_only
+    "embed_metadata": True,        # titre/artiste/album + pochette + chapitres
+                                   # dans les fichiers produits (MP3, M4A, MP4)
     "organize_by_site": False,
     "organize_by_playlist": False,
     "playlist_numbering": 0,       # 0=original, 1=séquentiel, 2=aucun

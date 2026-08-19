@@ -9,6 +9,10 @@ dependencies = [
     "imageio-ffmpeg>=0.5.0",
     "psutil>=5.9.0",
     "mistune>=3.0.0",
+    # Requis par yt-dlp pour ecrire la pochette dans les fichiers M4A/MP4 :
+    # sans mutagen il retombe sur AtomicParsley puis ffmpeg+ffprobe, or on
+    # n'embarque PAS ffprobe -> le post-traitement echouerait.
+    "mutagen>=1.47.0",
     "curl_cffi>=0.7.0",
     "yt-dlp-ejs>=0.8.0",
     "DrissionPage>=4.0.0",

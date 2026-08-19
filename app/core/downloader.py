@@ -652,6 +652,11 @@ class Downloader:
 
         _apply_format(opts, format_spec, format_id, audio_groups)
         _apply_subtitles(opts, eff_settings)
+        # Apres les sous-titres : l'ordre de la liste est l'ordre d'execution,
+        # et les metadonnees doivent etre ecrites une fois la conversion audio
+        # et l'incrustation des sous-titres passees.
+        embed_thumb, _thumb_ext = _apply_metadata(
+            opts, eff_settings, format_spec, format_id)
 
         # Options yt-dlp supplémentaires (raw) : drapeaux booléens uniquement
         # (ex. --no-mtime, --write-thumbnail). On protege les options que l'appli
@@ -679,6 +684,14 @@ class Downloader:
                             downloader=ydl,
                             ffmpeg_path=get_ffmpeg_path(self._settings),
                         ),
+                        when="post_process",
+                    )
+                if embed_thumb:
+                    # En dernier : la pochette s'ecrit dans le fichier final,
+                    # donc apres la conversion, les metadonnees et l'eventuelle
+                    # incrustation des sous-titres (qui reencode la video).
+                    ydl.add_post_processor(
+                        _SafeEmbedThumbnailPP(ydl, already_have_thumbnail=False),
                         when="post_process",
                     )
                 ydl.download([url])
@@ -1194,6 +1207,76 @@ def _apply_subtitles(opts: dict, settings: dict) -> None:
             "key": "FFmpegEmbedSubtitle",
             "already_have_subtitle": False,
         })
+
+
+# Extensions dont on connait le conteneur final AVEC CERTITUDE et pour
+# lesquelles yt-dlp sait ecrire une pochette. On n'ajoute le post-processeur
+# que dans ces cas : en « auto », le conteneur issu de la fusion depend des
+# flux (webm possible), et yt-dlp leve une erreur sur un conteneur non
+# supporte — ce qui ferait echouer un telechargement pourtant reussi.
+_THUMBNAIL_CONTAINERS = {"mp3", "m4a", "mp4"}
+
+
+class _SafeEmbedThumbnailPP(yt_dlp.postprocessor.EmbedThumbnailPP):
+    """Pochette « best effort ». Une image illisible, un conteneur inattendu ou
+    un ffmpeg recalcitrant ne doivent JAMAIS transformer un telechargement
+    reussi en echec : on avertit dans le log et on rend la main. L'image
+    temporaire est signalee comme supprimable pour ne pas laisser de .webp ou
+    de .jpg trainer a cote du fichier final."""
+
+    def run(self, info):
+        try:
+            return super().run(info)
+        except Exception as exc:
+            _log.warning("Pochette non integree (%s) : %s",
+                         info.get("ext", "?"), exc)
+            leftovers = [
+                t["filepath"] for t in (info.get("thumbnails") or [])
+                if t.get("filepath") and os.path.exists(t["filepath"])
+            ]
+            return leftovers, info
+
+
+def _target_ext(format_spec: str, format_id: str | None) -> str:
+    """Extension du fichier final quand elle est certaine, sinon "". """
+    if format_id or format_spec in ("subtitles_only", "amc_audio", "amc_video"):
+        return ""
+    if format_spec in ("mp3", "m4a", "mp4"):
+        return format_spec
+    # « auto » : conteneur decide a la fusion (mkv/webm/mp4) -> inconnu.
+    return ""
+
+
+def _apply_metadata(opts: dict, settings: dict, format_spec: str,
+                    format_id: str | None) -> tuple[bool, str]:
+    """Ecrit les metadonnees (titre, artiste, album, chapitres) et la pochette
+    dans le fichier produit. Sans ca, un MP3 tire de YouTube arrive nu : le
+    lecteur de l'utilisateur n'a que le nom de fichier a annoncer, et la
+    bibliotheque ne peut ni trier ni regrouper.
+
+    Retourne `(pochette_demandee, extension_cible)` — l'appelant instancie le
+    post-processeur de pochette, qui doit passer APRES la conversion audio.
+    """
+    if not settings.get("embed_metadata", True) or opts.get("skip_download"):
+        return False, ""
+
+    # Metadonnees : toujours possibles, ffmpeg seul suffit (pas de ffprobe).
+    # `add_chapters` pose les reperes de chapitres, precieux sur les longs
+    # formats (conferences, concerts, emissions).
+    opts.setdefault("postprocessors", []).append({
+        "key": "FFmpegMetadata",
+        "add_metadata": True,
+        "add_chapters": True,
+        "add_infojson": False,
+    })
+
+    ext = _target_ext(format_spec, format_id)
+    if ext not in _THUMBNAIL_CONTAINERS:
+        return False, ext
+    # Il faut recuperer l'image pour pouvoir l'integrer. Elle est ecrite dans
+    # le dossier temporaire du telechargement et supprimee apres integration.
+    opts["writethumbnail"] = True
+    return True, ext
 
 
 class _BurnSubtitlesPP(yt_dlp.postprocessor.PostProcessor):

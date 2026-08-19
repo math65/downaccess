@@ -329,6 +329,17 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(lbl_ad, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.choice_ad, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
 
+        self.chk_metadata = wx.CheckBox(
+            page,
+            label=_("Renseigner les informations du fichier (titre, auteur, "
+                    "pochette, chapitres)"),
+            name=_("Renseigner les informations du fichier"),
+        )
+        self.chk_metadata.SetToolTip(
+            _("Votre lecteur audio peut alors annoncer le titre et l'auteur, "
+              "et classer le fichier dans votre bibliothèque."))
+        sizer.Add(self.chk_metadata, 0, wx.EXPAND | wx.ALL, 12)
+
         page.SetSizer(sizer)
         return page
 
@@ -515,6 +526,7 @@ class SettingsDialog(wx.Dialog):
         idx = POST_CHOICES.index(post) if post in POST_CHOICES else 0
         self.choice_post.SetSelection(idx)
         ad_mode = s.get("audio_description_mode", "ask")
+        self.chk_metadata.SetValue(bool(s.get("embed_metadata", True)))
         ad_idx = AD_MODE_CHOICES.index(ad_mode) if ad_mode in AD_MODE_CHOICES else 0
         self.choice_ad.SetSelection(ad_idx)
 
@@ -568,6 +580,7 @@ class SettingsDialog(wx.Dialog):
         # Formats
         s["post_processing"] = POST_CHOICES[self.choice_post.GetSelection()]
         s["audio_description_mode"] = AD_MODE_CHOICES[self.choice_ad.GetSelection()]
+        s["embed_metadata"] = self.chk_metadata.GetValue()
 
         # Sous-titres
         s["auto_subtitles"]  = self.chk_auto_subs.GetValue()

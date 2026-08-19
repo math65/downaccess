@@ -676,7 +676,7 @@ The **Reset all warnings** button shows again the warning messages you had chose
 
 ### Formats tab
 
-This tab contains two settings.
+This tab contains three settings.
 
 **Default format** — the format into which your downloads will be converted. Four choices are offered:
 
@@ -695,6 +695,8 @@ This format is applied by default to every new download; you can always change i
 - **Original version only**: automatically takes the regular track, without audio description.
 
 With one of the three automatic modes, you are no longer asked: the track or tracks are chosen for you.
+
+**Fill in the file information** — **ticked** by default. DownAccess writes each downloaded file's title, author, date, the video's cover art and, when the video provides them, its chapters. Your audio player can then announce the title and author instead of just the file name, and your library can sort and group your files properly. Untick this box if you would rather have completely raw files.
 
 ### Subtitles tab
 

@@ -76,6 +76,9 @@ a = Analysis(
         'yt_dlp.extractor',
         'yt_dlp.extractor._extractors',
         'yt_dlp.postprocessor',
+        # Pochette M4A/MP4 (yt-dlp l'importe paresseusement, donc invisible
+        # pour l'analyse statique de PyInstaller)
+        'mutagen',
         # i18n (lecture des .po au runtime)
         'polib',
         # Divers
