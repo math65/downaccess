@@ -174,10 +174,104 @@ def is_transient_error(msg: str) -> bool:
     low = (msg or "").lower()
     if "annul" in low or "cancel" in low:
         return False
+    # Disque plein : reessayer ne fera que reremplir le disque. Garde-fou
+    # explicite, pour que l'ajout d'un motif transitoire ne l'attrape jamais.
+    if is_disk_full_error(low):
+        return False
     return any(p in low for p in _TRANSIENT_ERROR_PATTERNS)
 
 
-def _humanize_error(msg: str) -> str:
+# ------------------------------------------------------------------
+# Espace disque
+# ------------------------------------------------------------------
+
+# Marge exigee au-dessus de la taille estimee : yt-dlp ecrit aussi les
+# sous-titres, la miniature et le fichier fusionne, et l'estimation elle-meme
+# est approximative (debit x duree quand le serveur ne donne pas `filesize`).
+# On ne bloque donc que si la place manque franchement.
+_FREE_SPACE_MARGIN = 150 * 1024 * 1024
+
+# Disque plein. yt-dlp/Python remontent l'erreur systeme en anglais
+# ("[Errno 28] No space left on device"), parfois localisee par Windows.
+_DISK_FULL_PATTERNS = (
+    "no space left on device", "errno 28",
+    "disk full", "not enough space", "espace insuffisant",
+)
+
+
+def is_disk_full_error(msg: str) -> bool:
+    """Vrai si l'echec vient d'un disque plein (et non du site ou du reseau)."""
+    return any(p in (msg or "").lower() for p in _DISK_FULL_PATTERNS)
+
+
+def free_space_bytes(path: str) -> int:
+    """Octets libres sur le volume de `path`. Remonte vers le premier parent
+    existant (le dossier de destination n'est cree qu'au telechargement) et
+    retourne -1 si le volume reste introuvable (lecteur reseau deconnecte)."""
+    current = os.path.abspath(path or ".")
+    while True:
+        try:
+            return shutil.disk_usage(current).free
+        except OSError:
+            parent = os.path.dirname(current)
+            if not parent or parent == current:
+                return -1
+            current = parent
+
+
+def _fmt_size(size: int) -> str:
+    """Taille lisible. Volontairement duplique de `app/ui/format_dialog.py` :
+    `app/core` n'importe jamais `app/ui` (meme msgid -> meme traduction)."""
+    size = max(int(size), 0)
+    if size >= 1_073_741_824:
+        return _("{n:.1f} Go").format(n=size / 1_073_741_824)
+    if size >= 1_048_576:
+        return _("{n:.0f} Mo").format(n=size / 1_048_576)
+    return _("{n:.0f} Ko").format(n=size / 1024)
+
+
+def _space_detail(dest: str, needed: int, free: int) -> str:
+    """Bloc « combien il reste / combien il faut », commun aux deux messages."""
+    lines = []
+    if free >= 0:
+        lines.append(_("Espace libre sur « {folder} » : {size}.").format(
+            folder=dest, size=_fmt_size(free)))
+    if needed > 0:
+        lines.append(_("Espace nécessaire : environ {size}.").format(
+            size=_fmt_size(needed)))
+    return "\n".join(lines)
+
+
+def _free_space_advice() -> str:
+    return _(
+        "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
+        "téléchargement dans les Préférences (Ctrl+P)."
+    )
+
+
+def not_enough_space_message(dest: str, needed: int, free: int) -> str:
+    """Message du garde-fou, AVANT que le telechargement ne demarre."""
+    parts = [_("Il n'y a pas assez d'espace libre sur le disque pour "
+               "télécharger ce fichier.")]
+    detail = _space_detail(dest, needed, free)
+    if detail:
+        parts.append(detail)
+    parts.append(_free_space_advice())
+    return "\n\n".join(parts)
+
+
+def disk_full_message(dest: str) -> str:
+    """Message quand le disque s'est rempli PENDANT le telechargement."""
+    parts = [_("Votre disque est plein : le téléchargement n'a pas pu être "
+               "enregistré.")]
+    detail = _space_detail(dest, 0, free_space_bytes(dest) if dest else -1)
+    if detail:
+        parts.append(detail)
+    parts.append(_free_space_advice())
+    return "\n\n".join(parts)
+
+
+def _humanize_error(msg: str, dest: str = "") -> str:
     """Traduit certaines erreurs yt-dlp cryptiques en messages clairs et
     actionnables pour le grand public.
 
@@ -185,6 +279,12 @@ def _humanize_error(msg: str) -> str:
     remplace que le message affiché à l'utilisateur dans le dialogue d'erreur.
     """
     low = msg.lower()
+
+    # Disque plein. Le texte brut de yt-dlp ("unable to write data: [Errno 28]
+    # No space left on device") est en anglais et incomprehensible pour le
+    # grand public, alors que la cause est simple et la solution immediate.
+    if is_disk_full_error(low):
+        return disk_full_message(dest)
 
     # Navigateur ouvert → base de cookies verrouillée (yt-dlp issue #7271).
     # Avec le parcours de connexion guidée (navigateur dédié), ce cas ne
@@ -208,10 +308,11 @@ def _humanize_error(msg: str) -> str:
     return msg
 
 
-def _raise_download_error(raw_msg: str, cause: Exception) -> None:
+def _raise_download_error(raw_msg: str, cause: Exception, dest: str = "") -> None:
     """Lève l'erreur du bon type : LoginRequiredError si une connexion
-    aiderait, sinon DownloadError. Le message est reformulé pour l'utilisateur."""
-    friendly = _humanize_error(raw_msg)
+    aiderait, sinon DownloadError. Le message est reformulé pour l'utilisateur.
+    `dest` = dossier de destination, pour chiffrer l'espace disque restant."""
+    friendly = _humanize_error(raw_msg, dest)
     if _is_login_required(raw_msg):
         raise LoginRequiredError(friendly) from cause
     raise DownloadError(friendly) from cause
@@ -347,9 +448,9 @@ class Downloader:
                 raw_formats=info.get("formats") or [],
             )
         except yt_dlp.utils.DownloadError as exc:
-            _raise_download_error(str(exc), exc)
+            _raise_download_error(str(exc), exc, self._settings.get("download_folder", ""))
         except Exception as exc:
-            _raise_download_error(str(exc), exc)
+            _raise_download_error(str(exc), exc, self._settings.get("download_folder", ""))
         finally:
             if cookie_jar_path:
                 try:
@@ -392,6 +493,22 @@ class Downloader:
         """
         _log.info("Démarrage téléchargement id=%s url=%s format=%s", download_id, url, format_spec)
         dest = self._settings.get("download_folder", ".")
+
+        # Garde-fou disque plein : inutile de telecharger vingt minutes pour
+        # echouer a l'ecriture sur « No space left on device ». On refuse tout
+        # de suite, avec un message qui dit ce qui manque. L'estimation
+        # (`expected_bytes`) peut etre approximative : on ne bloque que si la
+        # place manque franchement (taille estimee + _FREE_SPACE_MARGIN), pour
+        # ne jamais refuser un telechargement qui serait passe.
+        if expected_bytes > 0 and format_spec != "subtitles_only":
+            _free = free_space_bytes(dest)
+            _needed = expected_bytes + _FREE_SPACE_MARGIN
+            if 0 <= _free < _needed:
+                _log.error(
+                    "Espace disque insuffisant id=%s : %d octets libres, %d requis",
+                    download_id, _free, _needed)
+                raise DownloadError(
+                    not_enough_space_message(dest, _needed, _free))
 
         by_site     = self._settings.get("organize_by_site", False)
         by_playlist = self._settings.get("organize_by_playlist", False) and playlist_title
@@ -624,16 +741,16 @@ class Downloader:
                             ydl.download([url])
                         subtitle_warning = err_msg
                     except yt_dlp.utils.DownloadError as exc2:
-                        _raise_download_error(str(exc2), exc2)
+                        _raise_download_error(str(exc2), exc2, dest)
                     except Exception as exc2:
-                        _raise_download_error(str(exc2), exc2)
+                        _raise_download_error(str(exc2), exc2, dest)
                 else:
-                    _raise_download_error(err_msg, exc)
+                    _raise_download_error(err_msg, exc, dest)
             except Exception as exc:
                 if log_buf is not None and on_verbose_log is not None:
                     on_verbose_log(log_buf.getvalue())
                 _log.error("Erreur inattendue id=%s url=%s — %s", download_id, url, exc)
-                _raise_download_error(str(exc), exc)
+                _raise_download_error(str(exc), exc, dest)
         finally:
             monitor_stop.set()
             if cookie_jar_path:

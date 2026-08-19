@@ -2240,15 +2240,15 @@ msgstr "unknown"
 msgid "{count} entrée(s)"
 msgstr "{count} entries"
 
-#: app/ui/format_dialog.py:165
+#: app/core/downloader.py:230 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr "{n:.0f} KB"
 
-#: app/ui/format_dialog.py:163
+#: app/core/downloader.py:229 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr "{n:.0f} MB"
 
-#: app/ui/format_dialog.py:161
+#: app/core/downloader.py:227 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr "{n:.1f} GB"
 
@@ -2268,7 +2268,7 @@ msgstr "Failed"
 msgid "⚠ Mode manuel disponible pour une seule URL à la fois."
 msgstr "⚠ Manual mode is available for only one URL at a time."
 
-#: app/core/downloader.py:736 app/core/downloader.py:739
+#: app/core/downloader.py:853 app/core/downloader.py:856
 msgid "Annulé par l'utilisateur"
 msgstr "Cancelled by user"
 
@@ -2286,7 +2286,7 @@ msgstr "HTTP error {code}."
 msgid "Erreur inconnue."
 msgstr "Unknown error."
 
-#: app/core/downloader.py:1142
+#: app/core/downloader.py:1259
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
@@ -2318,7 +2318,7 @@ msgstr ""
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr "Unable to check the version (connection unavailable)."
 
-#: app/core/downloader.py:1130
+#: app/core/downloader.py:1247
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
@@ -2444,7 +2444,7 @@ msgid ""
 "fenêtre."
 msgstr "The DownAccess browser is open. Sign in, then close this window."
 
-#: app/core/downloader.py:203
+#: app/core/downloader.py:303
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -2502,7 +2502,7 @@ msgid ""
 "vidéos."
 msgstr "DownAccess will remember your sign-in to {site} for future videos."
 
-#: app/core/downloader.py:193
+#: app/core/downloader.py:293
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -3391,6 +3391,31 @@ msgstr "{site} — {category}"
 #: app/core/site_search.py:60
 msgid "Émissions"
 msgstr "Programmes"
+
+#: app/core/downloader.py:237
+msgid "Espace libre sur « {folder} » : {size}."
+msgstr "Free space in \"{folder}\": {size}."
+
+#: app/core/downloader.py:240
+msgid "Espace nécessaire : environ {size}."
+msgstr "Space required: about {size}."
+
+#: app/core/downloader.py:254
+msgid ""
+"Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
+msgstr "There is not enough free space on the disk to download this file."
+
+#: app/core/downloader.py:246
+msgid ""
+"Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
+"téléchargement dans les Préférences (Ctrl+P)."
+msgstr ""
+"Free up some space on this disk, or choose a different download folder in "
+"Preferences (Ctrl+P)."
+
+#: app/core/downloader.py:265
+msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
+msgstr "Your disk is full: the download could not be saved."
 
 #~ msgid "Nombre de résultats"
 #~ msgstr "Number of results"

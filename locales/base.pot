@@ -302,7 +302,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:736 app/core/downloader.py:739
+#: app/core/downloader.py:853 app/core/downloader.py:856
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -496,7 +496,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:203
+#: app/core/downloader.py:303
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -1041,7 +1041,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1142
+#: app/core/downloader.py:1259
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1079,6 +1079,14 @@ msgstr ""
 
 #: app/ui/uge_dialog.py:570 app/ui/uge_dialog.py:593
 msgid "Erreur — Extraction guidée"
+msgstr ""
+
+#: app/core/downloader.py:237
+msgid "Espace libre sur « {folder} » : {size}."
+msgstr ""
+
+#: app/core/downloader.py:240
+msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
 #: app/core/custom_sites.py:50
@@ -1261,6 +1269,11 @@ msgstr ""
 msgid "Historique des téléchargements"
 msgstr ""
 
+#: app/core/downloader.py:254
+msgid ""
+"Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
+msgstr ""
+
 #: app/ui/main_window.py:2043
 msgid ""
 "Il y a {count} téléchargement(s) en cours ou en attente.\n"
@@ -1327,7 +1340,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:193
+#: app/core/downloader.py:293
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1390,7 +1403,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1130
+#: app/core/downloader.py:1247
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1637,6 +1650,12 @@ msgstr ""
 
 #: app/ui/player_dialog.py:203 app/ui/player_dialog.py:236
 msgid "Lecture."
+msgstr ""
+
+#: app/core/downloader.py:246
+msgid ""
+"Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
+"téléchargement dans les Préférences (Ctrl+P)."
 msgstr ""
 
 #: app/ui/settings_dialog.py:397
@@ -2801,6 +2820,10 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
+#: app/core/downloader.py:265
+msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
+msgstr ""
+
 #: app/ui/report_dialog.py:67
 msgid "Votre email (obligatoire, pour qu'on puisse vous répondre) :"
 msgstr ""
@@ -3075,15 +3098,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/ui/format_dialog.py:165
+#: app/core/downloader.py:230 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/ui/format_dialog.py:163
+#: app/core/downloader.py:229 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/ui/format_dialog.py:161
+#: app/core/downloader.py:227 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr ""
 
