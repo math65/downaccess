@@ -437,6 +437,22 @@ Most actions apply to the item currently selected in the list. First select the 
 
 When a download finishes, DownAccess announces it. If you have enabled the matching option in the preferences, your destination folder opens automatically once all downloads are finished.
 
+### Reading a video's transcript (context menu)
+
+You cannot skim a video: there is no way to tell in ten seconds whether forty minutes are worth it, nor to find the passage where a word is spoken. Text, on the other hand, you can skim.
+
+Select a download in the list, open the context menu (right-click or the **Menu key** on your keyboard) and choose **Read the transcript**. DownAccess fetches the subtitles from the site — the ones written by the author when the video has them, the automatic ones otherwise — and strips away all the technical scaffolding: no more block numbers, timestamps or tags, and no more repetition (automatic subtitles repeat each fragment several times as they scroll).
+
+The text appears in a **Transcript** window, in a read-only area where the focus lands directly: you can read with the arrow keys, line by line or word by word, and search for a passage. Three buttons go with it:
+
+- **Save as text...**: writes the transcript to a .txt file of your choosing.
+- **Copy all**: puts the whole text on the clipboard.
+- **Close**: closes the window.
+
+The download does not have to be finished: the transcript is fetched from the site, and it takes a few seconds.
+
+**Good to know:** many videos simply have no subtitles at all, and DownAccess says so calmly — it is not a fault. A site may also refuse to serve them temporarily; in that case, try again a little later.
+
 ### Reordering the queue
 
 If several downloads are waiting their turn, you can change the order in which they run:

@@ -201,6 +201,16 @@ class DownloadList(wx.ListCtrl):
             return None
         return self._status_codes.get(dl_id)
 
+    def get_selected_title(self) -> str:
+        """Titre affiche de l'item selectionne (vide si aucune selection)."""
+        dl_id = self.get_selected_id()
+        if dl_id is None:
+            return ""
+        idx = self._items.get(dl_id)
+        if idx is None:
+            return ""
+        return self.GetItemText(idx, COL_TITLE)
+
     def move_item_up(self, download_id: str) -> bool:
         idx = self._items.get(download_id)
         if idx is None or idx == 0:

@@ -437,6 +437,22 @@ La plupart des actions s'appliquent à l'élément actuellement sélectionné da
 
 Quand un téléchargement se termine, DownAccess vous l'annonce. Si vous avez activé l'option correspondante dans les préférences, votre dossier de destination s'ouvre automatiquement une fois tous les téléchargements terminés.
 
+### Lire la transcription d'une vidéo (menu contextuel)
+
+Une vidéo ne se survole pas : impossible de savoir en dix secondes si les quarante minutes valent le détour, ni de retrouver le passage où un mot est prononcé. Le texte, si.
+
+Sélectionnez un téléchargement dans la liste, ouvrez le menu contextuel (clic droit ou **touche Menu** du clavier) et choisissez **Lire la transcription**. DownAccess récupère les sous-titres du site — ceux écrits par l'auteur si la vidéo en propose, les sous-titres automatiques sinon — et les nettoie de tout leur appareillage technique : plus de numéros de bloc, plus d'horodatages, plus de balises, et plus de répétitions (les sous-titres automatiques répètent chaque bribe plusieurs fois en défilant).
+
+Le texte s'affiche dans une fenêtre **Transcription**, dans une zone en lecture seule où le focus arrive directement : vous pouvez lire aux flèches, ligne par ligne ou mot par mot, et chercher un passage. Trois boutons accompagnent la lecture :
+
+- **Enregistrer en texte...** : écrit la transcription dans un fichier .txt de votre choix.
+- **Copier tout** : place le texte entier dans le presse-papiers.
+- **Fermer** : referme la fenêtre.
+
+Il n'est pas nécessaire que le téléchargement soit terminé : la transcription est récupérée depuis le site, l'opération prend quelques secondes.
+
+**Bon à savoir :** beaucoup de vidéos n'ont tout simplement aucun sous-titre, et DownAccess vous le dit alors calmement — ce n'est pas une panne. Il arrive aussi qu'un site refuse temporairement de les fournir ; dans ce cas, réessayez un peu plus tard.
+
 ### Réordonner la file
 
 Si plusieurs téléchargements attendent leur tour, vous pouvez changer leur ordre de passage :

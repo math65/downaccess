@@ -65,6 +65,7 @@ from app.core.custom_sites import is_custom_site_url, detect_audio_tracks
 from app.ui.playlist_dialog import PlaylistDialog
 from app.ui.search_dialog import RESULT_BACK, SearchDialog, SearchResultsDialog
 from app.ui.settings_dialog import SettingsDialog
+from app.ui.transcript_dialog import TranscriptDialog
 from app.ui.uge_dialog import UGEDialog
 from app.ui.login_dialog import LoginDialog
 from app.ui.login_required_dialog import LoginRequiredDialog
@@ -425,8 +426,60 @@ class MainWindow(wx.Frame):
         item_amc.Enable(ready)
         menu.Bind(wx.EVT_MENU,
                   lambda _e: self._on_open_in_amc(filepath), item_amc)
+
+        url = self._dl_data.get(dl_id, {}).get("url", "")
+        item_transcript = menu.Append(wx.ID_ANY, _("Lire la transcription"))
+        item_transcript.Enable(bool(url))
+        title = self.download_list.get_selected_title() or ""
+        menu.Bind(wx.EVT_MENU,
+                  lambda _e: self._on_show_transcript(url, title), item_transcript)
+
         self.download_list.PopupMenu(menu)
         menu.Destroy()
+        wx.CallAfter(self.download_list.SetFocus)
+
+    def _on_show_transcript(self, url: str, title: str) -> None:
+        """Recupere les sous-titres du media et les affiche en texte lisible.
+
+        La recuperation passe par le reseau (quelques secondes) : elle se fait
+        dans un thread pour ne pas figer la fenetre, et le resultat revient par
+        `wx.CallAfter`.
+        """
+        import threading
+        from app.core.transcript import TranscriptError, fetch_transcript
+
+        self.set_status(_("Récupération de la transcription…"))
+        speech.speak(_("Récupération de la transcription."))
+
+        def worker() -> None:
+            try:
+                text, lang = fetch_transcript(self.settings, url)
+            except TranscriptError as exc:
+                wx.CallAfter(self._on_transcript_failed, str(exc))
+            except Exception as exc:      # jamais tuer le thread silencieusement
+                _log.exception("Transcription : erreur inattendue")
+                wx.CallAfter(self._on_transcript_failed, str(exc))
+            else:
+                wx.CallAfter(self._on_transcript_ready, title, text, lang)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _on_transcript_ready(self, title: str, text: str, language: str) -> None:
+        self.set_status(_("Transcription prête."))
+        dlg = TranscriptDialog(self, title, text, language)
+        dlg.ShowModal()
+        dlg.Destroy()
+        wx.CallAfter(self.download_list.SetFocus)
+
+    def _on_transcript_failed(self, message: str) -> None:
+        self.set_status(_("Transcription indisponible."))
+        wx.MessageBox(
+            _("La transcription de ce média n'a pas pu être obtenue.\n\n"
+              "Beaucoup de vidéos n'ont tout simplement pas de sous-titres. "
+              "Si celle-ci en propose, réessayez dans un moment : le site les "
+              "refuse parfois temporairement.\n\nDétail : {error}").format(
+                  error=message[:300]),
+            _("Transcription indisponible"), wx.OK | wx.ICON_INFORMATION, self)
         wx.CallAfter(self.download_list.SetFocus)
 
     def _on_open_in_amc(self, filepath: str) -> None:
