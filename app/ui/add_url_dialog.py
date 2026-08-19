@@ -1,5 +1,7 @@
 from urllib.parse import urlparse
 
+from app.core.downloader import parse_timecode
+
 import wx
 
 
@@ -49,15 +51,19 @@ class AddUrlDialog(wx.Dialog):
 
     def __init__(self, parent, default_format: str = "auto",
                  initial_urls: str = "",
-                 default_subtitles: bool = False):
+                 default_subtitles: bool = False,
+                 with_range: bool = False):
         super().__init__(
             parent,
-            title=_("Ajouter des URLs"),
+            title=_("Télécharger un extrait") if with_range else _("Ajouter des URLs"),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
         self._default_format = default_format
         self._initial_urls = initial_urls
         self._default_subtitles = default_subtitles
+        # Les champs de decoupe n'apparaissent que dans le parcours « extrait » :
+        # inutile d'alourdir le dialogue le plus utilise de l'application.
+        self._with_range = with_range
         self._build_ui()
         self._bind_events()
         self.SetMinSize((480, 360))
@@ -108,6 +114,19 @@ class AddUrlDialog(wx.Dialog):
         )
         self.chk_subtitles.SetValue(self._default_subtitles)
 
+        # Debut / fin de l'extrait (parcours « extrait » uniquement)
+        self.lbl_start = self.txt_start = None
+        self.lbl_end = self.txt_end = None
+        if self._with_range:
+            self.lbl_start = wx.StaticText(
+                panel, label=_("Début de l'extrait (heures:minutes:secondes) :"))
+            self.txt_start = wx.TextCtrl(panel, name=_("Début de l'extrait"))
+            self.txt_start.SetHint("0:00")
+            self.lbl_end = wx.StaticText(
+                panel, label=_("Fin de l'extrait (heures:minutes:secondes) :"))
+            self.txt_end = wx.TextCtrl(panel, name=_("Fin de l'extrait"))
+            self.txt_end.SetHint("3:30")
+
         # Avertissement "Manuel + plusieurs URLs"
         self.lbl_manual_warn = wx.StaticText(
             panel,
@@ -129,6 +148,11 @@ class AddUrlDialog(wx.Dialog):
         main_sizer.Add(lbl_fmt,               0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         main_sizer.Add(self.choice_fmt,       0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         main_sizer.Add(self.chk_subtitles,    0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        if self._with_range:
+            main_sizer.Add(self.lbl_start, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+            main_sizer.Add(self.txt_start, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
+            main_sizer.Add(self.lbl_end,   0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+            main_sizer.Add(self.txt_end,   0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         main_sizer.Add(self.lbl_manual_warn,  0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 4)
         main_sizer.Add(btn_sizer,             0, wx.EXPAND | wx.ALL, 12)
 
@@ -137,7 +161,12 @@ class AddUrlDialog(wx.Dialog):
         # Ordre Tab
         self.choice_fmt.MoveAfterInTabOrder(self.txt_urls)
         self.chk_subtitles.MoveAfterInTabOrder(self.choice_fmt)
-        self.btn_ok.MoveAfterInTabOrder(self.chk_subtitles)
+        if self._with_range:
+            self.txt_start.MoveAfterInTabOrder(self.chk_subtitles)
+            self.txt_end.MoveAfterInTabOrder(self.txt_start)
+            self.btn_ok.MoveAfterInTabOrder(self.txt_end)
+        else:
+            self.btn_ok.MoveAfterInTabOrder(self.chk_subtitles)
         self.btn_cancel.MoveAfterInTabOrder(self.btn_ok)
 
         self.txt_urls.SetFocus()
@@ -206,6 +235,29 @@ class AddUrlDialog(wx.Dialog):
             else:
                 return
 
+        # Extrait : timecodes lisibles et coherents
+        if self._with_range:
+            try:
+                section = self.get_section()
+            except ValueError as exc:
+                bad_start = str(exc) == "start"
+                wx.MessageBox(
+                    _("Le moment indiqué n'est pas compréhensible.\n\n"
+                      "Écrivez-le en heures, minutes et secondes séparées par "
+                      "des deux-points, par exemple 1:05:30 pour une heure "
+                      "cinq minutes trente, ou 4:20 pour quatre minutes vingt."),
+                    _("Moment invalide"), wx.OK | wx.ICON_WARNING, self,
+                )
+                (self.txt_start if bad_start else self.txt_end).SetFocus()
+                return
+            if section and section[1] <= section[0]:
+                wx.MessageBox(
+                    _("La fin de l'extrait doit venir après son début."),
+                    _("Extrait impossible"), wx.OK | wx.ICON_WARNING, self,
+                )
+                self.txt_end.SetFocus()
+                return
+
         self.EndModal(wx.ID_OK)
 
     # ------------------------------------------------------------------
@@ -224,3 +276,23 @@ class AddUrlDialog(wx.Dialog):
 
     def get_subtitles(self) -> bool:
         return self.chk_subtitles.GetValue()
+
+    def get_section(self) -> tuple[float, float] | None:
+        """(debut, fin) en secondes, ou None si aucun extrait n'est demande.
+        Une fin vide vaut « jusqu'au bout » (yt-dlp accepte l'infini).
+        Leve ValueError("start"/"end") si le champ correspondant est illisible."""
+        if not self._with_range:
+            return None
+        raw_start = self.txt_start.GetValue().strip()
+        raw_end   = self.txt_end.GetValue().strip()
+        if not raw_start and not raw_end:
+            return None
+        try:
+            start = parse_timecode(raw_start) if raw_start else 0.0
+        except ValueError:
+            raise ValueError("start") from None
+        try:
+            end = parse_timecode(raw_end) if raw_end else float("inf")
+        except ValueError:
+            raise ValueError("end") from None
+        return (start, end)

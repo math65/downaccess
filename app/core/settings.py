@@ -23,6 +23,8 @@ DEFAULTS: dict = {
                                         # ask | ad_only | original_and_ad | original_only
     "embed_metadata": True,        # titre/artiste/album + pochette + chapitres
                                    # dans les fichiers produits (MP3, M4A, MP4)
+    "split_chapters": False,       # un fichier par chapitre quand la video
+                                   # en propose (le fichier entier est remplace)
     "organize_by_site": False,
     "organize_by_playlist": False,
     "playlist_numbering": 0,       # 0=original, 1=séquentiel, 2=aucun

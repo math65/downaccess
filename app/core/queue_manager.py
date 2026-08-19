@@ -27,6 +27,8 @@ class QueueItem:
     use_cookies: bool = False          # Forcer les cookies navigateur (retry)
     skip_info: bool = False             # Passer fetch_info (URL interceptée avec token)
     subtitles_override: bool | None = None  # None = utiliser les préférences
+    section: tuple[float, float] | None = None  # (début, fin) en secondes
+                                        # = ne télécharger que cet extrait
     stop_event:  threading.Event = field(default_factory=threading.Event)
     pause_event: threading.Event = field(default_factory=threading.Event)
 
@@ -94,7 +96,8 @@ class QueueManager:
             playlist_number: int | None = None,
             use_cookies: bool = False,
             skip_info: bool = False,
-            subtitles_override: bool | None = None) -> str:
+            subtitles_override: bool | None = None,
+            section: tuple[float, float] | None = None) -> str:
         """Ajoute une URL à la file. Retourne le download_id."""
         dl_id = str(uuid.uuid4())
         item = QueueItem(
@@ -111,6 +114,7 @@ class QueueManager:
             use_cookies=use_cookies,
             skip_info=skip_info,
             subtitles_override=subtitles_override,
+            section=section,
         )
         with self._lock:
             self._queue.append(item)
@@ -282,6 +286,13 @@ class QueueManager:
             expected_bytes = estimate_total_bytes(
                 raw_formats, item.format_spec, item.format_id, item.audio_groups,
                 duration=getattr(info, "duration", 0.0))
+            # Extrait : l'estimation porte sur la video entiere. Sans mise a
+            # l'echelle, la barre plafonnerait a quelques pour cent et le
+            # garde-fou d'espace disque reclamerait la place du fichier complet.
+            duration = float(getattr(info, "duration", 0.0) or 0.0)
+            if item.section and duration > 0:
+                ratio = (item.section[1] - item.section[0]) / duration
+                expected_bytes = int(expected_bytes * min(max(ratio, 0.0), 1.0))
 
         try:
             warning = dl.download(
@@ -298,6 +309,7 @@ class QueueManager:
                 playlist_number=item.playlist_number,
                 use_cookies=item.use_cookies,
                 subtitles_override=item.subtitles_override,
+                section=item.section,
             )
             if warning and self._on_warning:
                 self._post(self._on_warning, dl_id, warning)

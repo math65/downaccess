@@ -70,7 +70,7 @@ The main window is made up of four areas, from top to bottom.
 
 Three menus bring together all the actions:
 
-- **File**: add one or more addresses (Ctrl+N), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
+- **File**: add one or more addresses (Ctrl+N), download an extract (Ctrl+E), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
 - **Downloads**: start (F5), pause or resume (Space), cancel (Delete), clear the list (Shift+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
 - **Help**: show the list of keyboard shortcuts, update the download engine or the application, contact support or make a suggestion, open the project page and show the "About" information.
 
@@ -121,6 +121,19 @@ This is the main method. From the **File** menu, choose **Add URL...** (Ctrl+N).
 - DownAccess checks each address: if a URL points to a site's home page (rather than to a specific video), a message asks you to copy the full address of a video.
 - If the address contains both a video and a playlist, DownAccess will ask whether you want to download **the entire playlist** or only **the video**.
 
+### Downloading only an extract (Ctrl+E)
+
+Sometimes you only need one passage: a track within a long concert, one contribution in a two-hour broadcast. From the **File** menu, choose **Download an extract...** (Ctrl+E).
+
+The window is the usual add-URL one, with two extra fields after the subtitles box:
+
+1. **Start of the extract (hours:minutes:seconds)** — the moment the extract begins, for example `1:05:30` for one hour five minutes thirty, or `4:20` for four minutes twenty. Leave it empty to start from the beginning.
+2. **End of the extract (hours:minutes:seconds)** — the moment it stops. Leave it empty to go to the end.
+
+DownAccess downloads only the requested passage, and the cut is made exactly at the moments you gave. The resulting file carries the timecodes in its name, for example `My concert [1-05-30 a 1-12-00].mp3`, so you can pull several passages out of the same video without them overwriting each other.
+
+If a moment cannot be understood, or the end comes before the start, DownAccess tells you and puts the focus back in the field concerned.
+
 ### Pasting a URL directly (Ctrl+V)
 
 If you have already copied an address (from your browser, for example), you don't have to open the Add window. From the main DownAccess window, simply press **Ctrl+V**.
@@ -164,6 +177,7 @@ DownAccess recognizes the addresses even if the file contains other lines of tex
 | Action | Shortcut |
 |---|---|
 | Add one or more URLs | Ctrl+N |
+| Download only an extract | Ctrl+E |
 | Paste a URL from the clipboard | Ctrl+V |
 | Turn clipboard monitoring on/off | Ctrl+Shift+V |
 
@@ -676,7 +690,7 @@ The **Reset all warnings** button shows again the warning messages you had chose
 
 ### Formats tab
 
-This tab contains three settings.
+This tab contains four settings.
 
 **Default format** — the format into which your downloads will be converted. Four choices are offered:
 
@@ -697,6 +711,8 @@ This format is applied by default to every new download; you can always change i
 With one of the three automatic modes, you are no longer asked: the track or tracks are chosen for you.
 
 **Fill in the file information** — **ticked** by default. DownAccess writes each downloaded file's title, author, date, the video's cover art and, when the video provides them, its chapters. Your audio player can then announce the title and author instead of just the file name, and your library can sort and group your files properly. Untick this box if you would rather have completely raw files.
+
+**Create one file per chapter when the video offers them** — **unticked** by default. Some long videos (talks, concerts, broadcasts) are divided into chapters by their author. Tick this box and DownAccess produces one file per chapter instead of a single file several hours long: you move through the parts with the arrow keys in your folder, rather than moving blindly along one long track. Each part keeps the title, author and cover art. The whole file is not kept. If the video has no chapters, nothing changes.
 
 ### Subtitles tab
 
@@ -904,6 +920,7 @@ Here are all the shortcuts available in DownAccess.
 | Shortcut | Action |
 |---|---|
 | **Ctrl+N** | Add one or more URLs |
+| **Ctrl+E** | Download only an extract of a video |
 | **Ctrl+F** | Search for videos or music (YouTube, SoundCloud, etc.) |
 | **Ctrl+G** | Guided extraction (built-in browser) |
 | **Ctrl+V** | Paste a URL from the clipboard |

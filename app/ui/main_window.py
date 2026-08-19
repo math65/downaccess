@@ -111,6 +111,7 @@ ID_GITHUB       = wx.NewIdRef()
 ID_IMPORT_LIST  = wx.NewIdRef()
 ID_HISTORY      = wx.NewIdRef()
 ID_USER_GUIDE   = wx.NewIdRef()
+ID_ADD_SECTION  = wx.NewIdRef()
 
 
 def _docs_dir() -> Path:
@@ -1222,6 +1223,10 @@ class MainWindow(wx.Frame):
             wx.ID_NEW, _("&Ajouter URL...\tCtrl+N"),
             _("Ajouter un ou plusieurs URLs à télécharger"),
         )
+        self.mi_section = file_menu.Append(
+            ID_ADD_SECTION, _("Télécharger un &extrait...\tCtrl+E"),
+            _("Ne télécharger qu'un passage précis d'une vidéo, entre deux moments"),
+        )
         self.mi_uge = file_menu.Append(
             ID_UGE, _("Extraction &guidée...\tCtrl+G"),
             _("Ouvrir le navigateur intégré pour détecter les médias sur n'importe quelle page"),
@@ -1403,6 +1408,7 @@ class MainWindow(wx.Frame):
 
     def _bind_events(self) -> None:
         self.Bind(wx.EVT_MENU, self._on_add_url,        id=wx.ID_NEW)
+        self.Bind(wx.EVT_MENU, self._on_add_section,    id=ID_ADD_SECTION)
         self.Bind(wx.EVT_MENU, self._on_uge,            id=ID_UGE)
         self.Bind(wx.EVT_MENU, self._on_login,          id=ID_LOGIN)
         self.Bind(wx.EVT_MENU, self._on_search,         id=ID_SEARCH)
@@ -1671,6 +1677,23 @@ class MainWindow(wx.Frame):
         dlg = LoginDialog(self)
         dlg.Show()
 
+    def _on_add_section(self, _event) -> None:
+        """Meme dialogue que l'ajout classique, avec les deux champs de decoupe."""
+        default_fmt = self.settings.get("post_processing", "none")
+        if default_fmt == "none":
+            default_fmt = "auto"
+        with AddUrlDialog(self, default_format=default_fmt,
+                          default_subtitles=self.settings.get("auto_subtitles", False),
+                          with_range=True) as dlg:
+            if dlg.ShowModal() != wx.ID_OK:
+                return
+            urls    = dlg.get_urls()
+            fmt     = dlg.get_format_choice()
+            subs    = dlg.get_subtitles()
+            section = dlg.get_section()
+        for url in urls:
+            self._enqueue_url(url, fmt, subtitles_override=subs, section=section)
+
     def _on_add_url(self, _event) -> None:
         default_fmt = self.settings.get("post_processing", "none")
         if default_fmt == "none":
@@ -1745,7 +1768,8 @@ class MainWindow(wx.Frame):
                      playlist_title: str | None = None,
                      playlist_number: int | None = None,
                      skip_info: bool = False,
-                     subtitles_override: bool | None = None) -> None:
+                     subtitles_override: bool | None = None,
+                     section: tuple[float, float] | None = None) -> None:
         # Détection URL mixte vidéo + playlist (ex: YouTube watch?v=...&list=...)
         if not playlist_title and "list=" in url and ("watch?" in url or "/watch/" in url):
             url = self._ask_video_or_playlist(url)
@@ -1768,7 +1792,8 @@ class MainWindow(wx.Frame):
                                 playlist_title=playlist_title,
                                 playlist_number=playlist_number,
                                 skip_info=skip_info,
-                                subtitles_override=subtitles_override)
+                                subtitles_override=subtitles_override,
+                                section=section)
         if format_spec == "auto":
             label = _("Auto")
         elif format_spec == "subtitles_only":
@@ -2244,6 +2269,7 @@ class MainWindow(wx.Frame):
         msg = _(
             "F1               Ouvrir le guide d'utilisation\n"
             "Ctrl+N           Ajouter URL(s)\n"
+            "Ctrl+E           Télécharger un extrait\n"
             "Ctrl+F           Rechercher (YouTube, SoundCloud...)\n"
             "Ctrl+G           Extraction guidée (navigateur intégré)\n"
             "Ctrl+V           Coller URL depuis le presse-papiers\n"

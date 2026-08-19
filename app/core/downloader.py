@@ -482,6 +482,7 @@ class Downloader:
         playlist_number: int | None = None,
         use_cookies: bool = False,
         subtitles_override: bool | None = None,
+        section: tuple[float, float] | None = None,
     ) -> str | None:
         """
         Télécharge l'URL dans le dossier configuré.
@@ -490,6 +491,7 @@ class Downloader:
         verbose        : active les logs yt-dlp détaillés (mode diagnostic)
         on_verbose_log : appelé avec le log complet en fin de téléchargement
         playlist_title : titre de la playlist parente (pour l'organisation en sous-dossier)
+        section        : (debut, fin) en secondes — ne telecharge que cet extrait
         """
         _log.info("Démarrage téléchargement id=%s url=%s format=%s", download_id, url, format_spec)
         dest = self._settings.get("download_folder", ".")
@@ -552,8 +554,30 @@ class Downloader:
             240 - len(_eff_prefix) - len(_num_prefix) - len("/.m4a.part") - 4,
         )
 
-        name_part = f"{_num_prefix}%(title).{_trim_len}s.%(ext)s"
+        # Extrait : le suffixe evite d'ecraser un telechargement complet du meme
+        # media, et distingue deux extraits differents de la meme video.
+        _suffix = ""
+        if section:
+            _suffix = (f" [{_timecode_for_filename(section[0])}"
+                       f" a {_timecode_for_filename(section[1])}]")
+            _trim_len = max(50, _trim_len - len(_suffix))
+
+        name_part = f"{_num_prefix}%(title).{_trim_len}s{_suffix}.%(ext)s"
         outtmpl = f"{_rel_dir}/{name_part}" if _rel_dir else name_part
+
+        # Decoupe par chapitres : yt-dlp nomme les morceaux avec le gabarit
+        # « chapter ». On partage le budget de caracteres entre le titre de la
+        # video et celui du chapitre (meme garde-fou MAX_PATH que ci-dessus).
+        split_chapters = bool(self._settings.get("split_chapters")) and not section
+        if split_chapters:
+            _part = max(25, (_trim_len - 12) // 2)
+            _chapter_name = (f"{_num_prefix}%(title).{_part}s"
+                             f" - %(section_number)03d %(section_title).{_part}s.%(ext)s")
+            outtmpl = {
+                "default": outtmpl,
+                "chapter": (f"{_rel_dir}/{_chapter_name}" if _rel_dir
+                            else _chapter_name),
+            }
 
         log_buf = io.StringIO() if verbose else None
 
@@ -650,6 +674,17 @@ class Downloader:
             eff_settings["auto_subtitles"] = True
             opts["skip_download"] = True
 
+        # Extrait : yt-dlp ne recupere que l'intervalle demande.
+        # `force_keyframes_at_cuts` est indispensable ici — sans lui le debut
+        # est recale sur l'image cle precedente (mesure : 5 s -> 12 s demandes
+        # donnaient 12 s de fichier au lieu de 7). L'utilisateur qui a saisi un
+        # moment precis doit obtenir ce moment ; le reencodage autour des coupes
+        # coute un peu de temps, mais seule la portion extraite est traitee.
+        if section:
+            opts["download_ranges"] = yt_dlp.utils.download_range_func(
+                [], [(section[0], section[1])])
+            opts["force_keyframes_at_cuts"] = True
+
         _apply_format(opts, format_spec, format_id, audio_groups)
         _apply_subtitles(opts, eff_settings)
         # Apres les sous-titres : l'ordre de la liste est l'ordre d'execution,
@@ -687,13 +722,20 @@ class Downloader:
                         when="post_process",
                     )
                 if embed_thumb:
-                    # En dernier : la pochette s'ecrit dans le fichier final,
-                    # donc apres la conversion, les metadonnees et l'eventuelle
-                    # incrustation des sous-titres (qui reencode la video).
+                    # Apres la conversion, les metadonnees et l'eventuelle
+                    # incrustation des sous-titres (qui reencode la video) :
+                    # la pochette s'ecrit dans le fichier deja finalise.
                     ydl.add_post_processor(
                         _SafeEmbedThumbnailPP(ydl, already_have_thumbnail=False),
                         when="post_process",
                     )
+                if split_chapters:
+                    # Tout a la fin : la decoupe copie les flux du fichier
+                    # complet, donc les morceaux heritent des metadonnees et de
+                    # la pochette deja ecrites. L'inverse produirait des
+                    # chapitres nus.
+                    ydl.add_post_processor(
+                        _SplitChaptersPP(ydl), when="post_process")
                 ydl.download([url])
 
         # Moniteur disque : filet de progression + annulation pour les flux qui
@@ -1277,6 +1319,54 @@ def _apply_metadata(opts: dict, settings: dict, format_spec: str,
     # le dossier temporaire du telechargement et supprimee apres integration.
     opts["writethumbnail"] = True
     return True, ext
+
+
+def format_timecode(seconds: float) -> str:
+    """Secondes -> "h:mm:ss" (ou "m:ss" en dessous d'une heure)."""
+    total = round(max(seconds, 0.0))
+    h, rest = divmod(total, 3600)
+    m, sec = divmod(rest, 60)
+    return f"{h}:{m:02d}:{sec:02d}" if h else f"{m}:{sec:02d}"
+
+
+def parse_timecode(text: str) -> float:
+    """ "1:23:45", "12:30", "90" -> secondes. Leve ValueError si illisible."""
+    parts = (text or "").strip().replace(",", ".").split(":")
+    if not 1 <= len(parts) <= 3 or any(not p.strip() for p in parts):
+        raise ValueError(text)
+    total = 0.0
+    for part in parts:
+        total = total * 60 + float(part)
+    if total < 0:
+        raise ValueError(text)
+    return total
+
+
+def _timecode_for_filename(seconds: float) -> str:
+    """Timecode utilisable dans un nom de fichier Windows (pas de « : »).
+    Une fin non bornee (extrait « jusqu'au bout ») se lit « fin »."""
+    if seconds == float("inf"):
+        return _("fin")
+    return format_timecode(seconds).replace(":", "-")
+
+
+class _SplitChaptersPP(yt_dlp.postprocessor.FFmpegSplitChaptersPP):
+    """Decoupe en un fichier par chapitre, PUIS supprime le fichier entier.
+
+    yt-dlp conserve l'original par defaut ; ici l'utilisateur a demande « un
+    fichier par chapitre », garder les deux doublerait l'espace occupe sans
+    qu'il l'ait demande. Si la video n'a pas de chapitres, la classe parente ne
+    produit rien : on ne supprime alors surtout pas le seul fichier telecharge.
+    """
+
+    def run(self, info):
+        had_chapters = bool(info.get("chapters"))
+        to_delete, info = super().run(info)
+        if had_chapters and info.get("filepath"):
+            written = [c.get("filepath") for c in (info.get("chapters") or [])]
+            if any(f and os.path.exists(f) for f in written):
+                to_delete = [*to_delete, info["filepath"]]
+        return to_delete, info
 
 
 class _BurnSubtitlesPP(yt_dlp.postprocessor.PostProcessor):

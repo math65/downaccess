@@ -340,6 +340,17 @@ class SettingsDialog(wx.Dialog):
               "et classer le fichier dans votre bibliothèque."))
         sizer.Add(self.chk_metadata, 0, wx.EXPAND | wx.ALL, 12)
 
+        self.chk_split = wx.CheckBox(
+            page,
+            label=_("Créer un fichier par chapitre quand la vidéo en propose"),
+            name=_("Créer un fichier par chapitre"),
+        )
+        self.chk_split.SetToolTip(
+            _("Utile pour les longs enregistrements : au lieu d'un seul fichier "
+              "de plusieurs heures, vous obtenez un fichier par chapitre, que "
+              "vous parcourez aux flèches. Le fichier entier n'est pas conservé."))
+        sizer.Add(self.chk_split, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+
         page.SetSizer(sizer)
         return page
 
@@ -527,6 +538,7 @@ class SettingsDialog(wx.Dialog):
         self.choice_post.SetSelection(idx)
         ad_mode = s.get("audio_description_mode", "ask")
         self.chk_metadata.SetValue(bool(s.get("embed_metadata", True)))
+        self.chk_split.SetValue(bool(s.get("split_chapters", False)))
         ad_idx = AD_MODE_CHOICES.index(ad_mode) if ad_mode in AD_MODE_CHOICES else 0
         self.choice_ad.SetSelection(ad_idx)
 
@@ -581,6 +593,7 @@ class SettingsDialog(wx.Dialog):
         s["post_processing"] = POST_CHOICES[self.choice_post.GetSelection()]
         s["audio_description_mode"] = AD_MODE_CHOICES[self.choice_ad.GetSelection()]
         s["embed_metadata"] = self.chk_metadata.GetValue()
+        s["split_chapters"] = self.chk_split.GetValue()
 
         # Sous-titres
         s["auto_subtitles"]  = self.chk_auto_subs.GetValue()

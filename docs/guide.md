@@ -70,7 +70,7 @@ La fenêtre principale se compose de quatre zones, du haut vers le bas.
 
 Trois menus regroupent toutes les actions :
 
-- **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
+- **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), télécharger un extrait (Ctrl+E), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
 - **Téléchargements** : démarrer (F5), mettre en pause ou reprendre (Espace), annuler (Suppr), vider la liste (Maj+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
 - **Aide** : afficher la liste des raccourcis clavier, mettre à jour le moteur de téléchargement ou l'application, contacter le support ou faire une suggestion, ouvrir la page du projet et afficher les informations « À propos ».
 
@@ -121,6 +121,19 @@ C'est la méthode principale. Depuis le menu **Fichier**, choisissez **Ajouter U
 - DownAccess vérifie chaque adresse : si une URL pointe vers la page d'accueil d'un site (et non vers une vidéo précise), un message vous demande de copier l'adresse complète d'une vidéo.
 - Si l'adresse contient à la fois une vidéo et une playlist, DownAccess vous demandera si vous voulez télécharger **la playlist** entière ou seulement **la vidéo**.
 
+### Télécharger seulement un extrait (Ctrl+E)
+
+Vous n'avez parfois besoin que d'un passage : un morceau dans un long concert, une intervention dans une émission de deux heures. Depuis le menu **Fichier**, choisissez **Télécharger un extrait...** (Ctrl+E).
+
+La fenêtre est celle de l'ajout d'URL, avec deux champs supplémentaires après la case des sous-titres :
+
+1. **Début de l'extrait (heures:minutes:secondes)** — le moment où l'extrait commence, par exemple `1:05:30` pour une heure cinq minutes trente, ou `4:20` pour quatre minutes vingt. Laissez vide pour partir du début.
+2. **Fin de l'extrait (heures:minutes:secondes)** — le moment où il s'arrête. Laissez vide pour aller jusqu'au bout.
+
+DownAccess ne télécharge que le passage demandé, et la coupe est faite exactement aux moments indiqués. Le fichier obtenu porte les timecodes dans son nom, par exemple `Mon concert [1-05-30 a 1-12-00].mp3` : vous pouvez donc extraire plusieurs passages d'une même vidéo sans qu'ils s'écrasent.
+
+Si le moment saisi n'est pas compréhensible, ou si la fin arrive avant le début, DownAccess vous le signale et replace le focus dans le champ concerné.
+
 ### Coller une URL directement (Ctrl+V)
 
 Si vous avez déjà copié une adresse (depuis votre navigateur, par exemple), vous n'êtes pas obligé d'ouvrir la fenêtre d'ajout. Depuis la fenêtre principale de DownAccess, appuyez simplement sur **Ctrl+V**.
@@ -164,6 +177,7 @@ DownAccess reconnaît les adresses même si le fichier contient d'autres lignes 
 | Action | Raccourci |
 |---|---|
 | Ajouter une ou plusieurs URL | Ctrl+N |
+| Télécharger seulement un extrait | Ctrl+E |
 | Coller une URL depuis le presse-papiers | Ctrl+V |
 | Activer/désactiver la surveillance du presse-papiers | Ctrl+Shift+V |
 
@@ -676,7 +690,7 @@ Le bouton **Réinitialiser tous les avertissements** réaffiche les messages d'a
 
 ### Onglet Formats
 
-Cet onglet contient trois réglages.
+Cet onglet contient quatre réglages.
 
 **Format par défaut** — le format dans lequel vos téléchargements seront convertis. Quatre choix sont proposés :
 
@@ -697,6 +711,8 @@ Ce format est appliqué par défaut à chaque nouveau téléchargement ; vous po
 Avec l'un des trois modes automatiques, vous n'êtes plus interrogé : la ou les pistes sont choisies pour vous.
 
 **Renseigner les informations du fichier** — case **cochée** par défaut. DownAccess inscrit dans chaque fichier téléchargé son titre, son auteur, sa date, la pochette de la vidéo et, quand la vidéo en propose, ses chapitres. Votre lecteur audio peut alors annoncer le titre et l'auteur au lieu du seul nom de fichier, et votre bibliothèque peut classer et regrouper vos fichiers correctement. Décochez cette case si vous préférez des fichiers totalement bruts.
+
+**Créer un fichier par chapitre quand la vidéo en propose** — case **décochée** par défaut. Certaines vidéos longues (conférences, concerts, émissions) sont découpées en chapitres par leur auteur. En cochant cette case, DownAccess produit un fichier par chapitre au lieu d'un seul fichier de plusieurs heures : vous parcourez les passages aux flèches dans votre dossier, au lieu de vous déplacer à l'aveugle dans une longue piste. Chaque morceau conserve le titre, l'auteur et la pochette. Le fichier entier n'est pas conservé. Si la vidéo n'a pas de chapitres, rien ne change.
 
 ### Onglet Sous-titres
 
@@ -905,6 +921,7 @@ Voici tous les raccourcis disponibles dans DownAccess.
 |---|---|
 | **F1** | Ouvrir le guide d'utilisation |
 | **Ctrl+N** | Ajouter une ou plusieurs URLs |
+| **Ctrl+E** | Télécharger seulement un extrait d'une vidéo |
 | **Ctrl+F** | Rechercher des vidéos ou musiques (YouTube, SoundCloud, etc.) |
 | **Ctrl+G** | Extraction guidée (navigateur intégré) |
 | **Ctrl+V** | Coller une URL depuis le presse-papiers |
