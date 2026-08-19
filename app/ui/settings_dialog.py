@@ -259,6 +259,17 @@ class SettingsDialog(wx.Dialog):
             "DownAccess ouvre le navigateur dans un profil séparé de votre "
             "navigation habituelle. Vous vous connectez aux sites une seule "
             "fois : la connexion est conservée pour les fois suivantes."))
+        self.chk_subs_start = wx.CheckBox(page,
+            label=_("Relever les abonnements au lancement"),
+            name=_("Relever les abonnements au lancement"))
+        self.chk_subs_start.SetToolTip(
+            _("Vérifie discrètement vos chaînes et podcasts suivis au démarrage. "
+              "Le nombre de nouveautés apparaît dans le menu Fichier, sans rien "
+              "interrompre."))
+        self.chk_subs_announce = wx.CheckBox(page,
+            label=_("Annoncer vocalement les nouveautés des abonnements"),
+            name=_("Annoncer vocalement les nouveautés des abonnements"))
+
         self.chk_intercept_title = wx.CheckBox(page,
             label=_("Utiliser le titre de la page comme nom de fichier (interception)"),
             name=_("Utiliser le titre de la page comme nom de fichier"))
@@ -291,6 +302,8 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(lbl_browser,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.choice_browser,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_browser_hint,           0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
+        sizer.Add(self.chk_subs_start,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(self.chk_subs_announce,     0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_intercept_title,   0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_warn,                   0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.btn_reset_warnings,    0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
@@ -528,6 +541,8 @@ class SettingsDialog(wx.Dialog):
         self.choice_browser.SetSelection(
             self._browser_codes.index(browser) if browser in self._browser_codes else 0)
         self.chk_intercept_title.SetValue(s.get("intercept_use_page_title", True))
+        self.chk_subs_start.SetValue(bool(s.get("subscriptions_check_on_start", True)))
+        self.chk_subs_announce.SetValue(bool(s.get("subscriptions_announce", False)))
         announce = s.get("download_announcements", "always")
         ann_idx = ANNOUNCE_CHOICES.index(announce) if announce in ANNOUNCE_CHOICES else 0
         self.radio_announce.SetSelection(ann_idx)
@@ -587,6 +602,8 @@ class SettingsDialog(wx.Dialog):
         s["results_paging"] = PAGING_CHOICES[max(0, self.radio_paging.GetSelection())]
         s["browser_choice"] = self._browser_codes[max(0, self.choice_browser.GetSelection())]
         s["intercept_use_page_title"] = self.chk_intercept_title.GetValue()
+        s["subscriptions_check_on_start"] = self.chk_subs_start.GetValue()
+        s["subscriptions_announce"] = self.chk_subs_announce.GetValue()
         s["download_announcements"]   = ANNOUNCE_CHOICES[self.radio_announce.GetSelection()]
 
         # Formats

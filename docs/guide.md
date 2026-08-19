@@ -70,7 +70,7 @@ La fenêtre principale se compose de quatre zones, du haut vers le bas.
 
 Trois menus regroupent toutes les actions :
 
-- **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), télécharger un extrait (Ctrl+E), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
+- **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), télécharger un extrait (Ctrl+E), gérer les abonnements (Ctrl+B), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
 - **Téléchargements** : démarrer (F5), mettre en pause ou reprendre (Espace), annuler (Suppr), vider la liste (Maj+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
 - **Aide** : afficher la liste des raccourcis clavier, mettre à jour le moteur de téléchargement ou l'application, contacter le support ou faire une suggestion, ouvrir la page du projet et afficher les informations « À propos ».
 
@@ -178,6 +178,7 @@ DownAccess reconnaît les adresses même si le fichier contient d'autres lignes 
 |---|---|
 | Ajouter une ou plusieurs URL | Ctrl+N |
 | Télécharger seulement un extrait | Ctrl+E |
+| Abonnements (chaînes et podcasts) | Ctrl+B |
 | Coller une URL depuis le presse-papiers | Ctrl+V |
 | Activer/désactiver la surveillance du presse-papiers | Ctrl+Shift+V |
 
@@ -496,6 +497,47 @@ Certaines adresses (typiquement sur YouTube) désignent à la fois une vidéo pr
 - **Annuler** : n'ajoute rien.
 
 Ainsi, vous ne récupérez jamais une playlist entière par accident en voulant une seule vidéo, ni l'inverse.
+
+## Suivre des chaînes et des podcasts
+
+Jusqu'ici, suivre une émission voulait dire ouvrir DownAccess, retaper la recherche, et comparer de tête avec ce que vous aviez déjà téléchargé. On peut faire l'inverse : vous vous abonnez une fois, et DownAccess vous dit ce qui est arrivé depuis votre dernière visite.
+
+### Ouvrir les abonnements (Ctrl+B)
+
+Depuis le menu **Fichier**, choisissez **Abonnements...** (Ctrl+B). La fenêtre liste les chaînes et podcasts que vous suivez, avec pour chacun son type, le format de téléchargement, s'il est automatique, et la date de la dernière vérification.
+
+Quatre boutons accompagnent la liste : **Suivre une chaîne...**, **Ne plus suivre**, **Vérifier maintenant** et **Voir les nouveautés**.
+
+### S'abonner
+
+Cliquez sur **Suivre une chaîne...** puis collez une adresse. DownAccess accepte :
+
+- l'adresse d'une **chaîne YouTube** sous toutes ses formes (avec un @, avec /channel/, avec /c/ ou /user/) ;
+- l'adresse d'une **playlist YouTube** ;
+- l'adresse d'un **flux de podcast** (le fichier .xml ou .rss) ;
+- la **page d'accueil d'un podcast** : DownAccess y cherche lui-même le flux.
+
+Vous choisissez ensuite le format des téléchargements pour cette source (ou **Format par défaut des préférences**, pour que vos abonnements suivent vos préférences générales si vous en changez un jour), et vous pouvez cocher **Télécharger automatiquement les nouveautés**.
+
+Au moment où vous vous abonnez, tout ce qui est déjà publié est considéré comme vu : s'abonner veut dire « préviens-moi de ce qui arrive », pas « déverse-moi les quinze dernières vidéos ».
+
+### Voir les nouveautés
+
+Au lancement, DownAccess relève discrètement vos abonnements. Rien ne s'affiche, rien ne vous interrompt : le nombre de nouveautés apparaît simplement dans l'entrée de menu, qui devient par exemple **Abonnements (3 nouveautés)...**. Si vous préférez l'entendre, cochez **Annoncer vocalement les nouveautés des abonnements** dans les préférences (onglet Général).
+
+La fenêtre **Nouveautés de vos abonnements** présente tout ce qui est arrivé, toutes sources confondues : le titre, la source, la date, et un **résumé** de l'élément sur lequel vous êtes positionné. Chaque ligne porte une case à cocher, cochée par défaut. Trois issues :
+
+- **Télécharger la sélection** : met en file ce que vous avez coché. Tout ce qui était affiché est ensuite considéré comme vu, y compris ce que vous n'avez pas retenu : écarter un élément est un choix, pas un oubli.
+- **Tout marquer comme vu** : ne télécharge rien et n'en reparle plus.
+- **Plus tard** : ne touche à rien. Les mêmes nouveautés vous seront représentées au prochain relevé.
+
+### Vérifier à la demande
+
+Le bouton **Vérifier maintenant** interroge tous vos abonnements sans attendre le prochain lancement. Un abonnement en panne (adresse changée, serveur momentanément indisponible) n'empêche jamais les autres de remonter : DownAccess vous signale lesquels n'ont pas répondu et vous montre le reste.
+
+### Pourquoi c'est rapide
+
+DownAccess utilise les **flux** publiés par les sites, pas une exploration complète de la chaîne. Une vérification coûte quelques kilo-octets et une seule requête par abonnement, même pour une chaîne qui compte des milliers de vidéos. C'est ce qui permet de relever vos abonnements à chaque lancement sans ralentir le démarrage.
 
 ## Se connecter à un site et contenu protégé
 
@@ -938,6 +980,7 @@ Voici tous les raccourcis disponibles dans DownAccess.
 | **F1** | Ouvrir le guide d'utilisation |
 | **Ctrl+N** | Ajouter une ou plusieurs URLs |
 | **Ctrl+E** | Télécharger seulement un extrait d'une vidéo |
+| **Ctrl+B** | Abonnements : chaînes et podcasts suivis |
 | **Ctrl+F** | Rechercher des vidéos ou musiques (YouTube, SoundCloud, etc.) |
 | **Ctrl+G** | Extraction guidée (navigateur intégré) |
 | **Ctrl+V** | Coller une URL depuis le presse-papiers |

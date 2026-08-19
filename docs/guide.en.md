@@ -70,7 +70,7 @@ The main window is made up of four areas, from top to bottom.
 
 Three menus bring together all the actions:
 
-- **File**: add one or more addresses (Ctrl+N), download an extract (Ctrl+E), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
+- **File**: add one or more addresses (Ctrl+N), download an extract (Ctrl+E), manage subscriptions (Ctrl+B), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
 - **Downloads**: start (F5), pause or resume (Space), cancel (Delete), clear the list (Shift+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
 - **Help**: show the list of keyboard shortcuts, update the download engine or the application, contact support or make a suggestion, open the project page and show the "About" information.
 
@@ -178,6 +178,7 @@ DownAccess recognizes the addresses even if the file contains other lines of tex
 |---|---|
 | Add one or more URLs | Ctrl+N |
 | Download only an extract | Ctrl+E |
+| Subscriptions (channels and podcasts) | Ctrl+B |
 | Paste a URL from the clipboard | Ctrl+V |
 | Turn clipboard monitoring on/off | Ctrl+Shift+V |
 
@@ -496,6 +497,47 @@ Some addresses (typically on YouTube) point to both a specific video and the pla
 - **Cancel**: adds nothing.
 
 That way, you never accidentally grab an entire playlist when you wanted a single video, or vice versa.
+
+## Following channels and podcasts
+
+Until now, following a show meant opening DownAccess, typing the search again, and comparing from memory with what you had already downloaded. It can work the other way round: you subscribe once, and DownAccess tells you what has arrived since your last visit.
+
+### Opening subscriptions (Ctrl+B)
+
+From the **File** menu, choose **Subscriptions...** (Ctrl+B). The window lists the channels and podcasts you follow, each with its type, download format, whether it is automatic, and when it was last checked.
+
+Four buttons go with the list: **Follow a channel...**, **Stop following**, **Check now** and **See what is new**.
+
+### Subscribing
+
+Click **Follow a channel...** and paste an address. DownAccess accepts:
+
+- the address of a **YouTube channel** in any of its forms (with an @, with /channel/, with /c/ or /user/);
+- the address of a **YouTube playlist**;
+- the address of a **podcast feed** (the .xml or .rss file);
+- a **podcast's home page**: DownAccess looks for the feed itself.
+
+You then choose the download format for that source (or **Default format from preferences**, so your subscriptions follow your general preferences if you ever change them), and you can tick **Download new items automatically**.
+
+At the moment you subscribe, everything already published is treated as seen: subscribing means "tell me about what arrives", not "dump the last fifteen videos on me".
+
+### Seeing what is new
+
+At startup, DownAccess quietly checks your subscriptions. Nothing appears, nothing interrupts you: the number of new items simply shows up in the menu entry, which becomes for example **Subscriptions (3 new)...**. If you would rather hear it, tick **Announce subscription news out loud** in the preferences (General tab).
+
+The **New from your subscriptions** window shows everything that has arrived, from all sources together: the title, the source, the date, and a **summary** of the item you are on. Each row has a checkbox, ticked by default. Three ways out:
+
+- **Download the selection**: queues what you ticked. Everything that was shown is then treated as seen, including what you left out: setting an item aside is a choice, not an oversight.
+- **Mark all as seen**: downloads nothing and does not mention them again.
+- **Later**: changes nothing. The same items will be shown again at the next check.
+
+### Checking on demand
+
+The **Check now** button queries all your subscriptions without waiting for the next launch. A broken subscription (changed address, server briefly unavailable) never stops the others from coming through: DownAccess tells you which ones did not answer and shows you the rest.
+
+### Why it is fast
+
+DownAccess uses the **feeds** published by the sites, not a full crawl of the channel. One check costs a few kilobytes and a single request per subscription, even for a channel with thousands of videos. That is what makes it possible to check your subscriptions at every launch without slowing the startup down.
 
 ## Logging in to a Site and Protected Content
 
@@ -937,6 +979,7 @@ Here are all the shortcuts available in DownAccess.
 |---|---|
 | **Ctrl+N** | Add one or more URLs |
 | **Ctrl+E** | Download only an extract of a video |
+| **Ctrl+B** | Subscriptions: channels and podcasts you follow |
 | **Ctrl+F** | Search for videos or music (YouTube, SoundCloud, etc.) |
 | **Ctrl+G** | Guided extraction (built-in browser) |
 | **Ctrl+V** | Paste a URL from the clipboard |

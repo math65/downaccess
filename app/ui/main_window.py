@@ -65,6 +65,8 @@ from app.core.custom_sites import is_custom_site_url, detect_audio_tracks
 from app.ui.playlist_dialog import PlaylistDialog
 from app.ui.search_dialog import RESULT_BACK, SearchDialog, SearchResultsDialog
 from app.ui.settings_dialog import SettingsDialog
+from app.ui.subscriptions_dialog import SubscriptionsDialog
+from app.ui.new_items_dialog import NewItemsDialog
 from app.ui.transcript_dialog import TranscriptDialog
 from app.ui.uge_dialog import UGEDialog
 from app.ui.login_dialog import LoginDialog
@@ -113,6 +115,7 @@ ID_IMPORT_LIST  = wx.NewIdRef()
 ID_HISTORY      = wx.NewIdRef()
 ID_USER_GUIDE   = wx.NewIdRef()
 ID_ADD_SECTION  = wx.NewIdRef()
+ID_SUBSCRIPTIONS = wx.NewIdRef()
 
 
 def _docs_dir() -> Path:
@@ -310,6 +313,9 @@ class MainWindow(wx.Frame):
         # Mise à jour yt-dlp en cours au démarrage → bloquer les téléchargements
         self._updater_running: bool = True
         self._pending_downloads: list[tuple[str, str, str | None, str | None]] = []
+        # Nouveautes d'abonnements relevees au demarrage, en attente que
+        # l'utilisateur ouvre la fenetre (Ctrl+B).
+        self._pending_new_items: dict = {}
         # Etat de la derniere recherche (contexte + page affichee) et URL de
         # playlist qui en proviennent : permet de revenir aux resultats depuis
         # la selection des videos d'une playlist.
@@ -405,6 +411,141 @@ class MainWindow(wx.Frame):
         # Ouvrir le dossier si tous les téléchargements sont terminés
         if self.settings.get("open_folder_when_done") and self._all_done():
             self._open_download_folder()
+
+    # ------------------------------------------------------------------
+    # Abonnements (chaines suivies et podcasts)
+    # ------------------------------------------------------------------
+
+    def _on_subscriptions(self, _event) -> None:
+        dlg = SubscriptionsDialog(self, on_new_items=self._show_new_items,
+                                  pending=self._pending_new_items)
+        dlg.ShowModal()
+        dlg.Destroy()
+        wx.CallAfter(self.download_list.SetFocus)
+
+    def _show_new_items(self, fresh: dict, subs_list: list) -> None:
+        """Presente les nouveautes relevees et met en file ce qui est choisi.
+
+        `fresh` : {sub_id: [FeedEntry]}. Trois issues possibles, et une seule
+        marque « vu » sans rien telecharger — fermer la fenetre doit pouvoir
+        laisser les nouveautes en attente pour plus tard.
+        """
+        from app.core import subscriptions as subs_mod
+
+        by_id = {s.sub_id: s for s in subs_list}
+        items = []
+        for sub_id, entries in fresh.items():
+            sub = by_id.get(sub_id)
+            if sub is None:
+                continue
+            for entry in entries:
+                items.append((sub.title, entry, sub.format_spec))
+        if not items:
+            return
+
+        dlg = NewItemsDialog(self, items)
+        result = dlg.ShowModal()
+        chosen = dlg.get_selected() if result == wx.ID_OK else []
+        dlg.Destroy()
+
+        if result == wx.ID_CANCEL:
+            # « Plus tard » : rien n'est marque, tout ressortira au prochain releve.
+            wx.CallAfter(self.download_list.SetFocus)
+            return
+
+        default_fmt = self.settings.get("post_processing", "auto")
+        if default_fmt == "none":
+            default_fmt = "auto"
+        for _source, entry, fmt in chosen:
+            self._enqueue_url(entry.url, fmt or default_fmt)
+
+        # Telecharge ou non, ce qui a ete montre est considere comme vu : les
+        # entrees ecartees sont un choix, pas un oubli.
+        for sub_id, entries in fresh.items():
+            sub = by_id.get(sub_id)
+            if sub is not None:
+                subs_mod.mark_seen(sub, entries)
+        subs_mod.save(subs_list)
+        self._pending_new_items = {}
+        self._update_subscriptions_label(0)
+        wx.CallAfter(self.download_list.SetFocus)
+
+    def _update_subscriptions_label(self, count: int) -> None:
+        """Affiche le nombre de nouveautes directement dans l'entree de menu :
+        c'est visible sans rien annoncer, donc compatible avec la regle des
+        verifications de demarrage silencieuses."""
+        if count:
+            base = _("A&bonnements ({n} nouveautés)...").format(n=count)
+        else:
+            base = _("A&bonnements...")
+        label = base + "\tCtrl+B"
+        try:
+            self.mi_subs.SetItemLabel(label)
+        except Exception:
+            pass
+
+    def check_subscriptions_at_startup(self) -> None:
+        """Releve silencieux des abonnements au lancement.
+
+        Rien ne s'affiche si rien n'est nouveau. Les abonnements marques
+        « automatique » partent directement en file ; les autres sont annonces
+        par le compteur du menu (et vocalement seulement si l'utilisateur l'a
+        demande dans les preferences).
+        """
+        if not self.settings.get("subscriptions_check_on_start", True):
+            return
+        from app.core import subscriptions as subs_mod
+
+        import threading
+
+        subs_list = subs_mod.load()
+        if not subs_list:
+            return
+
+        def worker() -> None:
+            fresh, _errors = subs_mod.check_all(subs_list)
+            subs_mod.save(subs_list)
+            wx.CallAfter(self._on_subscriptions_checked, fresh, subs_list)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _on_subscriptions_checked(self, fresh: dict, subs_list: list) -> None:
+        from app.core import subscriptions as subs_mod
+
+        by_id = {s.sub_id: s for s in subs_list}
+        auto_count = 0
+        manual: dict = {}
+        default_fmt = self.settings.get("post_processing", "auto")
+        if default_fmt == "none":
+            default_fmt = "auto"
+
+        for sub_id, entries in fresh.items():
+            sub = by_id.get(sub_id)
+            if sub is None:
+                continue
+            if sub.auto_download:
+                for entry in entries:
+                    self._enqueue_url(entry.url, sub.format_spec or default_fmt)
+                    auto_count += 1
+                subs_mod.mark_seen(sub, entries)
+            else:
+                manual[sub_id] = entries
+        if auto_count:
+            subs_mod.save(subs_list)
+
+        self._pending_new_items = manual
+        pending = sum(len(v) for v in manual.values())
+        self._update_subscriptions_label(pending)
+
+        if auto_count:
+            self.set_status(_("{n} nouveautés de vos abonnements ajoutées à la file.")
+                            .format(n=auto_count))
+        elif pending:
+            self.set_status(_("{n} nouveautés dans vos abonnements (Ctrl+B).")
+                            .format(n=pending))
+            if self.settings.get("subscriptions_announce", False):
+                speech.speak(_("{n} nouveautés dans vos abonnements.").format(n=pending),
+                             interrupt=False)
 
     # ------------------------------------------------------------------
     # Menu contextuel de la file (clic droit / touche Menu)
@@ -1288,6 +1429,10 @@ class MainWindow(wx.Frame):
             ID_LOGIN, _("Se &connecter à un site..."),
             _("Ouvrir un navigateur pour se connecter à un site et sauvegarder les cookies"),
         )
+        self.mi_subs = file_menu.Append(
+            ID_SUBSCRIPTIONS, _("A&bonnements...\tCtrl+B"),
+            _("Suivre des chaînes et des podcasts, et voir les nouveautés"),
+        )
         self.mi_search = file_menu.Append(
             ID_SEARCH, _("&Rechercher...\tCtrl+F"),
             _("Rechercher des vidéos ou musiques sur YouTube, SoundCloud, etc."),
@@ -1462,6 +1607,7 @@ class MainWindow(wx.Frame):
     def _bind_events(self) -> None:
         self.Bind(wx.EVT_MENU, self._on_add_url,        id=wx.ID_NEW)
         self.Bind(wx.EVT_MENU, self._on_add_section,    id=ID_ADD_SECTION)
+        self.Bind(wx.EVT_MENU, self._on_subscriptions,  id=ID_SUBSCRIPTIONS)
         self.Bind(wx.EVT_MENU, self._on_uge,            id=ID_UGE)
         self.Bind(wx.EVT_MENU, self._on_login,          id=ID_LOGIN)
         self.Bind(wx.EVT_MENU, self._on_search,         id=ID_SEARCH)
@@ -2323,6 +2469,7 @@ class MainWindow(wx.Frame):
             "F1               Ouvrir le guide d'utilisation\n"
             "Ctrl+N           Ajouter URL(s)\n"
             "Ctrl+E           Télécharger un extrait\n"
+            "Ctrl+B           Abonnements (chaînes et podcasts)\n"
             "Ctrl+F           Rechercher (YouTube, SoundCloud...)\n"
             "Ctrl+G           Extraction guidée (navigateur intégré)\n"
             "Ctrl+V           Coller URL depuis le presse-papiers\n"

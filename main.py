@@ -38,6 +38,9 @@ def main():
     # l'annonce (voir MainWindow._on_announcement_received) pour ne jamais ouvrir
     # deux modales en meme temps au demarrage.
     frame.check_announcement_at_startup()
+    # Releve des abonnements : silencieux, sans fenetre, il alimente juste
+    # le compteur du menu Abonnements (Ctrl+B).
+    frame.check_subscriptions_at_startup()
 
     app.MainLoop()
 
