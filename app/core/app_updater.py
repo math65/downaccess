@@ -69,7 +69,9 @@ def _file_sha256(path: str) -> str:
 
 def _parse_version(tag: str) -> tuple[int, ...]:
     """'v0.2.1' ou '0.2.1' → (0, 2, 1)"""
-    tag = tag.lstrip("v").strip()
+    # strip() AVANT lstrip("v") : un tag entoure d'espaces gardait sinon son
+    # « v » et retombait sur la version (0,).
+    tag = tag.strip().lstrip("v")
     try:
         return tuple(int(x) for x in tag.split("."))
     except Exception:

@@ -220,7 +220,7 @@ msgstr ""
 msgid "Adresse email requise"
 msgstr ""
 
-#: app/core/subscriptions.py:173 app/core/subscriptions.py:176
+#: app/core/subscriptions.py:190 app/core/subscriptions.py:194
 msgid "Adresse injoignable : {error}"
 msgstr ""
 
@@ -373,7 +373,7 @@ msgstr ""
 msgid "Arts et spectacles"
 msgstr ""
 
-#: app/core/app_updater.py:149
+#: app/core/app_updater.py:151
 msgid "Asset '{asset}' absent de la release {version}."
 msgstr ""
 
@@ -389,7 +389,7 @@ msgstr ""
 msgid "Aucun emplacement enregistré pour cette entrée."
 msgstr ""
 
-#: app/core/subscriptions.py:345
+#: app/core/subscriptions.py:372
 msgid "Aucun flux n'a été trouvé à cette adresse."
 msgstr ""
 
@@ -446,7 +446,7 @@ msgstr ""
 msgid "Aucune URL valide dans le presse-papiers."
 msgstr ""
 
-#: app/core/subscriptions.py:182
+#: app/core/subscriptions.py:209
 msgid "Aucune adresse indiquée."
 msgstr ""
 
@@ -580,7 +580,7 @@ msgid ""
 "adultes, privée ou réservée aux membres)."
 msgstr ""
 
-#: app/core/subscriptions.py:261
+#: app/core/subscriptions.py:288
 msgid "Ce document n'est pas un flux RSS ou Atom."
 msgstr ""
 
@@ -592,11 +592,11 @@ msgstr ""
 msgid "Ce fichier était déjà téléchargé."
 msgstr ""
 
-#: app/core/subscriptions.py:221
+#: app/core/subscriptions.py:248
 msgid "Ce flux contient une déclaration non autorisée."
 msgstr ""
 
-#: app/core/subscriptions.py:265
+#: app/core/subscriptions.py:292
 msgid "Ce flux ne contient aucune entrée exploitable."
 msgstr ""
 
@@ -683,7 +683,7 @@ msgstr ""
 msgid "Charger un fichier texte contenant une URL par ligne"
 msgstr ""
 
-#: app/core/subscriptions.py:106 app/ui/search_dialog.py:50
+#: app/core/subscriptions.py:107 app/ui/search_dialog.py:50
 msgid "Chaîne"
 msgstr ""
 
@@ -1331,7 +1331,7 @@ msgstr ""
 msgid "Fichier texte (*.txt)|*.txt"
 msgstr ""
 
-#: app/core/app_updater.py:273
+#: app/core/app_updater.py:275
 msgid "Fichier téléchargé trop petit ({size} octets) — corrompu ?"
 msgstr ""
 
@@ -1355,7 +1355,7 @@ msgstr ""
 msgid "Fin de l'extrait (heures:minutes:secondes) :"
 msgstr ""
 
-#: app/core/subscriptions.py:245
+#: app/core/subscriptions.py:272
 msgid "Flux RSS sans canal."
 msgstr ""
 
@@ -1487,7 +1487,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/app_updater.py:166
+#: app/core/app_updater.py:168
 msgid "Impossible de contacter GitHub."
 msgstr ""
 
@@ -1505,11 +1505,11 @@ msgstr ""
 msgid "Impossible de déterminer le domaine du site."
 msgstr ""
 
-#: app/core/app_updater.py:310
+#: app/core/app_updater.py:312
 msgid "Impossible de finaliser le fichier : {error}"
 msgstr ""
 
-#: app/core/app_updater.py:322
+#: app/core/app_updater.py:324
 msgid "Impossible de lancer l'installeur : {error}"
 msgstr ""
 
@@ -1526,7 +1526,7 @@ msgid ""
 "Fermez complètement votre navigateur, ou connectez-vous via le menu « Se connecter à un site », puis réessayez."
 msgstr ""
 
-#: app/core/app_updater.py:285
+#: app/core/app_updater.py:287
 msgid ""
 "Impossible de récupérer la somme de contrôle (SHA-256) de la nouvelle version.\n"
 "Mise à jour annulée par sécurité — réessayez plus tard."
@@ -1681,7 +1681,7 @@ msgstr ""
 msgid "L'information reste toujours visible dans la liste et la barre d'état."
 msgstr ""
 
-#: app/core/app_updater.py:327
+#: app/core/app_updater.py:329
 msgid "L'installeur s'est terminé immédiatement — fichier corrompu ?"
 msgstr ""
 
@@ -1838,7 +1838,7 @@ msgid ""
 "fenêtre."
 msgstr ""
 
-#: app/core/subscriptions.py:170
+#: app/core/subscriptions.py:186
 msgid "Le serveur a répondu {code} ({reason})."
 msgstr ""
 
@@ -2292,7 +2292,7 @@ msgstr ""
 msgid "Plus tard"
 msgstr ""
 
-#: app/core/subscriptions.py:106
+#: app/core/subscriptions.py:107
 msgid "Podcast"
 msgstr ""
 
@@ -2538,7 +2538,7 @@ msgstr ""
 msgid "Réinitialiser tous les avertissements"
 msgstr ""
 
-#: app/core/app_updater.py:141
+#: app/core/app_updater.py:143
 msgid "Réponse GitHub invalide."
 msgstr ""
 
@@ -2620,7 +2620,7 @@ msgstr ""
 msgid "Seulement quand DownAccess est au premier plan"
 msgstr ""
 
-#: app/core/subscriptions.py:186
+#: app/core/subscriptions.py:213
 msgid "Seules les adresses http et https sont acceptées."
 msgstr ""
 
@@ -2975,7 +2975,7 @@ msgstr ""
 msgid "Téléchargement volumineux"
 msgstr ""
 
-#: app/core/app_updater.py:250
+#: app/core/app_updater.py:252
 msgid "Téléchargement échoué : {error}"
 msgstr ""
 
@@ -3277,7 +3277,7 @@ msgid ""
 "Voulez-vous réessayer de vous connecter ?"
 msgstr ""
 
-#: app/core/app_updater.py:299
+#: app/core/app_updater.py:301
 msgid ""
 "Vérification d'intégrité échouée : le fichier téléchargé ne correspond pas\n"
 "à la somme de contrôle officielle. Mise à jour annulée par sécurité."
@@ -3392,7 +3392,7 @@ msgstr ""
 msgid "inconnue"
 msgstr ""
 
-#: app/core/subscriptions.py:110
+#: app/core/subscriptions.py:111
 msgid "jamais"
 msgstr ""
 

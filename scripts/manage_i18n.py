@@ -170,8 +170,20 @@ def update_language(project_root, language_code, pot_path):
     po_catalog.metadata = dict(pot_catalog.metadata)
     po_catalog.metadata["Language"] = language_code
     po_catalog.merge(pot_catalog)
+
+    # Purge des entrees mortes. Apres une fusion, toute entree encore vivante
+    # porte les occurrences venues du modele ; celles qui n'en ont aucune ne
+    # correspondent plus a aucune chaine du code. polib les laisse en double
+    # (une copie active + une copie obsolete), ce qui finit par polluer le
+    # catalogue et masquer les vraies chaines a traduire.
+    dead = [entry for entry in po_catalog if not entry.occurrences]
+    for entry in dead:
+        po_catalog.remove(entry)
+
     po_catalog.save(po_path)
     print(f"Updated {po_path}")
+    if dead:
+        print(f"  removed {len(dead)} obsolete entrie(s)")
 
 
 def main():

@@ -2285,7 +2285,7 @@ msgstr "⚠ Manual mode is available for only one URL at a time."
 msgid "Annulé par l'utilisateur"
 msgstr "Cancelled by user"
 
-#: app/core/app_updater.py:149
+#: app/core/app_updater.py:151
 msgid "Asset '{asset}' absent de la release {version}."
 msgstr "Asset '{asset}' missing from release {version}."
 
@@ -2303,23 +2303,23 @@ msgstr "Unknown error."
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
-#: app/core/app_updater.py:273
+#: app/core/app_updater.py:275
 msgid "Fichier téléchargé trop petit ({size} octets) — corrompu ?"
 msgstr "Downloaded file too small ({size} bytes) — corrupted?"
 
-#: app/core/app_updater.py:166
+#: app/core/app_updater.py:168
 msgid "Impossible de contacter GitHub."
 msgstr "Unable to contact GitHub."
 
-#: app/core/app_updater.py:310
+#: app/core/app_updater.py:312
 msgid "Impossible de finaliser le fichier : {error}"
 msgstr "Unable to finalize the file: {error}"
 
-#: app/core/app_updater.py:322
+#: app/core/app_updater.py:324
 msgid "Impossible de lancer l'installeur : {error}"
 msgstr "Unable to launch the installer: {error}"
 
-#: app/core/app_updater.py:285
+#: app/core/app_updater.py:287
 msgid ""
 "Impossible de récupérer la somme de contrôle (SHA-256) de la nouvelle version.\n"
 "Mise à jour annulée par sécurité — réessayez plus tard."
@@ -2335,7 +2335,7 @@ msgstr "Unable to check the version (connection unavailable)."
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
-#: app/core/app_updater.py:327
+#: app/core/app_updater.py:329
 msgid "L'installeur s'est terminé immédiatement — fichier corrompu ?"
 msgstr "The installer exited immediately — corrupted file?"
 
@@ -2347,15 +2347,15 @@ msgstr "Message sent. Thank you for your feedback!"
 msgid "Rapport envoyé avec succès."
 msgstr "Report sent successfully."
 
-#: app/core/app_updater.py:141
+#: app/core/app_updater.py:143
 msgid "Réponse GitHub invalide."
 msgstr "Invalid GitHub response."
 
-#: app/core/app_updater.py:250
+#: app/core/app_updater.py:252
 msgid "Téléchargement échoué : {error}"
 msgstr "Download failed: {error}"
 
-#: app/core/app_updater.py:299
+#: app/core/app_updater.py:301
 msgid ""
 "Vérification d'intégrité échouée : le fichier téléchargé ne correspond pas\n"
 "à la somme de contrôle officielle. Mise à jour annulée par sécurité."
@@ -3934,162 +3934,3 @@ msgstr "{n} new items in your subscriptions."
 #: app/ui/main_window.py:541
 msgid "{n} nouveautés de vos abonnements ajoutées à la file."
 msgstr "{n} new items from your subscriptions added to the queue."
-
-#~ msgid ""
-#~ "F1               Ouvrir le guide d'utilisation\n"
-#~ "Ctrl+N           Ajouter URL(s)\n"
-#~ "Ctrl+E           Télécharger un extrait\n"
-#~ "Ctrl+F           Rechercher (YouTube, SoundCloud...)\n"
-#~ "Ctrl+G           Extraction guidée (navigateur intégré)\n"
-#~ "Ctrl+V           Coller URL depuis le presse-papiers\n"
-#~ "Ctrl+Shift+V     Activer/désactiver la surveillance du presse-papiers\n"
-#~ "Ctrl+H           Afficher l'historique\n"
-#~ "F5               Démarrer la file\n"
-#~ "Espace           Pause / Reprendre\n"
-#~ "Suppr            Supprimer de la liste\n"
-#~ "Maj+Suppr        Vider toute la liste\n"
-#~ "F2               Réessayer\n"
-#~ "Alt+Haut         Monter dans la file\n"
-#~ "Alt+Bas          Descendre dans la file\n"
-#~ "Ctrl+O           Ouvrir le dossier de destination\n"
-#~ "Ctrl+P           Préférences\n"
-#~ "Alt+F4           Quitter"
-#~ msgstr ""
-#~ "F1               Open the user guide\n"
-#~ "Ctrl+N           Add URL(s)\n"
-#~ "Ctrl+E           Download an extract\n"
-#~ "Ctrl+F           Search (YouTube, SoundCloud...)\n"
-#~ "Ctrl+G           Guided extraction (built-in browser)\n"
-#~ "Ctrl+V           Paste URL from clipboard\n"
-#~ "Ctrl+Shift+V     Toggle clipboard monitoring\n"
-#~ "Ctrl+H           Show history\n"
-#~ "F5               Start the queue\n"
-#~ "Space            Pause / Resume\n"
-#~ "Delete           Remove from list\n"
-#~ "Shift+Delete     Clear the whole list\n"
-#~ "F2               Retry\n"
-#~ "Alt+Up           Move up in queue\n"
-#~ "Alt+Down         Move down in queue\n"
-#~ "Ctrl+O           Open destination folder\n"
-#~ "Ctrl+P           Preferences\n"
-#~ "Alt+F4           Quit"
-
-#~ msgid ""
-#~ "F1               Ouvrir le guide d'utilisation\n"
-#~ "Ctrl+N           Ajouter URL(s)\n"
-#~ "Ctrl+F           Rechercher (YouTube, SoundCloud...)\n"
-#~ "Ctrl+G           Extraction guidée (navigateur intégré)\n"
-#~ "Ctrl+V           Coller URL depuis le presse-papiers\n"
-#~ "Ctrl+Shift+V     Activer/désactiver la surveillance du presse-papiers\n"
-#~ "Ctrl+H           Afficher l'historique\n"
-#~ "F5               Démarrer la file\n"
-#~ "Espace           Pause / Reprendre\n"
-#~ "Suppr            Supprimer de la liste\n"
-#~ "Maj+Suppr        Vider toute la liste\n"
-#~ "F2               Réessayer\n"
-#~ "Alt+Haut         Monter dans la file\n"
-#~ "Alt+Bas          Descendre dans la file\n"
-#~ "Ctrl+O           Ouvrir le dossier de destination\n"
-#~ "Ctrl+P           Préférences\n"
-#~ "Alt+F4           Quitter"
-#~ msgstr ""
-#~ "F1               Open the user guide\n"
-#~ "Ctrl+N           Add URL(s)\n"
-#~ "Ctrl+F           Search (YouTube, SoundCloud...)\n"
-#~ "Ctrl+G           Guided extraction (built-in browser)\n"
-#~ "Ctrl+V           Paste URL from clipboard\n"
-#~ "Ctrl+Shift+V     Toggle clipboard monitoring\n"
-#~ "Ctrl+H           Show history\n"
-#~ "F5               Start the queue\n"
-#~ "Space            Pause / Resume\n"
-#~ "Delete           Remove from list\n"
-#~ "Shift+Delete     Clear the whole list\n"
-#~ "F2               Retry\n"
-#~ "Alt+Up           Move up in queue\n"
-#~ "Alt+Down         Move down in queue\n"
-#~ "Ctrl+O           Open destination folder\n"
-#~ "Ctrl+P           Preferences\n"
-#~ "Alt+F4           Quit"
-
-#~ msgid "Nombre de résultats"
-#~ msgstr "Number of results"
-
-#~ msgid "Résultats :"
-#~ msgstr "Results:"
-
-#~ msgid ""
-#~ "Utilisez les flèches pour naviguer, Espace pour cocher, Entrée pour "
-#~ "l'aperçu."
-#~ msgstr "Use arrows to navigate, Space to check, Enter to preview."
-
-#~ msgid "Veuillez saisir une requête."
-#~ msgstr "Please enter a query."
-
-#~ msgid "Aucun (fichier d'origine)"
-#~ msgstr "None (original file)"
-
-#~ msgid ""
-#~ "Cette vidéo propose plusieurs pistes audio. Choisissez celle à télécharger :"
-#~ msgstr "This video offers several audio tracks. Choose the one to download:"
-
-#~ msgid "Choix de la piste audio pour {title}. {count} pistes disponibles."
-#~ msgstr "Audio track selection for {title}. {count} tracks available."
-
-#~ msgid "Télécharger cette piste"
-#~ msgstr "Download this track"
-
-#~ msgid ""
-#~ "Fenêtre de recherche. Saisissez votre requête, choisissez le site et le "
-#~ "nombre de résultats."
-#~ msgstr ""
-#~ "Search window. Enter your query, choose the site and the number of results."
-
-#~ msgid "Connexion à YouTube nécessaire pour récupérer la playlist."
-#~ msgstr "A YouTube login is required to retrieve this playlist."
-
-#~ msgid "A&nnuler\tDelete"
-#~ msgstr "Ca&ncel\tDelete"
-
-#~ msgid ""
-#~ "Ctrl+N           Ajouter URL(s)\n"
-#~ "Ctrl+F           Rechercher (YouTube, SoundCloud...)\n"
-#~ "Ctrl+G           Extraction guidée (navigateur intégré)\n"
-#~ "Ctrl+V           Coller URL depuis le presse-papiers\n"
-#~ "Ctrl+Shift+V     Activer/désactiver la surveillance du presse-papiers\n"
-#~ "Ctrl+H           Afficher l'historique\n"
-#~ "F5               Démarrer la file\n"
-#~ "Espace           Pause / Reprendre\n"
-#~ "Suppr            Supprimer de la liste\n"
-#~ "Maj+Suppr        Vider toute la liste\n"
-#~ "F2               Réessayer\n"
-#~ "Alt+Haut         Monter dans la file\n"
-#~ "Alt+Bas          Descendre dans la file\n"
-#~ "Ctrl+O           Ouvrir le dossier de destination\n"
-#~ "Ctrl+P           Préférences\n"
-#~ "Alt+F4           Quitter"
-#~ msgstr ""
-#~ "Ctrl+N           Add URL(s)\n"
-#~ "Ctrl+F           Search (YouTube, SoundCloud...)\n"
-#~ "Ctrl+G           Guided extraction (built-in browser)\n"
-#~ "Ctrl+V           Paste URL from clipboard\n"
-#~ "Ctrl+Shift+V     Enable/disable clipboard monitoring\n"
-#~ "Ctrl+H           Show history\n"
-#~ "F5               Start the queue\n"
-#~ "Space            Pause / Resume\n"
-#~ "Delete           Remove from list\n"
-#~ "Shift+Delete     Clear the entire list\n"
-#~ "F2               Retry\n"
-#~ "Alt+Up           Move up in the queue\n"
-#~ "Alt+Down         Move down in the queue\n"
-#~ "Ctrl+O           Open destination folder\n"
-#~ "Ctrl+P           Preferences\n"
-#~ "Alt+F4           Quit"
-
-#~ msgid "Page &GitHub du projet"
-#~ msgstr "Project &GitHub page"
-
-#~ msgid "Raccourcis &clavier"
-#~ msgstr "&Keyboard shortcuts"
-
-#~ msgid "Surveiller le &presse-papiers\tCtrl+Shift+V"
-#~ msgstr "Monitor &clipboard\tCtrl+Shift+V"

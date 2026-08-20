@@ -23,6 +23,18 @@ dependencies = [
 dev = [
     "pyinstaller>=6.0",
     "ruff",
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Par defaut on NE lance PAS les tests qui sortent sur Internet : la suite doit
+# rester verte dans un train, et un site tiers en panne ne doit jamais faire
+# echouer un build. `uv run pytest -m network` les execute explicitement.
+addopts = "-m 'not network' --strict-markers"
+markers = [
+    "network: sort reellement sur Internet (exclu par defaut)",
+    "gui: construit de vraies fenetres wxPython (necessite un affichage)",
 ]
 
 [tool.uv]
@@ -69,5 +81,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# Les tests accedent volontairement aux helpers prives des modules qu'ils couvrent.
+"tests/*.py" = ["S101"]
 # Les scripts tournent en cp1252 sur Windows — pas d'auto-fix qui casserait le print
 "scripts/*.py" = ["F541"]  # f-string without placeholders (présents intentionnellement)

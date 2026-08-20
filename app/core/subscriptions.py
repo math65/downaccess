@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import re
+import time
 import uuid
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field, fields
@@ -158,22 +159,48 @@ def save(subs: list[Subscription]) -> None:
 # Reseau
 # ------------------------------------------------------------------
 
+# Codes que YouTube renvoie par intermittence sur une adresse pourtant valide.
+# Mesure du 2026-08-20 sur un meme flux de chaine : 3 echecs sur 8 requetes
+# (404 et 500). Sans reprise, un abonnement parfaitement sain serait declare
+# en panne une fois sur trois — et l'utilisateur, lisant « 404 », croirait son
+# adresse fausse et supprimerait l'abonnement.
+_CODES_A_REESSAYER = (404, 429, 500, 502, 503, 504)
+_TENTATIVES = 3
+_PAUSE_ENTRE_TENTATIVES = 1.0
+
+
 def _http_get(url: str) -> bytes:
-    """Telecharge un flux. Toute panne reseau ressort en FeedError : l'appelant
-    affiche ce message tel quel a l'utilisateur, il ne doit jamais tomber sur
-    une trace HTTPError brute."""
+    """Telecharge un flux, en reessayant les pannes passageres.
+
+    Toute panne ressort en FeedError : l'appelant affiche ce message tel quel a
+    l'utilisateur, il ne doit jamais tomber sur une trace HTTPError brute.
+    """
     req = Request(url, headers={"User-Agent": _UA, "Accept": "*/*"})
-    try:
-        with urlopen(req, timeout=HTTP_TIMEOUT) as resp:
-            return resp.read(MAX_FEED_BYTES + 1)[:MAX_FEED_BYTES]
-    except HTTPError as exc:
-        raise FeedError(_("Le serveur a répondu {code} ({reason}).").format(
-            code=exc.code, reason=exc.reason)) from exc
-    except URLError as exc:
-        raise FeedError(_("Adresse injoignable : {error}").format(
-            error=exc.reason)) from exc
-    except OSError as exc:
-        raise FeedError(_("Adresse injoignable : {error}").format(error=exc)) from exc
+    derniere: FeedError | None = None
+
+    for tentative in range(1, _TENTATIVES + 1):
+        try:
+            with urlopen(req, timeout=HTTP_TIMEOUT) as resp:
+                return resp.read(MAX_FEED_BYTES + 1)[:MAX_FEED_BYTES]
+        except HTTPError as exc:
+            derniere = FeedError(_("Le serveur a répondu {code} ({reason}).").format(
+                code=exc.code, reason=exc.reason))
+            reessayable = exc.code in _CODES_A_REESSAYER
+        except URLError as exc:
+            derniere = FeedError(_("Adresse injoignable : {error}").format(
+                error=exc.reason))
+            reessayable = True
+        except OSError as exc:
+            derniere = FeedError(_("Adresse injoignable : {error}").format(error=exc))
+            reessayable = True
+
+        if not reessayable or tentative == _TENTATIVES:
+            break
+        _log.info("Flux %s : tentative %d/%d echouee (%s), nouvel essai",
+                  url, tentative, _TENTATIVES, derniere)
+        time.sleep(_PAUSE_ENTRE_TENTATIVES * tentative)
+
+    raise derniere
 
 
 def _normalize_url(url: str) -> str:

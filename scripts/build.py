@@ -54,14 +54,23 @@ def main() -> int:
 
     py = str(VENV_PY) if VENV_PY.exists() else sys.executable
 
-    # 2. Generer les guides HTML embarques (depuis docs/*.md)
+    # 2. Suite de tests : un build ne doit jamais partir sur du code casse.
+    #    Les tests reseau sont exclus (marqueur `network`) pour ne pas dependre
+    #    d'un site tiers au moment du build.
+    step("Suite de tests…")
+    rc = subprocess.run([py, "-m", "pytest", "-q"], cwd=ROOT)
+    if rc.returncode != 0:
+        return fail("Des tests echouent — build interrompu")
+    ok("Tests passes")
+
+    # 3. Generer les guides HTML embarques (depuis docs/*.md)
     step("Generation des guides HTML…")
     rc = subprocess.run([py, "scripts/build_docs.py"], cwd=ROOT)
     if rc.returncode != 0:
         return fail("La generation des guides HTML a echoue")
     ok("Guides HTML generes")
 
-    # 3. PyInstaller
+    # 4. PyInstaller
     step("Build PyInstaller…")
     result = subprocess.run(
         [py, "-m", "PyInstaller", str(SPEC), "--noconfirm"],
@@ -71,14 +80,14 @@ def main() -> int:
         return fail(f"PyInstaller a échoué (code {result.returncode})")
     ok("PyInstaller terminé")
 
-    # 3. Vérifier l'exe
+    # 5. Vérifier l'exe
     step("Vérification du bundle…")
     if not EXE.exists():
         return fail(f"Exe introuvable : {EXE}")
     size = _size(BUNDLE)
     ok(f"Exe trouvé — taille du bundle : {size}")
 
-    # 4. Smoke test
+    # 6. Smoke test
     step("Smoke test (4 secondes)…")
     proc = subprocess.Popen([str(EXE)], cwd=ROOT)
     time.sleep(4)

@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 from pathlib import Path
@@ -64,12 +65,22 @@ def _config_file() -> Path:
 
 
 def load() -> dict:
-    cfg = dict(DEFAULTS)
+    # Copie PROFONDE : plusieurs valeurs par defaut sont des listes, et le code
+    # appelant y ajoute parfois un element en place (`cookie_sites.append(...)`,
+    # `seen_announcements.append(...)`). Avec une copie de surface, ces ajouts
+    # modifieraient DEFAULTS lui-meme et se retrouveraient dans une
+    # configuration neuve chargee plus tard dans la meme session.
+    cfg = copy.deepcopy(DEFAULTS)
     try:
         with open(_config_file(), encoding="utf-8") as f:
             saved = json.load(f)
         cfg.update({k: v for k, v in saved.items() if k in DEFAULTS})
     except FileNotFoundError:
+        pass
+    except (json.JSONDecodeError, OSError):
+        # Fichier tronque ou illisible (coupure de courant, disque plein au
+        # moment de l'ecriture) : on repart des valeurs par defaut plutot que
+        # de refuser de demarrer. `history` et `subscriptions` font de meme.
         pass
     # Migration : l'ancien code de format par défaut « none » correspond
     # désormais à « auto » (vocabulaire unifié avec le dialogue d'ajout).
