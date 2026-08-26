@@ -173,3 +173,53 @@ class _DossierFixe:
 
     def __exit__(self, *a):
         return False
+
+
+class TestDecoupageAuxPhrases:
+    """Regression : les paragraphes etaient coupes a 400 caracteres pile.
+
+    Un paragraphe se terminait au milieu d'une phrase et le suivant s'ouvrait
+    sur un fragment (« bien les couleurs, ou pas du tout. »). Au lecteur
+    d'ecran, qui parcourt bloc par bloc, chaque paragraphe commencait donc sur
+    un bout de phrase sans queue ni tete.
+    """
+
+    def vtt(self, texte):
+        return f"WEBVTT\n\n00:00:00.000 --> 00:10:00.000\n{texte}\n"
+
+    def test_aucun_paragraphe_ne_commence_au_milieu_d_une_phrase(self):
+        phrase = ("Cette phrase fait a peu pres soixante-dix caracteres et se "
+                  "termine ici. ")
+        texte = parse_subtitles(self.vtt(phrase * 20))
+        paragraphes = texte.split("\n\n")
+        assert len(paragraphes) > 1
+        for p in paragraphes:
+            assert p.startswith("Cette phrase"), f"fragment orphelin : {p[:40]!r}"
+
+    def test_aucun_paragraphe_ne_finit_au_milieu_d_une_phrase(self):
+        phrase = ("Cette phrase fait a peu pres soixante-dix caracteres et se "
+                  "termine ici. ")
+        texte = parse_subtitles(self.vtt(phrase * 20))
+        for p in texte.split("\n\n"):
+            assert p.endswith("."), f"phrase tronquee : {p[-40:]!r}"
+
+    def test_une_phrase_longue_reste_entiere(self):
+        """La couper ferait revenir le fragment qu'on veut eviter."""
+        longue = "mot " * 120 + "fin."          # ~500 caracteres, une phrase
+        texte = parse_subtitles(self.vtt(longue))
+        assert texte.count("\n\n") == 0
+        assert texte.endswith("fin.")
+
+    def test_sans_aucune_ponctuation_on_decoupe_quand_meme(self):
+        """Les sous-titres automatiques n'ont parfois aucun point : sans borne,
+        toute la video tiendrait en un seul paragraphe illisible."""
+        texte = parse_subtitles(self.vtt("mot " * 600))
+        paragraphes = texte.split("\n\n")
+        assert len(paragraphes) > 1
+        assert all(len(p) <= 700 for p in paragraphes)
+
+    def test_ponctuation_forte_reconnue(self):
+        texte = parse_subtitles(self.vtt(
+            "Question ? " * 40 + "Exclamation ! " * 40))
+        for p in texte.split("\n\n"):
+            assert p[0].isupper(), f"debut inattendu : {p[:30]!r}"

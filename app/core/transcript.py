@@ -43,6 +43,51 @@ _HEADER_PREFIXES = ("WEBVTT", "Kind:", "Language:", "NOTE", "STYLE", "REGION")
 # lecture hachee au lecteur d'ecran, tout en gardant des reperes pour naviguer.
 _PARAGRAPH_CHARS = 400
 
+# Plafond dur. Les sous-titres automatiques n'ont parfois aucune ponctuation de
+# toute la video : sans cette borne, tout tiendrait en un seul paragraphe.
+_PARAGRAPH_MAX = 700
+
+# Fin de phrase suivie d'une espace. Le texte est normalise avant decoupage :
+# les separateurs sont toujours une espace simple.
+_SENTENCE_END_RE = re.compile(r"(?<=[.!?…]) ")
+
+
+def _split_paragraphs(texte: str) -> list[str]:
+    """Regroupe le texte en paragraphes commencant tous sur un debut de phrase.
+
+    Couper au caractere pres terminait un paragraphe au milieu d'une phrase, et
+    le suivant s'ouvrait sur un fragment orphelin (« bien les couleurs, ou pas
+    du tout. ») : illisible au lecteur d'ecran, qui parcourt bloc par bloc.
+    """
+    phrases: list[str] = []
+    for part in _SENTENCE_END_RE.split(texte):
+        part = part.strip()
+        # Une phrase un peu longue reste entiere : la couper en deux ferait
+        # revenir le fragment orphelin qu'on cherche justement a eviter. Au-dela
+        # du plafond, c'est que la video n'a aucune ponctuation : on decoupe
+        # alors a la longueur visee, pour garder des blocs navigables.
+        while len(part) > _PARAGRAPH_MAX:
+            coupe = part.rfind(" ", 0, _PARAGRAPH_CHARS)
+            if coupe <= 0:
+                coupe = _PARAGRAPH_CHARS
+            phrases.append(part[:coupe].strip())
+            part = part[coupe:].strip()
+        if part:
+            phrases.append(part)
+
+    paragraphs: list[str] = []
+    current: list[str] = []
+    length = 0
+    for phrase in phrases:
+        if current and length + len(phrase) + 1 > _PARAGRAPH_CHARS:
+            paragraphs.append(" ".join(current))
+            current, length = [], 0
+        current.append(phrase)
+        length += len(phrase) + 1
+    if current:
+        paragraphs.append(" ".join(current))
+    return paragraphs
+
 
 def parse_subtitles(content: str) -> str:
     """Contenu brut d'un .vtt/.srt -> texte lisible.
@@ -73,22 +118,10 @@ def parse_subtitles(content: str) -> str:
                 continue
         pieces.append(line)
 
-    words = " ".join(pieces).split()
-    if not words:
+    texte = " ".join(" ".join(pieces).split())
+    if not texte:
         return ""
-
-    paragraphs: list[str] = []
-    current: list[str] = []
-    length = 0
-    for word in words:
-        current.append(word)
-        length += len(word) + 1
-        if length >= _PARAGRAPH_CHARS:
-            paragraphs.append(" ".join(current))
-            current, length = [], 0
-    if current:
-        paragraphs.append(" ".join(current))
-    return "\n\n".join(paragraphs)
+    return "\n\n".join(_split_paragraphs(texte))
 
 
 def _pick_subtitle_file(folder: str, langs: list[str]) -> str:
