@@ -65,6 +65,21 @@ def faux(monkeypatch):
     if double.barriere is not None:
         double.barriere.abort()
 
+    # Draine les files creees par le test. Un worker encore vivant instancierait
+    # `queue_manager.Downloader`, c'est-a-dire le double du test SUIVANT (le
+    # monkeypatch est global), et incrementerait ses compteurs : le test suivant
+    # comptait alors deux demarrages la ou il en attendait un, et echouait sans
+    # qu'aucun code applicatif soit en cause. Sur une machine peu chargee ces
+    # workers avaient le temps de finir avant le test suivant, d'ou des echecs
+    # intermittents. On attend ici qu'ils soient tous termines.
+    encours = list(_FILES_CREEES)
+    _FILES_CREEES.clear()
+    for file in encours:
+        file.cancel_all()
+    limite = time.monotonic() + DELAI_EVENEMENT
+    while time.monotonic() < limite and any(f.active_count for f in encours):
+        time.sleep(0.02)
+
 
 class Journal:
     """Collecte les evenements remontes a l'interface."""
@@ -87,8 +102,12 @@ class Journal:
         self.infos.append(info)
 
 
+# Files creees pendant le test courant, drainees au demontage de `faux`.
+_FILES_CREEES: list = []
+
+
 def manager(journal, max_concurrent=2):
-    return QueueManager(
+    file = QueueManager(
         settings={"download_folder": ".", "max_concurrent_downloads": max_concurrent},
         post_to_ui=lambda fn, *a: fn(*a),
         on_info=journal.on_info,
@@ -96,6 +115,8 @@ def manager(journal, max_concurrent=2):
         on_complete=journal.on_complete,
         on_error=journal.on_error,
     )
+    _FILES_CREEES.append(file)
+    return file
 
 
 # Duree pendant laquelle un worker simule reste bloque sur la barriere. Rien ne
@@ -106,9 +127,20 @@ def manager(journal, max_concurrent=2):
 # `faux` appelle abort() au demontage : aucun test n'attend reellement ce delai.
 DELAI_BLOCAGE = 60
 
+# Plafond d'attente d'un evenement asynchrone (worker demarre, callback
+# recu). Meme raisonnement que ci-dessus : large, car il ne se paie que
+# sur un test deja voue a echouer.
+DELAI_EVENEMENT = 30
 
-def attendre(condition, delai=5.0):
-    """Attend qu'une condition devienne vraie (les workers sont asynchrones)."""
+
+def attendre(condition, delai=DELAI_EVENEMENT):
+    """Attend qu'une condition devienne vraie (les workers sont asynchrones).
+
+    Le delai est volontairement large. Il ne coute rien quand tout va bien (on
+    sort des que la condition est vraie) et ne se paie que sur un test qui
+    echouera de toute facon. Trop court, il transforme une machine chargee en
+    faux echec : c'est ce qui rendait ce fichier intermittent.
+    """
     limite = time.monotonic() + delai
     while time.monotonic() < limite:
         if condition():
@@ -122,7 +154,7 @@ class TestDeroulementNominal:
         j = Journal()
         q = manager(j)
         dl_id = q.add("https://a/1")
-        assert j.fini.wait(5)
+        assert j.fini.wait(DELAI_EVENEMENT)
         assert j.completes == [dl_id]
         assert faux.demarres == ["https://a/1"]
 
@@ -130,7 +162,7 @@ class TestDeroulementNominal:
         j = Journal()
         q = manager(j)
         q.add("https://a/1")
-        assert j.fini.wait(5)
+        assert j.fini.wait(DELAI_EVENEMENT)
         assert j.infos[0].title == "Titre https://a/1"
 
     def test_identifiants_uniques(self, faux):
@@ -172,7 +204,7 @@ class TestErreurs:
         j = Journal()
         q = manager(j)
         dl_id = q.add("https://a/1")
-        assert j.fini.wait(5)
+        assert j.fini.wait(DELAI_EVENEMENT)
         assert j.erreurs[0][0] == dl_id
         assert "disque plein" in j.erreurs[0][1]
         assert j.erreurs[0][2] is False
@@ -183,7 +215,7 @@ class TestErreurs:
         j = Journal()
         q = manager(j)
         q.add("https://a/1")
-        assert j.fini.wait(5)
+        assert j.fini.wait(DELAI_EVENEMENT)
         assert j.erreurs[0][2] is True
 
     def test_exception_inattendue_ne_tue_pas_le_worker(self, faux):
@@ -191,7 +223,7 @@ class TestErreurs:
         j = Journal()
         q = manager(j)
         q.add("https://a/1")
-        assert j.fini.wait(5)
+        assert j.fini.wait(DELAI_EVENEMENT)
         assert len(j.erreurs) == 1
 
 
