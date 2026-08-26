@@ -34,7 +34,7 @@ class FauxDownloader:
         type(self).demarres.append(url)
         if type(self).barriere is not None:
             try:
-                type(self).barriere.wait(timeout=5)
+                type(self).barriere.wait(timeout=DELAI_BLOCAGE)
             except threading.BrokenBarrierError:
                 pass
         if type(self).duree:
@@ -98,6 +98,15 @@ def manager(journal, max_concurrent=2):
     )
 
 
+# Duree pendant laquelle un worker simule reste bloque sur la barriere. Rien ne
+# l'attend jamais : la barriere sert a immobiliser un telechargement le temps
+# que le test inspecte la file. Le delai doit donc etre franchement plus long
+# que la duree des assertions, sinon le worker repart tout seul sous charge et
+# la file avance en plein milieu du test (echecs intermittents). La fixture
+# `faux` appelle abort() au demontage : aucun test n'attend reellement ce delai.
+DELAI_BLOCAGE = 60
+
+
 def attendre(condition, delai=5.0):
     """Attend qu'une condition devienne vraie (les workers sont asynchrones)."""
     limite = time.monotonic() + delai
@@ -133,7 +142,7 @@ class TestDeroulementNominal:
 class TestConcurrence:
     def test_respecte_la_limite(self, faux):
         """Deux telechargements simultanes au maximum : le troisieme attend."""
-        faux.barriere = threading.Barrier(3, timeout=5)
+        faux.barriere = threading.Barrier(3, timeout=DELAI_BLOCAGE)
         j = Journal()
         q = manager(j, max_concurrent=2)
         for i in range(3):
@@ -188,7 +197,7 @@ class TestErreurs:
 
 class TestAnnulation:
     def test_annuler_avant_le_demarrage(self, faux):
-        faux.barriere = threading.Barrier(2, timeout=5)
+        faux.barriere = threading.Barrier(2, timeout=DELAI_BLOCAGE)
         j = Journal()
         q = manager(j, max_concurrent=1)
         q.add("https://a/0")
@@ -223,7 +232,7 @@ class TestAnnulation:
 
 class TestOrdre:
     def test_reordonner_l_attente(self, faux):
-        faux.barriere = threading.Barrier(2, timeout=5)
+        faux.barriere = threading.Barrier(2, timeout=DELAI_BLOCAGE)
         j = Journal()
         q = manager(j, max_concurrent=1)
         q.add("https://a/0")                 # part immediatement
@@ -239,7 +248,7 @@ class TestOrdre:
         faux.barriere.abort()
 
     def test_bornes_de_deplacement(self, faux):
-        faux.barriere = threading.Barrier(2, timeout=5)
+        faux.barriere = threading.Barrier(2, timeout=DELAI_BLOCAGE)
         j = Journal()
         q = manager(j, max_concurrent=1)
         q.add("https://a/0")
