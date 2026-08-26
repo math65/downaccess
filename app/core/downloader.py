@@ -335,6 +335,23 @@ def _should_use_cookies(settings: dict, url: str) -> bool:
                for site in settings.get("cookie_sites", []))
 
 
+def _looks_already_present(*, skip_download: bool, format_spec: str,
+                          section: tuple[float, float] | None,
+                          completed: int, any_download: bool) -> bool:
+    """Le fichier etait-il deja sur le disque avant ce telechargement ?
+
+    yt-dlp ne le dit pas : on le deduit du hook de progression. Un 'finished'
+    sans aucun 'downloading' prealable = aucun octet recu, donc fichier deja la.
+
+    Un extrait fait exception. Il passe par ffmpeg (force_keyframes_at_cuts),
+    qui n'emet jamais de 'downloading' : l'heuristique annoncerait « Deja
+    telecharge » a chaque extrait, meme dans un dossier vide.
+    """
+    if skip_download or format_spec == "subtitles_only" or section is not None:
+        return False
+    return completed > 0 and not any_download
+
+
 class Downloader:
     """
     Wrapper yt-dlp pour extraction d'infos et téléchargement.
@@ -830,11 +847,12 @@ class Downloader:
         # Fichier déjà présent : yt-dlp n'a téléchargé aucun octet (le hook
         # 'finished' arrive sans aucun 'downloading' préalable). On le signale
         # distinctement pour ne pas faire croire à un vrai téléchargement.
-        already_present = (
-            not opts.get("skip_download")
-            and format_spec != "subtitles_only"
-            and hook_state["completed"] > 0
-            and not hook_state["any_download"]
+        already_present = _looks_already_present(
+            skip_download=bool(opts.get("skip_download")),
+            format_spec=format_spec,
+            section=section,
+            completed=hook_state["completed"],
+            any_download=hook_state["any_download"],
         )
         if already_present:
             _log.info("Fichier déjà présent id=%s url=%s", download_id, url)

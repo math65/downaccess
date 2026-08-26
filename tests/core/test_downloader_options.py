@@ -6,7 +6,12 @@ Les tester revient a verifier le comportement du telechargeur sans reseau.
 
 import pytest
 
-from app.core.downloader import _apply_format, _apply_metadata, _apply_subtitles
+from app.core.downloader import (
+    _apply_format,
+    _apply_metadata,
+    _apply_subtitles,
+    _looks_already_present,
+)
 
 
 def keys_of(opts):
@@ -145,3 +150,41 @@ class TestMetadonnees:
         _apply_subtitles(opts, {"auto_subtitles": False})
         _apply_metadata(opts, {}, "mp3", None)
         assert keys_of(opts) == ["FFmpegExtractAudio", "FFmpegMetadata"]
+
+
+class TestFichierDejaPresent:
+    """Regression : tout extrait etait annonce « Deja telecharge ».
+
+    Un extrait passe par ffmpeg (force_keyframes_at_cuts), qui n'emet aucun
+    evenement 'downloading' — seulement 'finished'. L'heuristique « finished
+    sans downloading = fichier deja la » se declenchait donc a chaque extrait,
+    meme dans un dossier vide : l'utilisateur lisait « Deja telecharge » alors
+    que le fichier venait d'etre cree.
+    """
+
+    def cas(self, **kw):
+        base = {"skip_download": False, "format_spec": "mp3", "section": None,
+                "completed": 1, "any_download": False}
+        base.update(kw)
+        return _looks_already_present(**base)
+
+    def test_finished_sans_octet_recu_signale_un_fichier_deja_la(self):
+        assert self.cas() is True
+
+    def test_un_extrait_n_est_jamais_deja_present(self):
+        assert self.cas(section=(5.0, 12.0)) is False
+
+    def test_un_extrait_reste_honnete_meme_sans_octet_compte(self):
+        assert self.cas(section=(0.0, 7.0), completed=3) is False
+
+    def test_des_octets_recus_excluent_le_fichier_deja_la(self):
+        assert self.cas(any_download=True) is False
+
+    def test_aucun_fichier_termine_exclut_le_fichier_deja_la(self):
+        assert self.cas(completed=0) is False
+
+    def test_sous_titres_seuls_ne_sont_pas_concernes(self):
+        assert self.cas(format_spec="subtitles_only") is False
+
+    def test_sans_telechargement_rien_a_signaler(self):
+        assert self.cas(skip_download=True) is False
