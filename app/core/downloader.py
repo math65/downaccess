@@ -164,7 +164,41 @@ _TRANSIENT_ERROR_PATTERNS = (
     # ("incompleteread" sans espace : c'est le nom de la classe d'exception
     # http.client telle qu'elle apparait dans le message.)
     "more expected", "incompleteread", "content too short",
+    # Coupure reseau cote utilisateur : le nom de domaine ne se resout plus
+    # (wifi qui saute, box qui redemarre, VPN qui bascule). C'est le cas le
+    # plus manifestement reessayable qui soit : quelques secondes plus tard la
+    # connexion est revenue. Errno 11001 sous Windows, -2/-3 sous Linux.
+    "failed to resolve", "getaddrinfo failed", "name or service not known",
+    "temporary failure in name resolution", "11001",
+    "connection reset", "connection aborted", "connection refused",
+    "network is unreachable",
 )
+
+
+# Marqueurs d'une coupure de connexion cote utilisateur, pour distinguer dans
+# le message affiche « votre connexion a laché » de « le serveur a refuse ».
+_NETWORK_DOWN_PATTERNS = (
+    "failed to resolve", "getaddrinfo failed", "name or service not known",
+    "temporary failure in name resolution", "11001",
+    "network is unreachable", "connection refused",
+)
+
+
+def is_network_down_error(msg: str) -> bool:
+    """Vrai si l'erreur traduit une connexion Internet coupee ou instable."""
+    low = (msg or "").lower()
+    return any(p in low for p in _NETWORK_DOWN_PATTERNS)
+
+
+def is_drm_error(msg: str) -> bool:
+    """Vrai si le media est protege par DRM (Netflix, Disney+, france.tv...).
+
+    Cas sans issue : aucun reglage, aucune connexion, aucune nouvelle tentative
+    n'y changera quoi que ce soit. Le dire clairement evite a l'utilisateur de
+    chercher ce qu'il a mal fait.
+    """
+    low = (msg or "").lower()
+    return "drm" in low and ("protect" in low or "protég" in low or "chiffr" in low)
 
 
 def is_transient_error(msg: str) -> bool:
@@ -286,6 +320,29 @@ def _humanize_error(msg: str, dest: str = "") -> str:
     if is_disk_full_error(low):
         return disk_full_message(dest)
 
+    # Contenu protege par DRM. Sans ce message, l'utilisateur lit « This video
+    # is DRM protected » et cherche ce qu'il a mal regle : il n'y a rien a
+    # regler, aucun telechargeur ne peut recuperer ce media.
+    if is_drm_error(low):
+        return _(
+            "Cette vidéo est protégée contre la copie (DRM).\n\n"
+            "DownAccess ne peut pas la télécharger, et aucun réglage n'y "
+            "changera rien : c'est une protection posée par le site. Les "
+            "plateformes par abonnement (Netflix, Disney+, Prime Video) et "
+            "certaines vidéos de france.tv sont dans ce cas."
+        )
+
+    # Connexion coupee. Le texte brut (« Failed to resolve 'www.france.tv'
+    # ([Errno 11001] getaddrinfo failed) ») est en anglais et designe le site,
+    # ce qui fait croire a une panne du site ou de l'application alors que
+    # c'est la connexion locale qui a laché.
+    if is_network_down_error(low):
+        return _(
+            "La connexion Internet a été perdue pendant le téléchargement.\n\n"
+            "DownAccess a réessayé sans succès. Vérifiez votre connexion, "
+            "puis relancez le téléchargement avec la touche F2."
+        )
+
     # Navigateur ouvert → base de cookies verrouillée (yt-dlp issue #7271).
     # Avec le parcours de connexion guidée (navigateur dédié), ce cas ne
     # devrait plus survenir, mais on garde un message clair en repli.
@@ -369,12 +426,14 @@ class Downloader:
     def fetch_info(self, download_id: str, url: str,
                    use_cookies: bool = False,
                    referer: str | None = None,
-                   cookies: str | None = None) -> DownloadInfo | None:
+                   cookies: str | None = None,
+                   stop_event: threading.Event | None = None) -> DownloadInfo | None:
         """
         Retourne les métadonnées de l'URL sans télécharger.
         Détecte automatiquement les playlists.
         use_cookies : forcer l'utilisation des cookies (retry après erreur).
         referer / cookies : headers UGE (extraction guidée).
+        stop_event  : permet d'interrompre l'attente entre deux tentatives.
         """
         # Une chaîne / playlist « envois » -> onglet Vidéos (récupère TOUTES
         # les vidéos ; l'endpoint playlist est plafonné à 100 par YouTube)
@@ -426,54 +485,85 @@ class Downloader:
             from app.core.cookies import apply_cookies
             apply_cookies(flat_opts, url)
 
+        # Nouvelle tentative sur erreur transitoire. Sans cela, une simple
+        # coupure de connexion pendant l'analyse suffisait a faire echouer le
+        # telechargement, avec un message technique en anglais — alors que le
+        # telechargement lui-meme, lui, retentait deja trois fois.
+        _MAX_ATTEMPTS = 3
         try:
-            with yt_dlp.YoutubeDL(flat_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
-            if not info:
-                return None
-
-            # Playlist détectée
-            if info.get("_type") == "playlist" or info.get("entries") is not None:
-                entries = list(info.get("entries") or [])
-                # Filtrer les entrées None (vidéos privées/supprimées)
-                entries = [e for e in entries if e]
-                return DownloadInfo(
-                    download_id=download_id,
-                    url=url,
-                    title=info.get("title") or "Playlist",
-                    site=info.get("extractor_key") or "—",
-                    is_playlist=True,
-                    playlist_entries=entries,
-                    playlist_count=int(info.get("playlist_count") or 0),
-                )
-
-            # Vidéo unique — deuxième passe pour avoir les formats détaillés
-            full_opts = dict(flat_opts)
-            full_opts["extract_flat"] = False
-            with yt_dlp.YoutubeDL(full_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
-            if not info:
-                return None
-
-            return DownloadInfo(
-                download_id=download_id,
-                url=url,
-                title=info.get("title") or url,
-                site=info.get("extractor_key") or info.get("extractor") or "—",
-                fmt=_describe_format(info),
-                duration=float(info.get("duration") or 0),
-                raw_formats=info.get("formats") or [],
-            )
-        except yt_dlp.utils.DownloadError as exc:
-            _raise_download_error(str(exc), exc, self._settings.get("download_folder", ""))
-        except Exception as exc:
-            _raise_download_error(str(exc), exc, self._settings.get("download_folder", ""))
+            for _attempt_no in range(1, _MAX_ATTEMPTS + 1):
+                try:
+                    return self._extract_info(download_id, url, flat_opts)
+                except yt_dlp.utils.DownloadError as exc:
+                    if (_attempt_no < _MAX_ATTEMPTS
+                            and is_transient_error(str(exc))
+                            and not (stop_event and stop_event.is_set())):
+                        _log.warning(
+                            "Analyse : erreur transitoire id=%s (tentative "
+                            "%d/%d), nouvel essai : %s",
+                            download_id, _attempt_no, _MAX_ATTEMPTS, exc)
+                        _wait = 2.0
+                        while _wait > 0 and not (stop_event and stop_event.is_set()):
+                            time.sleep(0.2)
+                            _wait -= 0.2
+                        continue
+                    _raise_download_error(
+                        str(exc), exc, self._settings.get("download_folder", ""))
+                except Exception as exc:
+                    _raise_download_error(
+                        str(exc), exc, self._settings.get("download_folder", ""))
+            return None
         finally:
             if cookie_jar_path:
                 try:
                     os.unlink(cookie_jar_path)
                 except OSError:
                     pass
+
+    def _extract_info(self, download_id: str, url: str,
+                      flat_opts: dict) -> DownloadInfo | None:
+        """Une passe d'analyse, sans nouvelle tentative ni nettoyage.
+
+        Isole du reste pour que `fetch_info` puisse la rejouer telle quelle
+        apres une coupure reseau.
+        """
+        with yt_dlp.YoutubeDL(flat_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+        if not info:
+            return None
+
+        # Playlist détectée
+        if info.get("_type") == "playlist" or info.get("entries") is not None:
+            entries = list(info.get("entries") or [])
+            # Filtrer les entrées None (vidéos privées/supprimées)
+            entries = [e for e in entries if e]
+            return DownloadInfo(
+                download_id=download_id,
+                url=url,
+                title=info.get("title") or "Playlist",
+                site=info.get("extractor_key") or "—",
+                is_playlist=True,
+                playlist_entries=entries,
+                playlist_count=int(info.get("playlist_count") or 0),
+            )
+
+        # Vidéo unique — deuxième passe pour avoir les formats détaillés
+        full_opts = dict(flat_opts)
+        full_opts["extract_flat"] = False
+        with yt_dlp.YoutubeDL(full_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+        if not info:
+            return None
+
+        return DownloadInfo(
+            download_id=download_id,
+            url=url,
+            title=info.get("title") or url,
+            site=info.get("extractor_key") or info.get("extractor") or "—",
+            fmt=_describe_format(info),
+            duration=float(info.get("duration") or 0),
+            raw_formats=info.get("formats") or [],
+        )
 
     # ------------------------------------------------------------------
     # Téléchargement

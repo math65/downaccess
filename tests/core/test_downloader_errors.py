@@ -12,6 +12,8 @@ from app.core.downloader import (
     _is_login_required,
     disk_full_message,
     is_disk_full_error,
+    is_drm_error,
+    is_network_down_error,
     is_transient_error,
     not_enough_space_message,
 )
@@ -108,3 +110,161 @@ class TestConnexionRequise:
     def test_une_erreur_inconnue_passe_telle_quelle(self):
         raw = "ERROR: something nobody anticipated"
         assert _humanize_error(raw) == raw
+
+
+# Erreur reellement remontee par un testeur le 2026-08-22 : sa connexion a
+# laché une seconde pendant l'analyse d'une page france.tv.
+DNS_RAW = ("ERROR: [francetv:site] 8542604-dans-cette-tribu: Unable to download "
+           "webpage: HTTPSConnection(host='www.france.tv', port=443): Failed to "
+           "resolve 'www.france.tv' ([Errno 11001] getaddrinfo failed)")
+
+DRM_RAW = ("ERROR: [francetv] 29b2c7ed-8542-4e01-9195-28ef9a28aefd: "
+           "This video is DRM protected")
+
+
+class TestCoupureReseau:
+    """Regression : une coupure de connexion n'etait pas reessayee, et son
+    message brut en anglais faisait croire a une panne de l'application."""
+
+    def test_coupure_dns_est_transitoire(self):
+        assert is_transient_error(DNS_RAW) is True
+
+    def test_coupure_dns_reconnue(self):
+        assert is_network_down_error(DNS_RAW) is True
+
+    @pytest.mark.parametrize("brut", [
+        "Failed to resolve 'www.france.tv'",
+        "[Errno 11001] getaddrinfo failed",
+        "Name or service not known",
+        "Temporary failure in name resolution",
+        "Network is unreachable",
+        "Connection refused",
+    ])
+    def test_variantes_de_coupure(self, brut):
+        assert is_network_down_error(brut) is True
+        assert is_transient_error(brut) is True
+
+    @pytest.mark.parametrize("brut", [
+        "Connection reset by peer",
+        "Connection aborted",
+    ])
+    def test_connexion_interrompue_reessayee(self, brut):
+        """Reessayable, mais pas forcement une connexion coupee : le serveur
+        peut avoir ferme la porte. Le message reste generique."""
+        assert is_transient_error(brut) is True
+
+    def test_message_en_francais(self):
+        message = _humanize_error(DNS_RAW)
+        assert "connexion" in message.lower()
+        assert "getaddrinfo" not in message
+        assert "F2" in message, "l'utilisateur doit savoir comment relancer"
+
+    def test_le_disque_plein_n_est_pas_une_coupure(self):
+        assert is_network_down_error(DISK_FULL_RAW) is False
+
+
+class TestDrm:
+    """Le DRM est sans issue : aucun reglage n'y changera rien. Le dire
+    clairement evite a l'utilisateur de chercher ce qu'il a mal fait."""
+
+    def test_drm_reconnu(self):
+        assert is_drm_error(DRM_RAW) is True
+
+    def test_drm_jamais_reessaye(self):
+        """Reessayer un contenu protege ne peut mener nulle part."""
+        assert is_transient_error(DRM_RAW) is False
+
+    def test_message_en_francais(self):
+        message = _humanize_error(DRM_RAW)
+        assert "protégée" in message
+        assert "DRM protected" not in message
+
+    def test_pas_de_faux_positif(self):
+        assert is_drm_error("ERROR: unable to download video data") is False
+        assert is_drm_error(DISK_FULL_RAW) is False
+
+
+class TestNouvelleTentativeALAnalyse:
+    """Regression : l'analyse n'a jamais retente, meme sur une coupure reseau.
+
+    Un testeur a perdu sa connexion une seconde pendant l'analyse d'une page
+    france.tv ; le telechargement a echoue net, avec un message technique en
+    anglais. Le telechargement, lui, retentait deja trois fois : c'est l'etape
+    d'avant qui abandonnait au premier echec.
+    """
+
+    @pytest.fixture(autouse=True)
+    def sans_attente(self, monkeypatch):
+        """Neutralise la pause entre deux tentatives : on teste la logique de
+        reprise, pas la montre. Sans cela la classe couterait six secondes."""
+        from app.core import downloader
+        monkeypatch.setattr(downloader.time, "sleep", lambda _s: None)
+
+    def telechargeur(self, tmp_path):
+        from app.core.downloader import Downloader
+        return Downloader({"download_folder": str(tmp_path)})
+
+    def faux_extract(self, echecs, resultat):
+        """Echoue `echecs` fois avec une coupure DNS, puis reussit."""
+        import yt_dlp
+        etat = {"appels": 0}
+
+        def _extract(self, download_id, url, flat_opts):
+            etat["appels"] += 1
+            if etat["appels"] <= echecs:
+                raise yt_dlp.utils.DownloadError(DNS_RAW)
+            return resultat
+
+        return etat, _extract
+
+    def test_une_coupure_passagere_ne_fait_plus_echouer(self, tmp_path, monkeypatch):
+        from app.core.downloader import DownloadInfo, Downloader
+        attendu = DownloadInfo(download_id="x", url="https://a/1", title="Titre")
+        etat, faux = self.faux_extract(echecs=1, resultat=attendu)
+        monkeypatch.setattr(Downloader, "_extract_info", faux)
+        info = self.telechargeur(tmp_path).fetch_info("x", "https://a/1")
+        assert info is attendu
+        assert etat["appels"] == 2, "la deuxieme tentative doit avoir eu lieu"
+
+    def test_abandon_apres_trois_tentatives(self, tmp_path, monkeypatch):
+        from app.core.downloader import DownloadError, Downloader
+        etat, faux = self.faux_extract(echecs=99, resultat=None)
+        monkeypatch.setattr(Downloader, "_extract_info", faux)
+        with pytest.raises(DownloadError) as err:
+            self.telechargeur(tmp_path).fetch_info("x", "https://a/1")
+        assert etat["appels"] == 3
+        assert "connexion" in str(err.value).lower(), "message clair, pas le brut"
+
+    def test_une_erreur_definitive_n_est_pas_reessayee(self, tmp_path, monkeypatch):
+        """Le DRM ne s'arrangera pas en reessayant : echouer tout de suite."""
+        import yt_dlp
+        from app.core.downloader import DownloadError, Downloader
+        etat = {"appels": 0}
+
+        def _extract(self, download_id, url, flat_opts):
+            etat["appels"] += 1
+            raise yt_dlp.utils.DownloadError(DRM_RAW)
+
+        monkeypatch.setattr(Downloader, "_extract_info", _extract)
+        with pytest.raises(DownloadError):
+            self.telechargeur(tmp_path).fetch_info("x", "https://a/1")
+        assert etat["appels"] == 1
+
+    def test_annulation_interrompt_l_attente(self, tmp_path, monkeypatch):
+        """Annuler pendant l'attente entre deux essais doit rendre la main."""
+        import threading
+        from app.core.downloader import DownloadError, Downloader
+        arret = threading.Event()
+        etat = {"appels": 0}
+
+        def _extract(self, download_id, url, flat_opts):
+            import yt_dlp
+            etat["appels"] += 1
+            arret.set()          # l'utilisateur annule pendant l'analyse
+            raise yt_dlp.utils.DownloadError(DNS_RAW)
+
+        monkeypatch.setattr(Downloader, "_extract_info", _extract)
+        with pytest.raises(DownloadError):
+            self.telechargeur(tmp_path).fetch_info("x", "https://a/1",
+                                                   stop_event=arret)
+        assert etat["appels"] == 1, "aucune nouvelle tentative apres annulation"

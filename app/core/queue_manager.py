@@ -256,7 +256,8 @@ class QueueManager:
         else:
             try:
                 info = dl.fetch_info(dl_id, item.url, use_cookies=item.use_cookies,
-                                     referer=item.referer, cookies=item.cookies)
+                                     referer=item.referer, cookies=item.cookies,
+                                     stop_event=item.stop_event)
                 if not info:
                     return
                 if info.is_playlist:
