@@ -11,6 +11,7 @@ from app.core.downloader import (
     _apply_metadata,
     _apply_subtitles,
     _looks_already_present,
+    _retag_chapters,
 )
 
 
@@ -188,3 +189,60 @@ class TestFichierDejaPresent:
 
     def test_sans_telechargement_rien_a_signaler(self):
         assert self.cas(skip_download=True) is False
+
+
+class TestTagsDesChapitres:
+    """Regression : les 11 morceaux d'une video portaient tous le meme titre.
+
+    yt-dlp decoupe par copie de flux, donc chaque chapitre heritait des tags du
+    fichier entier. Au lecteur d'ecran, les onze pistes s'annoncaient a
+    l'identique : « un fichier par chapitre » perdait son interet.
+    """
+
+    def fichiers(self, tmp_path, noms, ext=".mp3"):
+        chapitres = []
+        for i, nom in enumerate(noms, start=1):
+            f = tmp_path / f"{i:03d}{ext}"
+            f.write_bytes(b"\x00" * 64)
+            chapitres.append({"title": nom, "filepath": str(f)})
+        return chapitres
+
+    def lire(self, chemin):
+        from mutagen.easyid3 import EasyID3
+        return EasyID3(chemin)
+
+    def test_chaque_chapitre_prend_son_titre(self, tmp_path):
+        chaps = self.fichiers(tmp_path, ["Intro", "Le Studio", "La fin"])
+        assert _retag_chapters(chaps, "Ma video") == 3
+        assert self.lire(chaps[1]["filepath"])["title"] == ["Le Studio"]
+
+    def test_le_titre_de_la_video_devient_l_album(self, tmp_path):
+        chaps = self.fichiers(tmp_path, ["Intro", "La fin"])
+        _retag_chapters(chaps, "Ma video")
+        for c in chaps:
+            assert self.lire(c["filepath"])["album"] == ["Ma video"]
+
+    def test_numero_de_piste_sur_le_total(self, tmp_path):
+        chaps = self.fichiers(tmp_path, ["a", "b", "c", "d"])
+        _retag_chapters(chaps, "Ma video")
+        assert self.lire(chaps[2]["filepath"])["tracknumber"] == ["3/4"]
+
+    def test_conteneur_non_inscriptible_ignore_en_silence(self, tmp_path):
+        """Matroska/WebM : mutagen ne sait pas y ecrire. Le nom de fichier
+        porte deja le chapitre, on n'echoue surtout pas pour autant."""
+        chaps = self.fichiers(tmp_path, ["Intro", "La fin"], ext=".webm")
+        assert _retag_chapters(chaps, "Ma video") == 0
+
+    def test_chapitre_sans_titre_ignore(self, tmp_path):
+        chaps = self.fichiers(tmp_path, ["Intro", "   "])
+        assert _retag_chapters(chaps, "Ma video") == 1
+
+    def test_fichier_absent_ignore(self, tmp_path):
+        chaps = self.fichiers(tmp_path, ["Intro"])
+        chaps.append({"title": "Fantome", "filepath": str(tmp_path / "nope.mp3")})
+        assert _retag_chapters(chaps, "Ma video") == 1
+
+    def test_sans_album_le_titre_reste_ecrit(self, tmp_path):
+        chaps = self.fichiers(tmp_path, ["Intro"])
+        assert _retag_chapters(chaps, "") == 1
+        assert self.lire(chaps[0]["filepath"])["title"] == ["Intro"]

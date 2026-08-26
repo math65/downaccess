@@ -12,7 +12,7 @@ class TestReglages:
     def test_valeurs_par_defaut_completes(self, appdata):
         s = cfg.load()
         for cle in ("download_folder", "max_concurrent_downloads", "post_processing",
-                    "embed_metadata", "split_chapters", "subscriptions_check_on_start",
+                    "embed_metadata", "chapters_mode", "subscriptions_check_on_start",
                     "language"):
             assert cle in s
 
@@ -92,7 +92,8 @@ class TestHistorique:
 
 @pytest.mark.parametrize("cle,attendu", [
     ("embed_metadata", True),        # les fichiers nus etaient le defaut historique
-    ("split_chapters", False),       # change le nombre de fichiers produits : opt-in
+    ("chapters_mode", "embed"),      # les reperes dans le fichier ne coutent rien ;
+                                     # decouper change le nombre de fichiers : opt-in
     ("subscriptions_check_on_start", True),
     ("subscriptions_announce", False),   # regle UX : demarrage silencieux
 ])

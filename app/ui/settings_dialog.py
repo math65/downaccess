@@ -17,6 +17,7 @@ LANGUAGE_CHOICES = ["auto", "fr", "en"]
 ANNOUNCE_CHOICES = ["always", "foreground", "never"]
 AD_MODE_CHOICES = ["ask", "ad_only", "original_and_ad", "original_only"]
 PAGING_CHOICES = ["pages", "continuous"]
+CHAPTERS_MODE_CHOICES = ["embed", "split", "ignore"]
 
 # Limiteur de vitesse : valeurs en octets/sec. 0 = illimité.
 RATELIMIT_VALUES = [
@@ -83,6 +84,14 @@ def _ad_mode_labels():
         _("Audiodescription seule"),
         _("Version originale + audiodescription"),
         _("Version originale seule"),
+    ]
+
+
+def _chapters_mode_labels():
+    return [
+        _("Garder un seul fichier, avec des repères de chapitres dedans"),
+        _("Créer un fichier par chapitre"),
+        _("Ignorer les chapitres"),
     ]
 
 
@@ -353,16 +362,22 @@ class SettingsDialog(wx.Dialog):
               "et classer le fichier dans votre bibliothèque."))
         sizer.Add(self.chk_metadata, 0, wx.EXPAND | wx.ALL, 12)
 
-        self.chk_split = wx.CheckBox(
+        lbl_chapters = wx.StaticText(
             page,
-            label=_("Créer un fichier par chapitre quand la vidéo en propose"),
-            name=_("Créer un fichier par chapitre"),
+            label=_("Quand la vidéo propose des chapitres :"))
+        self.choice_chapters = wx.Choice(
+            page,
+            choices=_chapters_mode_labels(),
+            name=_("Traitement des chapitres"),
         )
-        self.chk_split.SetToolTip(
-            _("Utile pour les longs enregistrements : au lieu d'un seul fichier "
-              "de plusieurs heures, vous obtenez un fichier par chapitre, que "
-              "vous parcourez aux flèches. Le fichier entier n'est pas conservé."))
-        sizer.Add(self.chk_split, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        self.choice_chapters.SetToolTip(
+            _("Les repères permettent à votre lecteur d'annoncer le chapitre en "
+              "cours et d'y sauter directement. Un fichier par chapitre est plus "
+              "pratique sur les très longs enregistrements, mais le fichier "
+              "entier n'est alors pas conservé."))
+        sizer.Add(lbl_chapters, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        sizer.Add(self.choice_chapters, 0,
+                  wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
 
         page.SetSizer(sizer)
         return page
@@ -553,7 +568,10 @@ class SettingsDialog(wx.Dialog):
         self.choice_post.SetSelection(idx)
         ad_mode = s.get("audio_description_mode", "ask")
         self.chk_metadata.SetValue(bool(s.get("embed_metadata", True)))
-        self.chk_split.SetValue(bool(s.get("split_chapters", False)))
+        chap_mode = s.get("chapters_mode", "embed")
+        chap_idx = (CHAPTERS_MODE_CHOICES.index(chap_mode)
+                    if chap_mode in CHAPTERS_MODE_CHOICES else 0)
+        self.choice_chapters.SetSelection(chap_idx)
         ad_idx = AD_MODE_CHOICES.index(ad_mode) if ad_mode in AD_MODE_CHOICES else 0
         self.choice_ad.SetSelection(ad_idx)
 
@@ -610,7 +628,8 @@ class SettingsDialog(wx.Dialog):
         s["post_processing"] = POST_CHOICES[self.choice_post.GetSelection()]
         s["audio_description_mode"] = AD_MODE_CHOICES[self.choice_ad.GetSelection()]
         s["embed_metadata"] = self.chk_metadata.GetValue()
-        s["split_chapters"] = self.chk_split.GetValue()
+        s["chapters_mode"] = CHAPTERS_MODE_CHOICES[
+            self.choice_chapters.GetSelection()]
 
         # Sous-titres
         s["auto_subtitles"]  = self.chk_auto_subs.GetValue()

@@ -585,7 +585,9 @@ class Downloader:
         # Decoupe par chapitres : yt-dlp nomme les morceaux avec le gabarit
         # « chapter ». On partage le budget de caracteres entre le titre de la
         # video et celui du chapitre (meme garde-fou MAX_PATH que ci-dessus).
-        split_chapters = bool(self._settings.get("split_chapters")) and not section
+        # Un extrait ne se decoupe pas : l'utilisateur a deja choisi son passage.
+        chapters_mode = self._settings.get("chapters_mode", "embed")
+        split_chapters = chapters_mode == "split" and not section
         if split_chapters:
             _part = max(25, (_trim_len - 12) // 2)
             _chapter_name = (f"{_num_prefix}%(title).{_part}s"
@@ -844,9 +846,6 @@ class Downloader:
         if log_buf is not None and on_verbose_log is not None:
             on_verbose_log(log_buf.getvalue())
 
-        # Fichier déjà présent : yt-dlp n'a téléchargé aucun octet (le hook
-        # 'finished' arrive sans aucun 'downloading' préalable). On le signale
-        # distinctement pour ne pas faire croire à un vrai téléchargement.
         already_present = _looks_already_present(
             skip_download=bool(opts.get("skip_download")),
             format_spec=format_spec,
@@ -1322,11 +1321,13 @@ def _apply_metadata(opts: dict, settings: dict, format_spec: str,
 
     # Metadonnees : toujours possibles, ffmpeg seul suffit (pas de ffprobe).
     # `add_chapters` pose les reperes de chapitres, precieux sur les longs
-    # formats (conferences, concerts, emissions).
+    # formats (conferences, concerts, emissions) : le lecteur annonce alors le
+    # chapitre et permet d'y sauter. On les pose aussi avant une decoupe, pour
+    # que chaque morceau connaisse le titre du chapitre dont il vient.
     opts.setdefault("postprocessors", []).append({
         "key": "FFmpegMetadata",
         "add_metadata": True,
-        "add_chapters": True,
+        "add_chapters": settings.get("chapters_mode", "embed") != "ignore",
         "add_infojson": False,
     })
 
@@ -1368,6 +1369,55 @@ def _timecode_for_filename(seconds: float) -> str:
     return format_timecode(seconds).replace(":", "-")
 
 
+def _retag_chapters(chapters: list[dict], album: str) -> int:
+    """Donne son propre titre a chaque fichier de chapitre.
+
+    yt-dlp decoupe par copie de flux : chaque morceau hérite tel quel des tags
+    du fichier entier, donc les onze chapitres s'annoncent tous sous le titre de
+    la video. Au lecteur d'ecran, « un fichier par chapitre » perd alors tout
+    son interet — le lecteur repete onze fois la meme chose.
+
+    On rétablit une structure d'album : titre = nom du chapitre, album = titre
+    de la video, piste = rang du chapitre. Le lecteur annonce alors « piste 5
+    sur 11, L'interface de NotebookLM ».
+
+    Les conteneurs Matroska/WebM ne sont pas réinscriptibles par mutagen : ils
+    sont ignorés en silence (la video garde le nom de chapitre dans son nom de
+    fichier). Retourne le nombre de fichiers effectivement retagues.
+    """
+    from mutagen.easyid3 import EasyID3
+    from mutagen.easymp4 import EasyMP4
+    from mutagen.id3 import ID3NoHeaderError
+
+    lecteurs = {".mp3": EasyID3, ".m4a": EasyMP4, ".mp4": EasyMP4,
+                ".m4b": EasyMP4}
+    total = len(chapters)
+    retagues = 0
+    for rang, chapitre in enumerate(chapters, start=1):
+        chemin = chapitre.get("filepath")
+        titre = (chapitre.get("title") or "").strip()
+        if not chemin or not titre or not os.path.exists(chemin):
+            continue
+        lecteur = lecteurs.get(os.path.splitext(chemin)[1].lower())
+        if lecteur is None:
+            continue
+        try:
+            try:
+                tags = lecteur(chemin)
+            except ID3NoHeaderError:
+                tags = lecteur()
+                tags.filename = chemin
+            tags["title"] = titre
+            if album:
+                tags["album"] = album
+            tags["tracknumber"] = f"{rang}/{total}"
+            tags.save(chemin)
+            retagues += 1
+        except Exception as exc:            # un tag rate ne perd pas le fichier
+            _log.warning("Chapitre %d : tags non ecrits (%s)", rang, exc)
+    return retagues
+
+
 class _SplitChaptersPP(yt_dlp.postprocessor.FFmpegSplitChaptersPP):
     """Decoupe en un fichier par chapitre, PUIS supprime le fichier entier.
 
@@ -1377,13 +1427,30 @@ class _SplitChaptersPP(yt_dlp.postprocessor.FFmpegSplitChaptersPP):
     produit rien : on ne supprime alors surtout pas le seul fichier telecharge.
     """
 
+    @staticmethod
+    def stream_copy_opts(copy=True, *, ext=None):
+        """Ne recopie pas la table des chapitres dans les morceaux.
+
+        ffmpeg recale les reperes du fichier entier sur chaque extrait sans les
+        elaguer : un morceau de 21 secondes se retrouvait a annoncer onze
+        chapitres s'etendant jusqu'a 23 minutes. Or chaque morceau EST un
+        chapitre — il n'a aucune liste a porter.
+        """
+        parent = yt_dlp.postprocessor.FFmpegPostProcessor.stream_copy_opts
+        yield from parent(copy, ext=ext)
+        yield from ("-map_chapters", "-1")
+
     def run(self, info):
         had_chapters = bool(info.get("chapters"))
         to_delete, info = super().run(info)
         if had_chapters and info.get("filepath"):
-            written = [c.get("filepath") for c in (info.get("chapters") or [])]
+            chapters = info.get("chapters") or []
+            written = [c.get("filepath") for c in chapters]
             if any(f and os.path.exists(f) for f in written):
                 to_delete = [*to_delete, info["filepath"]]
+                n = _retag_chapters(chapters, info.get("title") or "")
+                if n:
+                    self.to_screen(f"Titres de chapitres ecrits dans {n} fichier(s)")
         return to_delete, info
 
 

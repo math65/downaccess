@@ -24,8 +24,10 @@ DEFAULTS: dict = {
                                         # ask | ad_only | original_and_ad | original_only
     "embed_metadata": True,        # titre/artiste/album + pochette + chapitres
                                    # dans les fichiers produits (MP3, M4A, MP4)
-    "split_chapters": False,       # un fichier par chapitre quand la video
-                                   # en propose (le fichier entier est remplace)
+    "chapters_mode": "embed",      # que faire des chapitres d'une video :
+                                   # embed  = un seul fichier, reperes dedans
+                                   # split  = un fichier par chapitre
+                                   # ignore = aucun repere
     "subscriptions_check_on_start": True,   # relever les abonnements au lancement
     "subscriptions_announce": False,        # annoncer vocalement les nouveautes
                                             # (silencieux par defaut, cf. regle UX)
@@ -71,6 +73,7 @@ def load() -> dict:
     # modifieraient DEFAULTS lui-meme et se retrouveraient dans une
     # configuration neuve chargee plus tard dans la meme session.
     cfg = copy.deepcopy(DEFAULTS)
+    saved: dict = {}
     try:
         with open(_config_file(), encoding="utf-8") as f:
             saved = json.load(f)
@@ -86,6 +89,11 @@ def load() -> dict:
     # désormais à « auto » (vocabulaire unifié avec le dialogue d'ajout).
     if cfg.get("post_processing") == "none":
         cfg["post_processing"] = "auto"
+    # Migration : la case « un fichier par chapitre » est devenue un choix a
+    # trois entrees. Qui l'avait cochee garde son comportement ; les autres
+    # basculent sur le defaut (« embed »), qui est ce qui se passait deja.
+    if "chapters_mode" not in saved and saved.get("split_chapters"):
+        cfg["chapters_mode"] = "split"
     return cfg
 
 

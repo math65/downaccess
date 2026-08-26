@@ -770,7 +770,13 @@ Avec l'un des trois modes automatiques, vous n'êtes plus interrogé : la ou les
 
 **Renseigner les informations du fichier** — case **cochée** par défaut. DownAccess inscrit dans chaque fichier téléchargé son titre, son auteur, sa date, la pochette de la vidéo et, quand la vidéo en propose, ses chapitres. Votre lecteur audio peut alors annoncer le titre et l'auteur au lieu du seul nom de fichier, et votre bibliothèque peut classer et regrouper vos fichiers correctement. Décochez cette case si vous préférez des fichiers totalement bruts.
 
-**Créer un fichier par chapitre quand la vidéo en propose** — case **décochée** par défaut. Certaines vidéos longues (conférences, concerts, émissions) sont découpées en chapitres par leur auteur. En cochant cette case, DownAccess produit un fichier par chapitre au lieu d'un seul fichier de plusieurs heures : vous parcourez les passages aux flèches dans votre dossier, au lieu de vous déplacer à l'aveugle dans une longue piste. Chaque morceau conserve le titre, l'auteur et la pochette. Le fichier entier n'est pas conservé. Si la vidéo n'a pas de chapitres, rien ne change.
+**Quand la vidéo propose des chapitres** — trois choix possibles. Certaines vidéos longues (conférences, concerts, émissions) sont découpées en chapitres par leur auteur, et DownAccess vous laisse décider quoi en faire. Si la vidéo n'a pas de chapitres, ce réglage n'a aucun effet.
+
+- **Garder un seul fichier, avec des repères de chapitres dedans** — le choix par défaut. Vous obtenez un seul fichier, dans lequel les chapitres sont inscrits avec leur titre et leur position. Un lecteur qui sait les exploiter vous annonce alors le chapitre en cours et vous permet d'y sauter directement, sans quitter le fichier. Attention : tous les lecteurs ne gèrent pas les chapitres. VLC et foobar2000 les lisent ; le Lecteur Windows Média les ignore. Si votre lecteur ne vous annonce rien, essayez plutôt le choix suivant.
+
+- **Créer un fichier par chapitre** — DownAccess produit un fichier par chapitre au lieu d'un seul fichier de plusieurs heures : vous parcourez les passages aux flèches dans votre dossier, au lieu de vous déplacer à l'aveugle dans une longue piste. Chaque morceau porte le titre de son chapitre, le titre de la vidéo comme nom d'album et son numéro de piste : votre lecteur annonce par exemple « piste 5 sur 11, L'interface du logiciel ». L'auteur, la date et la pochette sont également conservés. Le fichier entier n'est pas gardé, pour ne pas occuper deux fois la place.
+
+- **Ignorer les chapitres** — aucun repère n'est inscrit et aucun découpage n'est fait. À réserver aux lecteurs anciens que la présence de chapitres perturbe.
 
 ### Onglet Sous-titres
 

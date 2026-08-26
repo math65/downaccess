@@ -121,7 +121,6 @@ class TestPreferences:
 
     @pytest.mark.parametrize("attribut,cle", [
         ("chk_metadata", "embed_metadata"),
-        ("chk_split", "split_chapters"),
         ("chk_subs_start", "subscriptions_check_on_start"),
         ("chk_subs_announce", "subscriptions_announce"),
     ])
@@ -135,8 +134,24 @@ class TestPreferences:
 
     def test_chaque_case_porte_une_etiquette(self, frame):
         dlg = SettingsDialog(frame, dict(DEFAULTS))
-        for attribut in ("chk_metadata", "chk_split", "chk_subs_start"):
+        for attribut in ("chk_metadata", "chk_subs_start"):
             assert getattr(dlg, attribut).GetLabel().strip()
+        dlg.Destroy()
+
+    @pytest.mark.parametrize("mode", ["embed", "split", "ignore"])
+    def test_aller_retour_du_traitement_des_chapitres(self, frame, mode):
+        """Les trois comportements doivent etre atteignables depuis la fenetre :
+        c'est tout l'interet d'avoir remplace la case a cocher par un choix."""
+        reglages = dict(DEFAULTS)
+        reglages["chapters_mode"] = mode
+        dlg = SettingsDialog(frame, reglages)
+        assert dlg._collect_values()["chapters_mode"] == mode
+        dlg.Destroy()
+
+    def test_les_trois_chapitres_sont_proposes(self, frame):
+        dlg = SettingsDialog(frame, dict(DEFAULTS))
+        assert dlg.choice_chapters.GetCount() == 3
+        assert all(dlg.choice_chapters.GetString(i).strip() for i in range(3))
         dlg.Destroy()
 
     def test_controles_tous_nommes(self, frame):

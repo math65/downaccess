@@ -770,7 +770,13 @@ With one of the three automatic modes, you are no longer asked: the track or tra
 
 **Fill in the file information** — **ticked** by default. DownAccess writes each downloaded file's title, author, date, the video's cover art and, when the video provides them, its chapters. Your audio player can then announce the title and author instead of just the file name, and your library can sort and group your files properly. Untick this box if you would rather have completely raw files.
 
-**Create one file per chapter when the video offers them** — **unticked** by default. Some long videos (talks, concerts, broadcasts) are divided into chapters by their author. Tick this box and DownAccess produces one file per chapter instead of a single file several hours long: you move through the parts with the arrow keys in your folder, rather than moving blindly along one long track. Each part keeps the title, author and cover art. The whole file is not kept. If the video has no chapters, nothing changes.
+**When the video has chapters** — three possible choices. Some long videos (talks, concerts, broadcasts) are divided into chapters by their author, and DownAccess lets you decide what to do with them. If the video has no chapters, this setting has no effect.
+
+- **Keep a single file, with chapter marks inside it** — the default choice. You get one file, with the chapters written into it along with their titles and positions. A player that supports them will announce the current chapter and let you jump straight to it without leaving the file. Be aware that not every player handles chapters: VLC and foobar2000 read them, while Windows Media Player ignores them. If your player announces nothing, try the next choice instead.
+
+- **Create one file per chapter** — DownAccess produces one file per chapter instead of a single file several hours long: you move through the parts with the arrow keys in your folder, rather than moving blindly along one long track. Each part carries its chapter title, the video title as the album name, and its track number, so your player announces something like "track 5 of 11, The software interface". The author, date and cover art are kept as well. The whole file is not kept, so it does not take up the space twice.
+
+- **Ignore chapters** — no marks are written and no splitting is done. Reserve this for older players that are confused by the presence of chapters.
 
 ### Subtitles tab
 
