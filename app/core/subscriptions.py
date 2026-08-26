@@ -377,12 +377,19 @@ def resolve_feed(url: str) -> tuple[str, str, str]:
 # ------------------------------------------------------------------
 
 def create(url: str, title: str = "", format_spec: str = "",
-           auto_download: bool = False) -> Subscription:
+           auto_download: bool = False,
+           catch_up: bool = False) -> Subscription:
     """Resout le flux et cree l'abonnement.
 
-    Toutes les entrees deja publiees sont marquees comme vues : s'abonner
-    aujourd'hui veut dire « previens-moi de ce qui arrive », pas « deverse-moi
-    les quinze dernieres videos ».
+    Par defaut, toutes les entrees deja publiees sont marquees comme vues :
+    s'abonner aujourd'hui veut dire « previens-moi de ce qui arrive », pas
+    « deverse-moi les quinze dernieres videos ».
+
+    `catch_up` inverse ce choix : rien n'est marque comme vu, et la premiere
+    verification propose donc tout le catalogue en ligne. Utile en decouvrant
+    un podcast dont on veut rattraper les anciens episodes — sans cela ils
+    resteraient invisibles a jamais, aucune verification ulterieure ne pouvant
+    les faire reapparaitre.
     """
     feed_url, kind, feed_title = resolve_feed(url)
     _title, entries = parse_feed(_http_get(feed_url))
@@ -397,7 +404,8 @@ def create(url: str, title: str = "", format_spec: str = "",
         auto_download=auto_download,
         added_at=now,
         last_checked=now,
-        seen_ids=[e.entry_id for e in entries][:MAX_SEEN_IDS],
+        seen_ids=([] if catch_up
+                  else [e.entry_id for e in entries][:MAX_SEEN_IDS]),
     )
 
 

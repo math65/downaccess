@@ -142,11 +142,11 @@ msgstr ""
 msgid "A&bonnements...\tCtrl+B"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:248
+#: app/ui/subscriptions_dialog.py:289
 msgid "Abonnement ajouté"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:116 app/ui/subscriptions_dialog.py:137
+#: app/ui/subscriptions_dialog.py:130 app/ui/subscriptions_dialog.py:151
 msgid "Abonnements"
 msgstr ""
 
@@ -224,7 +224,7 @@ msgstr ""
 msgid "Adresse injoignable : {error}"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:91
+#: app/ui/subscriptions_dialog.py:102
 msgid "Adresse manquante"
 msgstr ""
 
@@ -329,7 +329,7 @@ msgstr ""
 #: app/ui/main_window.py:1935 app/ui/playlist_dialog.py:102
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:160
-#: app/ui/subscriptions_dialog.py:69
+#: app/ui/subscriptions_dialog.py:78
 msgid "Annuler"
 msgstr ""
 
@@ -349,7 +349,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:925 app/core/downloader.py:928
+#: app/core/downloader.py:1015 app/core/downloader.py:1018
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -377,7 +377,7 @@ msgstr ""
 msgid "Asset '{asset}' absent de la release {version}."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:292
+#: app/ui/subscriptions_dialog.py:334
 msgid "Aucun abonnement"
 msgstr ""
 
@@ -462,11 +462,11 @@ msgstr ""
 msgid "Aucune note disponible."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:320
+#: app/ui/subscriptions_dialog.py:362
 msgid "Aucune nouveauté pour l'instant."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:316
+#: app/ui/subscriptions_dialog.py:358
 msgid ""
 "Aucune nouveauté.\n"
 "\n"
@@ -479,7 +479,7 @@ msgid "Aucune piste cochée"
 msgstr ""
 
 #: app/ui/search_dialog.py:629 app/ui/settings_dialog.py:697
-#: app/ui/subscriptions_dialog.py:264
+#: app/ui/subscriptions_dialog.py:306
 msgid "Aucune sélection"
 msgstr ""
 
@@ -530,7 +530,7 @@ msgstr ""
 msgid "Auto ({language})"
 msgstr ""
 
-#: app/ui/settings_dialog.py:265 app/ui/subscriptions_dialog.py:142
+#: app/ui/settings_dialog.py:265 app/ui/subscriptions_dialog.py:156
 msgid "Automatique"
 msgstr ""
 
@@ -566,6 +566,10 @@ msgstr ""
 msgid "Avertissements réinitialisés"
 msgstr ""
 
+#: app/ui/subscriptions_dialog.py:270
+msgid "Beaucoup de publications à télécharger"
+msgstr ""
+
 #: app/ui/search_dialog.py:98
 msgid "Catégorie à parcourir"
 msgstr ""
@@ -574,7 +578,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:303
+#: app/core/downloader.py:360
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -638,6 +642,13 @@ msgid ""
 "Cette playlist contient {total} vidéos, mais YouTube n'en rend que {got} accessibles directement.\n"
 "\n"
 "Voulez-vous récupérer la liste complète via le navigateur ? Cela peut prendre un moment pour les grandes playlists."
+msgstr ""
+
+#: app/core/downloader.py:327
+msgid ""
+"Cette vidéo est protégée contre la copie (DRM).\n"
+"\n"
+"DownAccess ne peut pas la télécharger, et aucun réglage n'y changera rien : c'est une protection posée par le site. Les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
 #: app/ui/audio_track_dialog.py:64
@@ -768,7 +779,7 @@ msgid "Confirmation"
 msgstr ""
 
 #: app/ui/history_dialog.py:167 app/ui/main_window.py:2272
-#: app/ui/subscriptions_dialog.py:269
+#: app/ui/subscriptions_dialog.py:311
 msgid "Confirmer"
 msgstr ""
 
@@ -828,6 +839,10 @@ msgstr ""
 msgid "Connexion à {site} mémorisée."
 msgstr ""
 
+#: app/ui/subscriptions_dialog.py:69 app/ui/subscriptions_dialog.py:70
+msgid "Considérer les publications déjà en ligne comme des nouveautés"
+msgstr ""
+
 #: app/ui/contact_dialog.py:28
 msgid "Contacter le support — DownAccess"
 msgstr ""
@@ -870,7 +885,7 @@ msgstr ""
 msgid "Demander à chaque fois"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:143
+#: app/ui/subscriptions_dialog.py:157
 msgid "Dernière vérification"
 msgstr ""
 
@@ -1176,7 +1191,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1517
+#: app/core/downloader.py:1607
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1216,11 +1231,11 @@ msgstr ""
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
-#: app/core/downloader.py:237
+#: app/core/downloader.py:271
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:240
+#: app/core/downloader.py:274
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1301,7 +1316,7 @@ msgstr ""
 #: app/ui/error_dialog.py:46 app/ui/error_dialog.py:47
 #: app/ui/login_dialog.py:110 app/ui/main_window.py:2493
 #: app/ui/player_dialog.py:119 app/ui/report_dialog.py:123
-#: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:153
+#: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:167
 #: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:305
 #: app/ui/warning_dialog.py:41 app/ui/warning_dialog.py:42
 msgid "Fermer"
@@ -1355,12 +1370,12 @@ msgstr ""
 msgid "Flux RSS sans canal."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:257
+#: app/ui/subscriptions_dialog.py:299
 msgid "Flux introuvable"
 msgstr ""
 
 #: app/ui/download_list.py:41 app/ui/history_dialog.py:52
-#: app/ui/subscriptions_dialog.py:141
+#: app/ui/subscriptions_dialog.py:155
 msgid "Format"
 msgstr ""
 
@@ -1452,7 +1467,7 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:254
+#: app/core/downloader.py:288
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
@@ -1523,7 +1538,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:293
+#: app/core/downloader.py:350
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1558,7 +1573,7 @@ msgstr ""
 msgid "Impossible de réessayer : données introuvables."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:254
+#: app/ui/subscriptions_dialog.py:296
 msgid ""
 "Impossible de suivre cette adresse.\n"
 "\n"
@@ -1595,7 +1610,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1505
+#: app/core/downloader.py:1595
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1603,7 +1618,7 @@ msgstr ""
 msgid "Incrustés dans l'image (ré-encode la vidéo, plus lent)"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:90
+#: app/ui/subscriptions_dialog.py:101
 msgid "Indiquez l'adresse à suivre."
 msgstr ""
 
@@ -1691,6 +1706,13 @@ msgstr ""
 
 #: app/ui/uge_dialog.py:342
 msgid "L'interception sera activée au lancement du navigateur."
+msgstr ""
+
+#: app/core/downloader.py:340
+msgid ""
+"La connexion Internet a été perdue pendant le téléchargement.\n"
+"\n"
+"DownAccess a réessayé sans succès. Vérifiez votre connexion, puis relancez le téléchargement avec la touche F2."
 msgstr ""
 
 #: app/ui/login_dialog.py:27
@@ -1894,7 +1916,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:246
+#: app/core/downloader.py:280
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -2040,11 +2062,11 @@ msgstr ""
 msgid "Ne plus afficher cet avertissement"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:147
+#: app/ui/subscriptions_dialog.py:161
 msgid "Ne plus suivre"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:268
+#: app/ui/subscriptions_dialog.py:310
 msgid "Ne plus suivre « {title} » ?"
 msgstr ""
 
@@ -2052,7 +2074,7 @@ msgstr ""
 msgid "Ne télécharger qu'un passage précis d'une vidéo, entre deux moments"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:139
+#: app/ui/subscriptions_dialog.py:153
 msgid "Nom"
 msgstr ""
 
@@ -2323,6 +2345,13 @@ msgid ""
 "Site : {site}"
 msgstr ""
 
+#: app/ui/subscriptions_dialog.py:71
+msgid ""
+"Pour rattraper le passé d'une chaîne ou d'un podcast que vous découvrez. "
+"Sans cette option, DownAccess ne vous signale que ce qui sera publié à "
+"partir de maintenant."
+msgstr ""
+
 #: app/ui/main_window.py:1282
 msgid ""
 "Pour récupérer la liste complète, DownAccess va ouvrir YouTube dans le navigateur.\n"
@@ -2434,7 +2463,7 @@ msgstr ""
 msgid "Recherche des pistes audio disponibles…"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:224
+#: app/ui/subscriptions_dialog.py:239
 msgid "Recherche du flux..."
 msgstr ""
 
@@ -2694,7 +2723,7 @@ msgstr ""
 msgid "Suggestion de fonctionnalité"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:68
+#: app/ui/subscriptions_dialog.py:77
 msgid "Suivre"
 msgstr ""
 
@@ -2706,7 +2735,7 @@ msgstr ""
 msgid "Suivre une chaîne ou un podcast"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:146
+#: app/ui/subscriptions_dialog.py:160
 msgid "Suivre une chaîne..."
 msgstr ""
 
@@ -2771,7 +2800,7 @@ msgstr ""
 msgid "Sélectionnez ce que vous voulez télécharger ({count} nouveautés) :"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:263
+#: app/ui/subscriptions_dialog.py:305
 msgid "Sélectionnez d'abord un abonnement."
 msgstr ""
 
@@ -2913,7 +2942,7 @@ msgstr ""
 msgid "Transcription — {title}"
 msgstr ""
 
-#: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:140
+#: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:154
 #: app/ui/uge_dialog.py:285
 msgid "Type"
 msgstr ""
@@ -3213,11 +3242,11 @@ msgstr ""
 msgid "Vidéos"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:151
+#: app/ui/subscriptions_dialog.py:165
 msgid "Voir les nouveautés"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:150
+#: app/ui/subscriptions_dialog.py:164
 msgid "Voir les {n} nouveautés"
 msgstr ""
 
@@ -3237,7 +3266,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:265
+#: app/core/downloader.py:299
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -3262,15 +3291,22 @@ msgstr ""
 msgid "Voulez-vous vraiment annuler la mise à jour en cours ?"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:189 app/ui/subscriptions_dialog.py:291
+#: app/ui/subscriptions_dialog.py:203 app/ui/subscriptions_dialog.py:333
 msgid "Vous ne suivez encore aucune chaîne ni podcast."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:246
+#: app/ui/subscriptions_dialog.py:286
 msgid ""
 "Vous suivez maintenant « {title} ».\n"
 "\n"
 "DownAccess vous signalera ce qui sera publié à partir de maintenant."
+msgstr ""
+
+#: app/ui/subscriptions_dialog.py:281
+msgid ""
+"Vous suivez maintenant « {title} ».\n"
+"\n"
+"{n} publications déjà en ligne vous attendent : ouvrez « Voir les nouveautés » pour choisir."
 msgstr ""
 
 #: app/ui/main_window.py:2517
@@ -3319,11 +3355,11 @@ msgstr ""
 msgid "Vérification en cours."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:295
+#: app/ui/subscriptions_dialog.py:337
 msgid "Vérification en cours..."
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:318 app/ui/subscriptions_dialog.py:321
+#: app/ui/subscriptions_dialog.py:360 app/ui/subscriptions_dialog.py:363
 msgid "Vérification terminée"
 msgstr ""
 
@@ -3337,7 +3373,7 @@ msgstr ""
 msgid "Vérifier et installer la dernière version de DownAccess"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:148
+#: app/ui/subscriptions_dialog.py:162
 msgid "Vérifier maintenant"
 msgstr ""
 
@@ -3392,7 +3428,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:1368
+#: app/core/downloader.py:1458
 msgid "fin"
 msgstr ""
 
@@ -3412,7 +3448,7 @@ msgstr ""
 msgid "média"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:201
+#: app/ui/subscriptions_dialog.py:215
 msgid "non"
 msgstr ""
 
@@ -3420,7 +3456,7 @@ msgstr ""
 msgid "non coché"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:201
+#: app/ui/subscriptions_dialog.py:215
 msgid "oui"
 msgstr ""
 
@@ -3570,19 +3606,19 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:230 app/ui/format_dialog.py:165
+#: app/core/downloader.py:264 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:229 app/ui/format_dialog.py:163
+#: app/core/downloader.py:263 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:227 app/ui/format_dialog.py:161
+#: app/core/downloader.py:261 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr ""
 
-#: app/ui/subscriptions_dialog.py:190
+#: app/ui/subscriptions_dialog.py:204
 msgid "{n} abonnements :"
 msgstr ""
 
@@ -3644,6 +3680,15 @@ msgstr ""
 
 #: app/ui/search_dialog.py:391
 msgid "{title} — Audiodescription"
+msgstr ""
+
+#: app/ui/subscriptions_dialog.py:263
+msgid ""
+"« {title} » compte déjà {n} publications en ligne, et vous avez demandé le téléchargement automatique : elles partiront toutes en téléchargement, ce qui peut occuper beaucoup de place.\n"
+"\n"
+"Tout télécharger maintenant ?\n"
+"\n"
+"Si vous répondez Non, l'abonnement est quand même créé : les {n} publications vous seront proposées et vous choisirez."
 msgstr ""
 
 #: app/ui/main_window.py:1534

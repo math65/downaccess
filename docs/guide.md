@@ -521,6 +521,10 @@ Vous choisissez ensuite le format des téléchargements pour cette source (ou **
 
 Au moment où vous vous abonnez, tout ce qui est déjà publié est considéré comme vu : s'abonner veut dire « préviens-moi de ce qui arrive », pas « déverse-moi les quinze dernières vidéos ».
 
+**Pour rattraper le passé**, cochez **Considérer les publications déjà en ligne comme des nouveautés**. C'est ce qu'il vous faut quand vous découvrez un podcast dont vous voulez les anciens épisodes : la première vérification vous les proposera tous, et vous choisirez lesquels télécharger. Sans cette case, ils resteraient invisibles à jamais — aucune vérification ultérieure ne peut faire réapparaître une publication déjà considérée comme vue.
+
+Si vous cochez cette case **en même temps** que le téléchargement automatique, DownAccess vous prévient avant d'agir : il vous annonce combien de publications vont partir en téléchargement et vous demande confirmation, car un catalogue entier peut représenter plusieurs gigaoctets. En répondant Non, l'abonnement est quand même créé et les publications vous sont proposées : vous gardez la main.
+
 ### Voir les nouveautés
 
 Au lancement, DownAccess relève discrètement vos abonnements. Rien ne s'affiche, rien ne vous interrompt : le nombre de nouveautés apparaît simplement dans l'entrée de menu, qui devient par exemple **Abonnements (3 nouveautés)...**. Si vous préférez l'entendre, cochez **Annoncer vocalement les nouveautés des abonnements** dans les préférences (onglet Général).

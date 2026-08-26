@@ -60,6 +60,29 @@ class TestCreation:
         assert sub.format_spec == "mp3"
         assert sub.auto_download is True
 
+    def test_rattrapage_propose_tout_le_catalogue(self, flux_fige):
+        """En decouvrant un podcast on veut souvent ses anciens episodes. Sans
+        cette option ils resteraient invisibles a jamais : aucune verification
+        ulterieure ne peut faire reapparaitre une entree marquee comme vue."""
+        sub = subs.create("https://www.youtube.com/feeds/videos.xml?channel_id=UC1",
+                          catch_up=True)
+        assert sub.seen_ids == []
+        assert len(subs.check(sub)) == 3
+
+    def test_sans_rattrapage_le_passe_reste_invisible(self, flux_fige):
+        """Le defaut ne change pas : c'est le comportement voulu."""
+        sub = subs.create("https://www.youtube.com/feeds/videos.xml?channel_id=UC1",
+                          catch_up=False)
+        assert subs.check(sub) == []
+
+    def test_rattrapage_n_empeche_pas_de_marquer_vu(self, flux_fige):
+        """Une fois les entrees proposees et traitees, elles ne doivent plus
+        revenir a la verification suivante."""
+        sub = subs.create("https://www.youtube.com/feeds/videos.xml?channel_id=UC1",
+                          catch_up=True)
+        subs.mark_seen(sub, subs.check(sub))
+        assert subs.check(sub) == []
+
 
 class TestReleve:
     def test_detecte_ce_qui_est_nouveau(self, flux_fige):

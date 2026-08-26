@@ -64,6 +64,15 @@ class AddSubscriptionDialog(wx.Dialog):
             "Sans cette option, DownAccess vous montre les nouveautés et vous "
             "choisissez ce que vous voulez."))
 
+        self.chk_catch_up = wx.CheckBox(
+            panel,
+            label=_("Considérer les publications déjà en ligne comme des nouveautés"),
+            name=_("Considérer les publications déjà en ligne comme des nouveautés"))
+        self.chk_catch_up.SetToolTip(_(
+            "Pour rattraper le passé d'une chaîne ou d'un podcast que vous "
+            "découvrez. Sans cette option, DownAccess ne vous signale que ce "
+            "qui sera publié à partir de maintenant."))
+
         btns = wx.StdDialogButtonSizer()
         self.btn_ok = wx.Button(panel, wx.ID_OK, label=_("Suivre"))
         self.btn_cancel = wx.Button(panel, wx.ID_CANCEL, label=_("Annuler"))
@@ -73,14 +82,16 @@ class AddSubscriptionDialog(wx.Dialog):
 
         for widget, flag in ((lbl_url, wx.TOP), (self.txt_url, wx.TOP),
                              (lbl_help, wx.TOP), (lbl_fmt, wx.TOP),
-                             (self.choice_fmt, wx.TOP), (self.chk_auto, wx.TOP)):
+                             (self.choice_fmt, wx.TOP), (self.chk_auto, wx.TOP),
+                             (self.chk_catch_up, wx.TOP)):
             sizer.Add(widget, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | flag, 10)
         sizer.Add(btns, 0, wx.EXPAND | wx.ALL, 12)
         panel.SetSizer(sizer)
 
         self.choice_fmt.MoveAfterInTabOrder(self.txt_url)
         self.chk_auto.MoveAfterInTabOrder(self.choice_fmt)
-        self.btn_ok.MoveAfterInTabOrder(self.chk_auto)
+        self.chk_catch_up.MoveAfterInTabOrder(self.chk_auto)
+        self.btn_ok.MoveAfterInTabOrder(self.chk_catch_up)
         self.txt_url.SetFocus()
 
         self.Bind(wx.EVT_BUTTON, self._on_ok, id=wx.ID_OK)
@@ -102,6 +113,9 @@ class AddSubscriptionDialog(wx.Dialog):
 
     def get_auto_download(self) -> bool:
         return self.chk_auto.GetValue()
+
+    def get_catch_up(self) -> bool:
+        return self.chk_catch_up.GetValue()
 
 
 class SubscriptionsDialog(wx.Dialog):
@@ -220,32 +234,60 @@ class SubscriptionsDialog(wx.Dialog):
             url = dlg.get_url()
             fmt = dlg.get_format()
             auto = dlg.get_auto_download()
+            catch_up = dlg.get_catch_up()
 
         self._set_busy(True, _("Recherche du flux..."))
 
         def worker() -> None:
             try:
-                sub = subs.create(url, format_spec=fmt, auto_download=auto)
+                sub = subs.create(url, format_spec=fmt, auto_download=auto,
+                                  catch_up=catch_up)
+                # Compte reel de ce que l'abonnement va proposer : sert a
+                # chiffrer l'avertissement avant un telechargement massif.
+                en_attente = len(subs.check(sub)) if catch_up else 0
             except subs.FeedError as exc:
                 wx.CallAfter(self._on_add_failed, str(exc))
             except Exception as exc:
                 wx.CallAfter(self._on_add_failed, str(exc))
             else:
-                wx.CallAfter(self._on_add_done, sub)
+                wx.CallAfter(self._on_add_done, sub, en_attente)
 
         threading.Thread(target=worker, daemon=True).start()
 
-    def _on_add_done(self, sub) -> None:
+    def _on_add_done(self, sub, en_attente: int = 0) -> None:
+        self._set_busy(False)
+        # Rattrapage + telechargement automatique : tout le catalogue partirait
+        # en file sans que rien ne soit demande. On chiffre avant d'engager.
+        if sub.auto_download and en_attente > 1:
+            reponse = wx.MessageBox(
+                _("« {title} » compte déjà {n} publications en ligne, et vous "
+                  "avez demandé le téléchargement automatique : elles partiront "
+                  "toutes en téléchargement, ce qui peut occuper beaucoup de "
+                  "place.\n\nTout télécharger maintenant ?\n\nSi vous répondez "
+                  "Non, l'abonnement est quand même créé : les {n} publications "
+                  "vous seront proposées et vous choisirez.")
+                .format(title=sub.title, n=en_attente),
+                _("Beaucoup de publications à télécharger"),
+                wx.YES_NO | wx.ICON_QUESTION, self)
+            if reponse != wx.YES:
+                sub.auto_download = False
+
         self._subs.append(sub)
         subs.save(self._subs)
-        self._set_busy(False)
         self._fill_list()
         self.lst.Select(len(self._subs) - 1)
         self.lst.Focus(len(self._subs) - 1)
-        wx.MessageBox(
-            _("Vous suivez maintenant « {title} ».\n\nDownAccess vous signalera "
-              "ce qui sera publié à partir de maintenant.").format(title=sub.title),
-            _("Abonnement ajouté"), wx.OK | wx.ICON_INFORMATION, self)
+        if en_attente:
+            corps = _("Vous suivez maintenant « {title} ».\n\n{n} publications "
+                      "déjà en ligne vous attendent : ouvrez « Voir les "
+                      "nouveautés » pour choisir.").format(title=sub.title,
+                                                           n=en_attente)
+        else:
+            corps = _("Vous suivez maintenant « {title} ».\n\nDownAccess vous "
+                      "signalera ce qui sera publié à partir de maintenant."
+                      ).format(title=sub.title)
+        wx.MessageBox(corps, _("Abonnement ajouté"),
+                      wx.OK | wx.ICON_INFORMATION, self)
         self.lst.SetFocus()
 
     def _on_add_failed(self, message: str) -> None:

@@ -521,6 +521,10 @@ You then choose the download format for that source (or **Default format from pr
 
 At the moment you subscribe, everything already published is treated as seen: subscribing means "tell me about what arrives", not "dump the last fifteen videos on me".
 
+**To catch up on the past**, tick **Treat everything already online as new**. This is what you want when you discover a podcast and would like its earlier episodes: the first check will offer you all of them, and you choose which ones to download. Without this box they would stay invisible for ever — no later check can bring back an item that has already been treated as seen.
+
+If you tick this box **at the same time** as automatic downloading, DownAccess warns you before acting: it tells you how many items are about to start downloading and asks for confirmation, because a whole back catalogue can run to several gigabytes. If you answer No, the subscription is still created and the items are offered to you: you stay in control.
+
 ### Seeing what is new
 
 At startup, DownAccess quietly checks your subscriptions. Nothing appears, nothing interrupts you: the number of new items simply shows up in the menu entry, which becomes for example **Subscriptions (3 new)...**. If you would rather hear it, tick **Announce subscription news out loud** in the preferences (General tab).

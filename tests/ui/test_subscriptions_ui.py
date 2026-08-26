@@ -52,6 +52,27 @@ class TestAjoutAbonnement:
         assert dlg.get_auto_download() is False
         dlg.Destroy()
 
+    def test_rattrapage_desactive_par_defaut(self, frame):
+        """S'abonner ne doit pas deverser tout le catalogue sans qu'on l'ait
+        demande : le rattrapage est un choix explicite."""
+        dlg = AddSubscriptionDialog(frame)
+        assert dlg.get_catch_up() is False
+        dlg.Destroy()
+
+    def test_rattrapage_activable(self, frame):
+        dlg = AddSubscriptionDialog(frame)
+        dlg.chk_catch_up.SetValue(True)
+        assert dlg.get_catch_up() is True
+        dlg.Destroy()
+
+    def test_les_deux_cases_portent_une_etiquette(self, frame):
+        """Sans etiquette, le lecteur d'ecran annonce « case a cocher » seule."""
+        dlg = AddSubscriptionDialog(frame)
+        for case in (dlg.chk_auto, dlg.chk_catch_up):
+            assert case.GetLabel().strip()
+            assert case.GetName().strip()
+        dlg.Destroy()
+
     def test_adresse_nettoyee(self, frame):
         dlg = AddSubscriptionDialog(frame)
         dlg.txt_url.SetValue("  https://a/f.xml  ")
