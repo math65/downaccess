@@ -1,6 +1,6 @@
 ## DownAccess 0.2.0
 
-The biggest update since DownAccess began. Five new features, a complete overhaul of Arte, and two months of user feedback.
+The biggest update since the first release. Five new features, a complete overhaul of Arte, and two months of user feedback.
 
 ### Your files finally know what they contain
 
@@ -8,13 +8,13 @@ Every download now arrives with its title, author, year, genre and cover art. Yo
 
 ### One file per chapter. Or just the part you care about.
 
-A three-hour lecture, a concert, a show cut into segments: DownAccess can turn it into as many files as there are chapters, each with its own title. Or keep none of them, if you would rather have a single file. The choice is yours, in Preferences.
+A three-hour lecture, a concert, a show in segments: DownAccess can turn it into as many files as there are chapters, each with its own title. Or leave it whole, if you would rather have a single file. The choice is yours, in Preferences.
 
-And when only a few minutes matter, **Download an extract** (Ctrl+E) fetches those alone. You give a start and an end, DownAccess handles the rest.
+And when only a few minutes matter, **Download an extract** (Ctrl+E) fetches those alone. A start, an end, that is all.
 
 ### The transcript, to read or to keep
 
-When a video has subtitles, you can read its text without downloading it. DownAccess gathers the subtitles into one continuous text, laid out in paragraphs, free of timestamps and repetitions. Read it on screen, copy it, or save it.
+When a video has subtitles, its text can be read without downloading anything. DownAccess gathers the subtitles into one continuous text, laid out in paragraphs, free of timestamps and repetitions. Read it on screen, copy it, or keep it.
 
 ### Subscribe. Then forget about it.
 
@@ -28,9 +28,9 @@ A **Subscriptions** tab in Preferences settles the rest: check at startup or not
 
 ### Arte, rebuilt from the ground up
 
-Arte's concerts and live performances were out of reach from DownAccess. They now have their own category, with more than two hundred programmes: festivals, recordings, music. Follow a festival like a channel, and every concert put online is brought to you.
+Arte's concerts and live performances were out of reach from DownAccess. They have their own category now, with more than two hundred programmes: festivals, recordings, music. Follow a festival like a channel, and every concert put online is brought to you.
 
-Arte's other catalogues opened up too. Pop culture and Children showed only ten programmes each; they now offer ninety. Documentaries, Films, Science and History have each gained around a hundred entries. And moving between pages of results is now instant.
+The other catalogues opened up too. Pop culture and Children showed only ten programmes each; they now offer ninety. Documentaries, Films, Science and History have each gained around a hundred entries. And moving between pages of results is instant.
 
 Opening the page of a festival or a series finally shows the titles of the programmes, their duration and their summary, instead of unreadable web addresses.
 
