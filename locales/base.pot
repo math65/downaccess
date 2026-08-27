@@ -350,7 +350,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:1117 app/core/downloader.py:1120
+#: app/core/downloader.py:1161 app/core/downloader.py:1164
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -583,7 +583,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:460
+#: app/core/downloader.py:495
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -649,11 +649,20 @@ msgid ""
 "Voulez-vous récupérer la liste complète via le navigateur ? Cela peut prendre un moment pour les grandes playlists."
 msgstr ""
 
-#: app/core/downloader.py:427
+#: app/core/downloader.py:462
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
 "DownAccess ne peut pas la télécharger, et aucun réglage n'y changera rien : c'est une protection posée par le site. Les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
+msgstr ""
+
+#: app/core/downloader.py:328
+msgid ""
+"Cette vidéo est protégée contre la copie (DRM).\n"
+"\n"
+"Le site ne laisse accessible que la bande-son : l'image, elle, est verrouillée. DownAccess préfère vous le dire plutôt que de vous laisser un fichier audio à la place de votre émission.\n"
+"\n"
+"Aucun réglage n'y changera rien, c'est une protection posée par le site. M6, les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
 #: app/ui/audio_track_dialog.py:64
@@ -1204,7 +1213,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1716
+#: app/core/downloader.py:1760
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1244,11 +1253,11 @@ msgstr ""
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
-#: app/core/downloader.py:371
+#: app/core/downloader.py:406
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:374
+#: app/core/downloader.py:409
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1480,7 +1489,7 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:388
+#: app/core/downloader.py:423
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
@@ -1551,7 +1560,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:450
+#: app/core/downloader.py:485
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1623,7 +1632,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1704
+#: app/core/downloader.py:1748
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1721,7 +1730,7 @@ msgstr ""
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
-#: app/core/downloader.py:440
+#: app/core/downloader.py:475
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -1929,7 +1938,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:380
+#: app/core/downloader.py:415
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3278,7 +3287,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:399
+#: app/core/downloader.py:434
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -3440,7 +3449,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:1567
+#: app/core/downloader.py:1611
 msgid "fin"
 msgstr ""
 
@@ -3618,15 +3627,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:364 app/ui/format_dialog.py:165
+#: app/core/downloader.py:399 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:363 app/ui/format_dialog.py:163
+#: app/core/downloader.py:398 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:361 app/ui/format_dialog.py:161
+#: app/core/downloader.py:396 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr ""
 

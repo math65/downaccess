@@ -34,7 +34,9 @@ The goal is simple: download your favourite media without ever needing the mouse
 
 ### What is not supported
 
-DownAccess cannot download content protected by digital locks (DRM). This includes subscription streaming services such as **Netflix, Disney+ and Prime Video**. These platforms encrypt their videos to prevent any recording: no application, including DownAccess, can get around this.
+DownAccess cannot download content protected by digital locks (DRM). This includes subscription streaming services such as **Netflix, Disney+ and Prime Video**, as well as **M6** catch-up TV (M6+, formerly 6play). These platforms encrypt their videos to prevent any recording: no application, including DownAccess, can get around this.
+
+Some sites still leave the soundtrack accessible. DownAccess warns you in that case, rather than handing you an audio file instead of your programme.
 
 Apart from these protected services, the vast majority of public video and audio sites work.
 

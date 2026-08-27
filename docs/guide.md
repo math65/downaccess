@@ -34,7 +34,9 @@ L'objectif est simple : télécharger vos médias préférés sans jamais avoir 
 
 ### Ce qui n'est pas pris en charge
 
-DownAccess ne peut pas télécharger les contenus protégés par des verrous numériques (DRM). Cela concerne notamment les services de streaming par abonnement comme **Netflix, Disney+ et Prime Video**. Ces plateformes chiffrent leurs vidéos pour empêcher tout enregistrement : aucune application, y compris DownAccess, ne peut les contourner.
+DownAccess ne peut pas télécharger les contenus protégés par des verrous numériques (DRM). Cela concerne notamment les services de streaming par abonnement comme **Netflix, Disney+ et Prime Video**, ainsi que les replays de **M6** (M6+, ex-6play). Ces plateformes chiffrent leurs vidéos pour empêcher tout enregistrement : aucune application, y compris DownAccess, ne peut les contourner.
+
+Certains sites laissent malgré tout la bande-son accessible. DownAccess vous prévient alors au lieu de vous livrer un fichier audio à la place de votre émission.
 
 En dehors de ces services protégés, l'immense majorité des sites vidéo et audio publics fonctionnent.
 

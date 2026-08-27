@@ -11,9 +11,11 @@ from app.core.downloader import (
     _humanize_error,
     _is_login_required,
     disk_full_message,
+    drm_locked_video_message,
     is_disk_full_error,
     is_drm_error,
     is_network_down_error,
+    video_is_drm_locked,
     is_transient_error,
     not_enough_space_message,
 )
@@ -268,3 +270,44 @@ class TestNouvelleTentativeALAnalyse:
             self.telechargeur(tmp_path).fetch_info("x", "https://a/1",
                                                    stop_event=arret)
         assert etat["appels"] == 1, "aucune nouvelle tentative apres annulation"
+
+
+class TestImageVerrouillee:
+    """M6 : les six qualites video du manifeste sont chiffrees, deux pistes
+    audio de 96 kbit/s restent lisibles. yt-dlp ecarte les formats proteges
+    puis prend « le meilleur disponible » — le son. Signale par Veronique le
+    2026-08-27 : tous ses programmes M6 arrivaient en .m4a, sans avertissement.
+    """
+
+    def test_detecte_l_image_verrouillee(self):
+        m6 = {"_has_drm": True,
+              "formats": [{"vcodec": "none", "acodec": "mp4a.40.2", "ext": "m4a"},
+                          {"vcodec": "none", "acodec": "mp4a.40.2", "ext": "m4a"}]}
+        assert video_is_drm_locked(m6)
+
+    def test_un_podcast_reste_telechargeable(self):
+        """Un media audio par nature n'a pas d'image non plus : se fier a la
+        seule absence d'image casserait les podcasts et SoundCloud."""
+        assert not video_is_drm_locked(
+            {"formats": [{"vcodec": "none", "acodec": "mp3"}]})
+
+    def test_video_partiellement_protegee_passe(self):
+        """Si une qualite lisible subsiste, on telecharge au lieu de refuser."""
+        assert not video_is_drm_locked(
+            {"_has_drm": True,
+             "formats": [{"vcodec": "avc1.64001F"}, {"vcodec": "none"}]})
+
+    def test_sans_information_on_ne_pretend_rien(self):
+        assert not video_is_drm_locked({})
+
+    def test_tout_est_protege(self):
+        """Plus rien n'a survecu au verrou : meme diagnostic."""
+        assert video_is_drm_locked({"_has_drm": True, "formats": []})
+
+    def test_message_explique_le_fichier_audio(self):
+        """L'utilisateur a deja recu des .m4a : le message doit faire le lien,
+        pas seulement dire « impossible »."""
+        message = drm_locked_video_message()
+        assert "DRM" in message
+        assert "bande-son" in message
+        assert "M6" in message

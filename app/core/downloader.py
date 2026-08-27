@@ -301,6 +301,41 @@ def is_drm_error(msg: str) -> bool:
     return "drm" in low and ("protect" in low or "protég" in low or "chiffr" in low)
 
 
+def video_is_drm_locked(info: dict) -> bool:
+    """Vrai si l'IMAGE du media est verrouillee alors que le son passe.
+
+    Cas mesure sur m6.fr (2026-08-27) : les six qualites video du manifeste
+    sont chiffrees, seules deux pistes audio de 96 kbit/s restent lisibles.
+    yt-dlp ecarte les formats proteges puis choisit « le meilleur disponible »,
+    c'est-a-dire l'audio : l'utilisateur recuperait un fichier .m4a en croyant
+    telecharger une emission, sans le moindre avertissement.
+
+    On ne se fie ni au domaine (6play.fr a migre vers m6.fr, et la garde de
+    yt-dlp ne suit que l'ancienne adresse) ni a « aucune image disponible »
+    seul — un podcast ou une piste SoundCloud n'ont pas d'image non plus, et
+    doivent continuer de se telecharger. Le signal, c'est la conjonction :
+    quelque chose EST protege (`_has_drm`, pose par yt-dlp avant qu'il ne
+    retire ces formats) et il ne reste plus rien avec de l'image.
+    """
+    if not info.get("_has_drm"):
+        return False
+    return not any((f.get("vcodec") or "none") != "none"
+                   for f in info.get("formats") or [])
+
+
+def drm_locked_video_message() -> str:
+    """Message pour une video dont seule la bande-son a echappe au verrou."""
+    return _(
+        "Cette vidéo est protégée contre la copie (DRM).\n\n"
+        "Le site ne laisse accessible que la bande-son : l'image, elle, est "
+        "verrouillée. DownAccess préfère vous le dire plutôt que de vous "
+        "laisser un fichier audio à la place de votre émission.\n\n"
+        "Aucun réglage n'y changera rien, c'est une protection posée par le "
+        "site. M6, les plateformes par abonnement (Netflix, Disney+, Prime "
+        "Video) et certaines vidéos de france.tv sont dans ce cas."
+    )
+
+
 def is_transient_error(msg: str) -> bool:
     """Vrai si l'erreur est probablement transitoire et qu'un nouvel essai
     (avec ré-extraction) a de bonnes chances d'aboutir. EXCLUT explicitement
@@ -609,6 +644,8 @@ class Downloader:
                         continue
                     _raise_download_error(
                         str(exc), exc, self._settings.get("download_folder", ""))
+                except DownloadError:
+                    raise          # message deja ecrit pour l'utilisateur
                 except Exception as exc:
                     _raise_download_error(
                         str(exc), exc, self._settings.get("download_folder", ""))
@@ -655,6 +692,13 @@ class Downloader:
             info = ydl.extract_info(url, download=False)
         if not info:
             return None
+
+        # Image verrouillee, son accessible : sans ce garde-fou, yt-dlp
+        # choisit « le meilleur format disponible » — la bande-son — et
+        # l'utilisateur recoit un .m4a a la place de son emission.
+        if video_is_drm_locked(info):
+            _log.error("Image protegee par DRM id=%s url=%s", download_id, url)
+            raise DownloadError(drm_locked_video_message())
 
         return DownloadInfo(
             download_id=download_id,

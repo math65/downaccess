@@ -2253,15 +2253,15 @@ msgstr "unknown"
 msgid "{count} entrée(s)"
 msgstr "{count} entries"
 
-#: app/core/downloader.py:364 app/ui/format_dialog.py:165
+#: app/core/downloader.py:399 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr "{n:.0f} KB"
 
-#: app/core/downloader.py:363 app/ui/format_dialog.py:163
+#: app/core/downloader.py:398 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr "{n:.0f} MB"
 
-#: app/core/downloader.py:361 app/ui/format_dialog.py:161
+#: app/core/downloader.py:396 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr "{n:.1f} GB"
 
@@ -2281,7 +2281,7 @@ msgstr "Failed"
 msgid "⚠ Mode manuel disponible pour une seule URL à la fois."
 msgstr "⚠ Manual mode is available for only one URL at a time."
 
-#: app/core/downloader.py:1117 app/core/downloader.py:1120
+#: app/core/downloader.py:1161 app/core/downloader.py:1164
 msgid "Annulé par l'utilisateur"
 msgstr "Cancelled by user"
 
@@ -2299,7 +2299,7 @@ msgstr "HTTP error {code}."
 msgid "Erreur inconnue."
 msgstr "Unknown error."
 
-#: app/core/downloader.py:1716
+#: app/core/downloader.py:1760
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
@@ -2331,7 +2331,7 @@ msgstr ""
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr "Unable to check the version (connection unavailable)."
 
-#: app/core/downloader.py:1704
+#: app/core/downloader.py:1748
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
@@ -2457,7 +2457,7 @@ msgid ""
 "fenêtre."
 msgstr "The DownAccess browser is open. Sign in, then close this window."
 
-#: app/core/downloader.py:460
+#: app/core/downloader.py:495
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -2515,7 +2515,7 @@ msgid ""
 "vidéos."
 msgstr "DownAccess will remember your sign-in to {site} for future videos."
 
-#: app/core/downloader.py:450
+#: app/core/downloader.py:485
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -3367,20 +3367,20 @@ msgstr "{site} — {category}"
 msgid "Émissions"
 msgstr "Programmes"
 
-#: app/core/downloader.py:371
+#: app/core/downloader.py:406
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr "Free space in \"{folder}\": {size}."
 
-#: app/core/downloader.py:374
+#: app/core/downloader.py:409
 msgid "Espace nécessaire : environ {size}."
 msgstr "Space required: about {size}."
 
-#: app/core/downloader.py:388
+#: app/core/downloader.py:423
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr "There is not enough free space on the disk to download this file."
 
-#: app/core/downloader.py:380
+#: app/core/downloader.py:415
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3388,7 +3388,7 @@ msgstr ""
 "Free up some space on this disk, or choose a different download folder in "
 "Preferences (Ctrl+P)."
 
-#: app/core/downloader.py:399
+#: app/core/downloader.py:434
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr "Your disk is full: the download could not be saved."
 
@@ -3463,7 +3463,7 @@ msgstr "Download an &extract...\tCtrl+E"
 msgid "Télécharger un extrait"
 msgstr "Download an extract"
 
-#: app/core/downloader.py:1567
+#: app/core/downloader.py:1611
 msgid "fin"
 msgstr "end"
 
@@ -3971,7 +3971,7 @@ msgstr ""
 "\n"
 "If you answer No, the subscription is still created: the {n} items will be offered to you and you choose."
 
-#: app/core/downloader.py:427
+#: app/core/downloader.py:462
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -3981,7 +3981,7 @@ msgstr ""
 "\n"
 "DownAccess cannot download it, and no setting will change that: the protection is put in place by the site. Subscription platforms (Netflix, Disney+, Prime Video) and some france.tv videos work this way."
 
-#: app/core/downloader.py:440
+#: app/core/downloader.py:475
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -4020,3 +4020,17 @@ msgid ""
 msgstr ""
 "To catch up on the past of something you have just discovered. Without this "
 "option, DownAccess only tells you about what gets published from now on."
+
+#: app/core/downloader.py:328
+msgid ""
+"Cette vidéo est protégée contre la copie (DRM).\n"
+"\n"
+"Le site ne laisse accessible que la bande-son : l'image, elle, est verrouillée. DownAccess préfère vous le dire plutôt que de vous laisser un fichier audio à la place de votre émission.\n"
+"\n"
+"Aucun réglage n'y changera rien, c'est une protection posée par le site. M6, les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
+msgstr ""
+"This video is protected against copying (DRM).\n"
+"\n"
+"The site only leaves the soundtrack accessible: the picture itself is locked. DownAccess would rather tell you than hand you an audio file instead of your programme.\n"
+"\n"
+"No setting will change this, it is a protection put in place by the site. M6, subscription platforms (Netflix, Disney+, Prime Video) and some france.tv videos are in this case."

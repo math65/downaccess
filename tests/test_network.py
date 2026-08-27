@@ -23,6 +23,8 @@ CHAINE_YOUTUBE = "https://www.youtube.com/@Arte"
 PODCAST = "https://podcasts.files.bbci.co.uk/p02nq0gn.rss"
 VIDEO_AVEC_SOUS_TITRES = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
 COLLECTION_ARTE = "https://www.arte.tv/fr/videos/RC-014468/cabaret-vert/"
+# M6 : image chiffree, bande-son en clair (cf. TestImageVerrouillee).
+EPISODE_M6 = "https://www.m6.fr/24-heures-chrono-p_28317/s1-e1-minuit-1h00-c_13185332"
 
 
 def joignable(action, quoi):
@@ -153,3 +155,18 @@ class TestContratArte:
                 "arte.tv")
         assert info["title"] and info["alt_title"]
         assert info["alt_title"] not in info["title"]
+
+
+class TestContratM6:
+    def test_l_image_reste_verrouillee_et_le_son_accessible(self):
+        """Contrat inverse des autres : on verifie qu'une protection est
+        TOUJOURS en place. Si M6 ouvrait ses videos, ce test tomberait et il
+        faudrait retirer le garde-fou au lieu de refuser un site devenu
+        telechargeable."""
+        import yt_dlp
+
+        from app.core.downloader import video_is_drm_locked
+        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
+                               "skip_download": True}) as ydl:
+            info = repond(lambda: ydl.extract_info(EPISODE_M6, download=False), "m6.fr")
+        assert video_is_drm_locked(info), "M6 semble telechargeable : revoir le garde-fou"
