@@ -4,6 +4,7 @@ import pytest
 
 from app.core.downloader import (
     _display_title,
+    _enrich_arte_collection_titles,
     _domain_from_url,
     _fmt_size,
     _normalize_youtube_channel_url,
@@ -257,3 +258,95 @@ class TestTitreAffiche:
         info = {"title": "La loi de Teheran", "alt_title": "",
                 "webpage_url": "https://www.arte.tv/fr/videos/1-A/x/"}
         assert _display_title(info) == "La loi de Teheran"
+
+
+class TestCollectionArteNommee:
+    """Les entrees d'une collection Arte arrivent nues chez yt-dlp.
+
+    `ArteTVPlaylistIE` renvoie de simples `url_result` : ni titre ni duree. La
+    fenetre de selection n'avait donc que l'URL a annoncer au lecteur d'ecran.
+    On complete depuis l'API EMAC, en rapprochant par identifiant de video.
+    """
+
+    COLLECTION = "https://www.arte.tv/fr/videos/RC-014468/cabaret-vert/"
+
+    def _api(self, monkeypatch, decrites, appels=None):
+        import app.core.site_search as site_search
+
+        def faux(url):
+            if appels is not None:
+                appels.append(url)
+            return decrites
+
+        monkeypatch.setattr(site_search, "arte_collection_entries", faux)
+
+    def test_complete_les_titres_manquants(self, monkeypatch):
+        self._api(monkeypatch, [{
+            "title": "Speed — Cabaret Vert 2026",
+            "duration": 2882,
+            "_summary": "Le groupe australien.",
+            "webpage_url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+        }])
+        entries = [{"url": "https://www.arte.tv/fr/videos/133232-001-A/speed/"}]
+        _enrich_arte_collection_titles(self.COLLECTION, entries)
+        assert entries[0]["title"] == "Speed — Cabaret Vert 2026"
+        assert entries[0]["duration"] == 2882
+        assert entries[0]["description"] == "Le groupe australien."
+
+    def test_rapproche_meme_si_la_langue_ou_le_slug_different(self, monkeypatch):
+        """Le meme episode s'atteint par plusieurs URL : seul l'id est fiable."""
+        self._api(monkeypatch, [{
+            "title": "Speed",
+            "webpage_url": "https://www.arte.tv/de/videos/133232-001-A/autre-slug/",
+        }])
+        entries = [{"url": "https://www.arte.tv/fr/videos/133232-001-A/speed/"}]
+        _enrich_arte_collection_titles(self.COLLECTION, entries)
+        assert entries[0]["title"] == "Speed"
+
+    def test_laisse_intactes_les_entrees_inconnues(self, monkeypatch):
+        """Une grande collection d'archives n'est pas exposee en entier."""
+        self._api(monkeypatch, [{
+            "title": "Speed",
+            "webpage_url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+        }])
+        entries = [{"url": "https://www.arte.tv/fr/videos/999999-000-A/inconnue/"}]
+        _enrich_arte_collection_titles(self.COLLECTION, entries)
+        assert not entries[0].get("title")
+
+    def test_ne_touche_pas_a_un_titre_deja_donne(self, monkeypatch):
+        self._api(monkeypatch, [{
+            "title": "Depuis l'API",
+            "webpage_url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+        }])
+        entries = [{"url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+                    "title": "Deja nomme"}]
+        _enrich_arte_collection_titles(self.COLLECTION, entries)
+        assert entries[0]["title"] == "Deja nomme"
+
+    def test_aucun_appel_reseau_hors_arte(self, monkeypatch):
+        appels = []
+        self._api(monkeypatch, [], appels)
+        entries = [{"url": "https://www.youtube.com/watch?v=abc"}]
+        _enrich_arte_collection_titles(
+            "https://www.youtube.com/playlist?list=PLabc", entries)
+        assert appels == []
+
+    def test_aucun_appel_si_tout_est_deja_nomme(self, monkeypatch):
+        """Playlist Arte deja decrite : pas de requete inutile."""
+        appels = []
+        self._api(monkeypatch, [], appels)
+        entries = [{"url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+                    "title": "Speed"}]
+        _enrich_arte_collection_titles(self.COLLECTION, entries)
+        assert appels == []
+
+    def test_api_en_panne_ne_casse_rien(self, monkeypatch):
+        import app.core.site_search as site_search
+
+        def explose(url):
+            raise OSError("reseau coupe")
+
+        monkeypatch.setattr(site_search, "arte_collection_entries", explose)
+        entries = [{"url": "https://www.arte.tv/fr/videos/133232-001-A/speed/"}]
+        _enrich_arte_collection_titles(self.COLLECTION, entries)
+        assert not entries[0].get("title")

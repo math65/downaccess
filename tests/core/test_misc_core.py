@@ -5,7 +5,15 @@ import pytest
 from app.core import i18n
 from app.core.cookies import _normalize_domain, jar_path_for
 from app.core.custom_sites import detect_audio_tracks, is_custom_site_extractor, is_custom_site_url
-from app.core.site_search import _clean_summary, _page_slice, _slugify, categories, supports_browse
+from app.core.site_search import (
+    _clean_summary,
+    _page_slice,
+    _slugify,
+    arte_collection_id,
+    arte_video_id,
+    categories,
+    supports_browse,
+)
 
 
 class TestLangue:
@@ -153,3 +161,31 @@ class TestCookies:
         chemin = jar_path_for("https://www.exemple.org/x")
         assert chemin.endswith("exemple.org.txt")
         assert not any(c in chemin.rsplit("\\", 1)[-1] for c in ':*?"<>|')
+
+
+class TestCollectionArte:
+    """Rapprochement des entrees d'une collection Arte avec l'API EMAC."""
+
+    @pytest.mark.parametrize("url,attendu", [
+        ("https://www.arte.tv/fr/videos/RC-014468/cabaret-vert/", ("fr", "RC-014468")),
+        ("https://www.arte.tv/de/videos/RC-027513/twin-peaks/", ("de", "RC-027513")),
+        # Langue non servie par Arte -> repli francais
+        ("https://www.arte.tv/nl/videos/RC-014468/x/", ("fr", "RC-014468")),
+    ])
+    def test_reconnait_une_collection(self, url, attendu):
+        assert arte_collection_id(url) == attendu
+
+    @pytest.mark.parametrize("url", [
+        "https://www.arte.tv/fr/videos/133232-001-A/speed/",   # video, pas collection
+        "https://www.youtube.com/playlist?list=PLabc",
+        "",
+    ])
+    def test_ignore_le_reste(self, url):
+        assert arte_collection_id(url) is None
+
+    def test_identifiant_de_video(self):
+        assert arte_video_id(
+            "https://www.arte.tv/fr/videos/133232-001-A/speed/") == "133232-001-A"
+        assert arte_video_id(
+            "https://www.arte.tv/de/videos/133232-001-a/speed/") == "133232-001-A"
+        assert arte_video_id("https://www.arte.tv/fr/videos/RC-014468/x/") == ""

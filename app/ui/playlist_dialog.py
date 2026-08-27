@@ -1,3 +1,6 @@
+import re
+from urllib.parse import unquote, urlparse
+
 import wx
 
 from app.core import speech
@@ -7,6 +10,40 @@ from app.ui.search_dialog import RESULT_BACK
 NUMBER_ORIGINAL   = 0  # Numéro de la vidéo dans la playlist
 NUMBER_SEQUENTIAL = 1  # Numéro séquentiel (1, 2, 3...)
 NUMBER_NONE       = 2  # Pas de numérotation
+
+
+# Segments d'URL qui ne decrivent rien (routage du site), a ne pas afficher
+# comme titre.
+_SEGMENTS_MUETS = ("watch", "video", "videos", "embed", "v", "player", "index")
+
+
+def label_from_url(url: str) -> str:
+    """Libelle lisible tire d'une URL, ou chaine vide si rien d'exploitable.
+
+    Repli d'affichage quand le site ne fournit pas de titre : une URL entiere
+    est illisible au lecteur d'ecran, alors que le dernier morceau du chemin
+    est souvent le titre en toutes lettres
+    (« /videos/133232-001-A/speed/ » -> « Speed »).
+    """
+    try:
+        chemin = urlparse(url or "").path
+    except ValueError:
+        return ""
+    segments = [s for s in chemin.split("/") if s]
+    if not segments:
+        return ""
+    dernier = unquote(segments[-1])
+    dernier = re.sub(r"\.\w{2,4}$", "", dernier)          # extension eventuelle
+    if dernier.lower() in _SEGMENTS_MUETS:
+        return ""
+    mots = re.sub(r"[-_+]+", " ", dernier).strip()
+    # Un identifiant nu (« 133232-001-A », « dQw4w9WgXcQ ») n'apprend rien :
+    # mieux vaut le repli generique « Entree N ».
+    if not mots or not re.search(r"[a-zA-Z]{3}", mots) or not re.search(r"[aeiouyAEIOUY]", mots):
+        return ""
+    if sum(c.isdigit() for c in mots) > len(mots) / 3:
+        return ""
+    return mots[0].upper() + mots[1:]
 
 
 class PlaylistDialog(wx.Dialog):
@@ -57,7 +94,9 @@ class PlaylistDialog(wx.Dialog):
         self.lst.InsertColumn(0, _("Titre"), width=460)
 
         for i, entry in enumerate(entries):
-            title = entry.get("title") or entry.get("url") or _("Entrée {n}").format(n=i + 1)
+            title = (entry.get("title")
+                     or label_from_url(entry.get("url") or "")
+                     or _("Entrée {n}").format(n=i + 1))
             self.lst.InsertItem(i, f"{i + 1}. {title}")
             self.lst.CheckItem(i, True)
 

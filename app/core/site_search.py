@@ -37,6 +37,7 @@ _FRANCETV_SEARCH_URL = "https://api-mobile.yatta.francetv.fr/apps/search"
 _FRANCETV_CATEGORY_URL = "https://api-mobile.yatta.francetv.fr/apps/categories/{slug}"
 # Arte : API "web" (api.arte.tv) — pas de jeton requis, contrairement à l'API "app".
 _ARTE_PAGE_URL = "https://api.arte.tv/api/emac/v4/{lang}/web/pages/{code}/"
+_ARTE_COLLECTION_URL = "https://api.arte.tv/api/emac/v4/{lang}/web/collections/{code}/"
 _ARTE_LANGS = ("fr", "de", "en", "es", "it", "pl")
 
 _TIMEOUT = 20
@@ -292,6 +293,87 @@ def _arte_entry(item: dict) -> dict | None:
             item.get("shortDescription") or item.get("teaserText")
         ),
     }
+
+
+# Collections Arte (« RC-014468 ») : yt-dlp developpe la page en playlist mais
+# ne donne AUCUN titre a ses entrees (`url_result` nu) — la fenetre de playlist
+# n'avait que l'URL a afficher. L'API EMAC, elle, decrit chaque video.
+_ARTE_COLLECTION_RE = re.compile(
+    r"arte\.tv/(?P<lang>[a-z]{2})/videos/(?P<code>RC-\d{6})", re.I)
+# Un identifiant de video Arte (« 133232-001-A ») : cle de rapprochement entre
+# les entrees yt-dlp et celles de l'API, insensible a la langue et au slug.
+_ARTE_VIDEO_ID_RE = re.compile(r"/videos/(\d{6}-\d{3}-[A-Z])", re.I)
+# Garde-fou : une grande collection empile beaucoup de rails paginés. On borne
+# le nombre de requetes pour ne pas faire attendre l'utilisateur.
+_ARTE_COLLECTION_MAX_PAGES = 8
+
+
+def arte_collection_id(url: str) -> tuple[str, str] | None:
+    """(langue, code) si l'URL est une collection Arte, sinon None."""
+    match = _ARTE_COLLECTION_RE.search(url or "")
+    if not match:
+        return None
+    return _arte_lang(match["lang"].lower()), match["code"].upper()
+
+
+def arte_video_id(url: str) -> str:
+    """Identifiant de la video dans une URL Arte, ou chaine vide."""
+    match = _ARTE_VIDEO_ID_RE.search(url or "")
+    return match[1].upper() if match else ""
+
+
+def arte_collection_entries(url: str) -> list[dict]:
+    """Videos d'une collection Arte, decrites par l'API EMAC.
+
+    Meme normalisation que la recherche (`_arte_entry`), donc meme libelle
+    « titre — sous-titre » que dans la liste de resultats. La page de collection
+    empile plusieurs rails (episodes recents, sous-collections...) : on les
+    aplatit tous et on suit leur pagination, comme pour le parcours par
+    categorie. Une grande collection d'archives n'est pas forcement exposee en
+    entier — l'appelant garde alors ses entrees non decrites.
+    """
+    ident = arte_collection_id(url)
+    if not ident:
+        return []
+    lang, code = ident
+    resp = cffi_requests.get(
+        _ARTE_COLLECTION_URL.format(lang=lang, code=code),
+        impersonate="chrome",
+        timeout=_TIMEOUT,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+
+    entries: list[dict] = []
+    seen: set[str] = set()
+
+    def _collect(items: list[dict]) -> None:
+        for item in items:
+            entry = _arte_entry(item)
+            if entry and entry["id"] not in seen:
+                seen.add(entry["id"])
+                entries.append(entry)
+
+    requests_left = _ARTE_COLLECTION_MAX_PAGES
+    for zone in data.get("zones", []):
+        content = zone.get("content") or {}
+        _collect(content.get("data") or [])
+        pagination = content.get("pagination") or {}
+        next_url = (pagination.get("links") or {}).get("next") or ""
+        pages = int(pagination.get("pages") or 1)
+        page = 2
+        while next_url and page <= pages and requests_left > 0:
+            requests_left -= 1
+            zone_url = re.sub(r"([?&]page=)\d+", rf"\g<1>{page}", next_url)
+            try:
+                more = cffi_requests.get(zone_url, impersonate="chrome",
+                                         timeout=_TIMEOUT)
+                more.raise_for_status()
+                _collect((more.json() or {}).get("data") or [])
+            except Exception:
+                break   # une page manquante ne doit pas perdre les precedentes
+            page += 1
+    return entries
 
 
 def _arte_zone_items(zone: dict) -> list[dict]:

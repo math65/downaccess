@@ -14,6 +14,7 @@ pytestmark = pytest.mark.gui
 
 from app.core.settings import DEFAULTS
 from app.ui.add_url_dialog import AddUrlDialog
+from app.ui.playlist_dialog import PlaylistDialog, label_from_url
 from app.ui.settings_dialog import SettingsDialog
 from app.ui.transcript_dialog import TranscriptDialog
 
@@ -159,4 +160,44 @@ class TestPreferences:
         dlg = SettingsDialog(frame, dict(DEFAULTS))
         muets = nommes(dlg)
         assert muets == [], [type(c).__name__ for c in muets]
+        dlg.Destroy()
+
+
+class TestListePlaylist:
+    """Une entree sans titre ne doit pas s'annoncer comme une URL entiere.
+
+    Les collections Arte arrivent sans aucun titre (yt-dlp renvoie des
+    `url_result` nus). A defaut de titre, le dernier morceau du chemin est
+    souvent le titre en toutes lettres, et se lit, lui.
+    """
+
+    @pytest.mark.parametrize("url,attendu", [
+        ("https://www.arte.tv/fr/videos/133232-001-A/speed/", "Speed"),
+        ("https://www.arte.tv/fr/videos/124239-072-A/arte-reportage/", "Arte reportage"),
+        ("https://exemple.org/a/mon-super-episode.html", "Mon super episode"),
+    ])
+    def test_libelle_lisible(self, url, attendu):
+        assert label_from_url(url) == attendu
+
+    @pytest.mark.parametrize("url", [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",   # segment de routage
+        "https://vimeo.com/123456",                      # identifiant nu
+        "https://www.arte.tv/fr/videos/133232-002-A/",   # identifiant nu
+        "",
+    ])
+    def test_rien_a_tirer_de_l_url(self, url):
+        assert label_from_url(url) == ""
+
+    def test_la_fenetre_affiche_le_libelle_et_non_l_url(self, frame):
+        entries = [
+            {"url": "https://www.arte.tv/fr/videos/133232-001-A/speed/"},
+            {"url": "https://vimeo.com/123456"},
+            {"title": "Ofenbach — Cabaret Vert 2026",
+             "url": "https://www.arte.tv/fr/videos/133232-006-A/ofenbach/"},
+        ]
+        dlg = PlaylistDialog(frame, "Cabaret Vert", entries)
+        libelles = [dlg.lst.GetItemText(i) for i in range(dlg.lst.GetItemCount())]
+        assert libelles[0] == "1. Speed"
+        assert "vimeo.com" not in libelles[1]          # repli generique
+        assert libelles[2] == "3. Ofenbach — Cabaret Vert 2026"
         dlg.Destroy()

@@ -149,6 +149,56 @@ def _normalize_youtube_channel_url(url: str) -> str:
     return url
 
 
+def _enrich_arte_collection_titles(url: str, entries: list) -> None:
+    """Donne un titre aux entrees d'une collection Arte, sur place.
+
+    yt-dlp developpe bien la collection en playlist mais renvoie des entrees
+    nues (ni `title` ni `alt_title`) : la fenetre de selection n'avait que
+    l'URL a annoncer. L'API EMAC decrit chaque video — on la rapproche par
+    identifiant (« 133232-001-A »), insensible a la langue et au slug.
+
+    Best effort : reseau coupe, API changee ou video absente du catalogue
+    expose, l'entree garde simplement son libelle de repli.
+    """
+    from app.core.site_search import (
+        arte_collection_entries,
+        arte_collection_id,
+        arte_video_id,
+    )
+
+    if not arte_collection_id(url) or not any(
+            not e.get("title") for e in entries):
+        return
+    try:
+        described = arte_collection_entries(url)
+    except Exception as exc:
+        _log.warning("Titres de la collection Arte indisponibles (%s) : %s", url, exc)
+        return
+
+    par_id = {}
+    for entry in described:
+        vid = arte_video_id(entry.get("webpage_url") or "")
+        if vid:
+            par_id[vid] = entry
+    if not par_id:
+        return
+
+    decrites = 0
+    for entry in entries:
+        if entry.get("title"):
+            continue
+        found = par_id.get(arte_video_id(entry.get("url") or ""))
+        if not found:
+            continue
+        entry["title"] = found["title"]
+        if found.get("duration") and not entry.get("duration"):
+            entry["duration"] = found["duration"]
+        if found.get("_summary") and not entry.get("description"):
+            entry["description"] = found["_summary"]
+        decrites += 1
+    _log.info("Collection Arte : %d/%d entrees nommees", decrites, len(entries))
+
+
 @dataclass
 class DownloadInfo:
     download_id: str
@@ -587,6 +637,7 @@ class Downloader:
             entries = list(info.get("entries") or [])
             # Filtrer les entrées None (vidéos privées/supprimées)
             entries = [e for e in entries if e]
+            _enrich_arte_collection_titles(url, entries)
             return DownloadInfo(
                 download_id=download_id,
                 url=url,

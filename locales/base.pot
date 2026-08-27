@@ -186,7 +186,7 @@ msgstr ""
 msgid "Activer l'interception des requêtes média"
 msgstr ""
 
-#: app/core/site_search.py:57
+#: app/core/site_search.py:58
 msgid "Actualités et société"
 msgstr ""
 
@@ -326,7 +326,7 @@ msgstr ""
 #: app/ui/guided_login_dialog.py:87 app/ui/guided_login_dialog.py:88
 #: app/ui/login_required_dialog.py:59 app/ui/login_required_dialog.py:60
 #: app/ui/main_window.py:1290 app/ui/main_window.py:1547
-#: app/ui/main_window.py:1935 app/ui/playlist_dialog.py:102
+#: app/ui/main_window.py:1935 app/ui/playlist_dialog.py:141
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:160
 #: app/ui/subscriptions_dialog.py:78
@@ -349,7 +349,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:1066 app/core/downloader.py:1069
+#: app/core/downloader.py:1117 app/core/downloader.py:1120
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -369,7 +369,7 @@ msgstr ""
 msgid "Aperçu — {title}"
 msgstr ""
 
-#: app/core/site_search.py:71
+#: app/core/site_search.py:72
 msgid "Arts et spectacles"
 msgstr ""
 
@@ -578,7 +578,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:410
+#: app/core/downloader.py:460
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -644,7 +644,7 @@ msgid ""
 "Voulez-vous récupérer la liste complète via le navigateur ? Cela peut prendre un moment pour les grandes playlists."
 msgstr ""
 
-#: app/core/downloader.py:377
+#: app/core/downloader.py:427
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -750,7 +750,7 @@ msgid ""
 "celles à télécharger."
 msgstr ""
 
-#: app/core/site_search.py:69
+#: app/core/site_search.py:70
 msgid "Cinéma"
 msgstr ""
 
@@ -873,7 +873,7 @@ msgstr ""
 msgid "Créer un fichier par chapitre"
 msgstr ""
 
-#: app/core/site_search.py:61
+#: app/core/site_search.py:62
 msgid "Culture pop"
 msgstr ""
 
@@ -901,7 +901,7 @@ msgstr ""
 msgid "Diagnostic en cours…"
 msgstr ""
 
-#: app/core/site_search.py:54 app/core/site_search.py:68
+#: app/core/site_search.py:55 app/core/site_search.py:69
 msgid "Documentaires"
 msgstr ""
 
@@ -1104,11 +1104,11 @@ msgstr ""
 msgid "Entrez une URL pour ouvrir le navigateur."
 msgstr ""
 
-#: app/ui/playlist_dialog.py:60
+#: app/ui/playlist_dialog.py:99
 msgid "Entrée {n}"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:54
+#: app/ui/playlist_dialog.py:91
 msgid "Entrées de la playlist"
 msgstr ""
 
@@ -1191,7 +1191,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1665
+#: app/core/downloader.py:1716
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1231,11 +1231,11 @@ msgstr ""
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
-#: app/core/downloader.py:321
+#: app/core/downloader.py:371
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:324
+#: app/core/downloader.py:374
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1354,7 +1354,7 @@ msgstr ""
 msgid "File de téléchargement"
 msgstr ""
 
-#: app/core/site_search.py:55
+#: app/core/site_search.py:56
 msgid "Films"
 msgstr ""
 
@@ -1455,7 +1455,7 @@ msgstr ""
 msgid "Général"
 msgstr ""
 
-#: app/core/site_search.py:59
+#: app/core/site_search.py:60
 msgid "Histoire"
 msgstr ""
 
@@ -1467,7 +1467,7 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:338
+#: app/core/downloader.py:388
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
@@ -1538,7 +1538,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:400
+#: app/core/downloader.py:450
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1610,7 +1610,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1653
+#: app/core/downloader.py:1704
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1642,7 +1642,7 @@ msgstr ""
 msgid "Interception des requêtes média désactivée."
 msgstr ""
 
-#: app/ui/playlist_dialog.py:68
+#: app/ui/playlist_dialog.py:107
 msgid "Inverser la sélection"
 msgstr ""
 
@@ -1658,7 +1658,7 @@ msgstr ""
 msgid "Jamais"
 msgstr ""
 
-#: app/core/site_search.py:62
+#: app/core/site_search.py:63
 msgid "Jeunesse"
 msgstr ""
 
@@ -1708,7 +1708,7 @@ msgstr ""
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
-#: app/core/downloader.py:390
+#: app/core/downloader.py:440
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -1916,7 +1916,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:330
+#: app/core/downloader.py:380
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -2054,7 +2054,7 @@ msgstr ""
 msgid "Navigateur à utiliser :"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:80
+#: app/ui/playlist_dialog.py:119
 msgid "Ne pas numéroter"
 msgstr ""
 
@@ -2106,15 +2106,15 @@ msgstr ""
 msgid "Nouveautés de vos abonnements"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:78
+#: app/ui/playlist_dialog.py:117
 msgid "Numéro dans la playlist (position originale)"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:79
+#: app/ui/playlist_dialog.py:118
 msgid "Numéro séquentiel (1, 2, 3...)"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:76 app/ui/playlist_dialog.py:84
+#: app/ui/playlist_dialog.py:115 app/ui/playlist_dialog.py:123
 msgid "Numérotation des fichiers"
 msgstr ""
 
@@ -2313,7 +2313,7 @@ msgstr ""
 msgid "Playlist incomplète"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:24
+#: app/ui/playlist_dialog.py:61
 msgid "Playlist — {title}"
 msgstr ""
 
@@ -2528,7 +2528,7 @@ msgstr ""
 msgid "Retour"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:97 app/ui/playlist_dialog.py:98
+#: app/ui/playlist_dialog.py:136 app/ui/playlist_dialog.py:137
 msgid "Retour aux résultats"
 msgstr ""
 
@@ -2644,7 +2644,7 @@ msgid ""
 "ce que vous voulez."
 msgstr ""
 
-#: app/core/site_search.py:58
+#: app/core/site_search.py:59
 msgid "Sciences"
 msgstr ""
 
@@ -2711,7 +2711,7 @@ msgstr ""
 msgid "Sous-titres uniquement"
 msgstr ""
 
-#: app/core/site_search.py:72
+#: app/core/site_search.py:73
 msgid "Sport"
 msgstr ""
 
@@ -2792,7 +2792,7 @@ msgstr ""
 msgid "Sélection du format pour {title}. {count} formats disponibles."
 msgstr ""
 
-#: app/ui/playlist_dialog.py:167
+#: app/ui/playlist_dialog.py:206
 msgid "Sélection vide"
 msgstr ""
 
@@ -2808,7 +2808,7 @@ msgstr ""
 msgid "Sélectionnez le format à télécharger :"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:48
+#: app/ui/playlist_dialog.py:85
 msgid "Sélectionnez les vidéos à télécharger ({count} entrées) :"
 msgstr ""
 
@@ -2820,7 +2820,7 @@ msgstr ""
 msgid "Sélectionnez un site à supprimer."
 msgstr ""
 
-#: app/core/site_search.py:56 app/core/site_search.py:70
+#: app/core/site_search.py:57 app/core/site_search.py:71
 msgid "Séries et fictions"
 msgstr ""
 
@@ -2865,7 +2865,7 @@ msgid "Tester ffmpeg"
 msgstr ""
 
 #: app/ui/download_list.py:39 app/ui/history_dialog.py:50
-#: app/ui/new_items_dialog.py:46 app/ui/playlist_dialog.py:57
+#: app/ui/new_items_dialog.py:46 app/ui/playlist_dialog.py:94
 #: app/ui/search_dialog.py:297
 msgid "Titre"
 msgstr ""
@@ -2882,7 +2882,7 @@ msgstr ""
 msgid "Tous types"
 msgstr ""
 
-#: app/ui/new_items_dialog.py:57 app/ui/playlist_dialog.py:67
+#: app/ui/new_items_dialog.py:57 app/ui/playlist_dialog.py:106
 #: app/ui/search_dialog.py:339
 msgid "Tout désélectionner"
 msgstr ""
@@ -2891,7 +2891,7 @@ msgstr ""
 msgid "Tout marquer comme vu"
 msgstr ""
 
-#: app/ui/new_items_dialog.py:56 app/ui/playlist_dialog.py:66
+#: app/ui/new_items_dialog.py:56 app/ui/playlist_dialog.py:105
 #: app/ui/search_dialog.py:338
 msgid "Tout sélectionner"
 msgstr ""
@@ -3059,7 +3059,7 @@ msgstr ""
 msgid "Télécharger la piste choisie"
 msgstr ""
 
-#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:101
+#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:140
 #: app/ui/search_dialog.py:361
 msgid "Télécharger la sélection"
 msgstr ""
@@ -3205,7 +3205,7 @@ msgid ""
 "Exemple : prenom@exemple.com"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:164 app/ui/playlist_dialog.py:166
+#: app/ui/playlist_dialog.py:203 app/ui/playlist_dialog.py:205
 msgid "Veuillez sélectionner au moins une entrée."
 msgstr ""
 
@@ -3266,7 +3266,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:349
+#: app/core/downloader.py:399
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -3428,7 +3428,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:1516
+#: app/core/downloader.py:1567
 msgid "fin"
 msgstr ""
 
@@ -3606,15 +3606,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:314 app/ui/format_dialog.py:165
+#: app/core/downloader.py:364 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:313 app/ui/format_dialog.py:163
+#: app/core/downloader.py:363 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:311 app/ui/format_dialog.py:161
+#: app/core/downloader.py:361 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr ""
 
@@ -3662,7 +3662,7 @@ msgstr ""
 msgid "{seconds} s"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:183
+#: app/ui/playlist_dialog.py:222
 msgid "{selected} / {total} vidéo(s) sélectionnée(s)"
 msgstr ""
 
@@ -3711,7 +3711,7 @@ msgstr ""
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr ""
 
-#: app/core/site_search.py:60
+#: app/core/site_search.py:61
 msgid "Émissions"
 msgstr ""
 
