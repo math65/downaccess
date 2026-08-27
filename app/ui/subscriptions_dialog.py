@@ -29,7 +29,7 @@ def _format_labels() -> list[str]:
 
 
 class AddSubscriptionDialog(wx.Dialog):
-    """Saisie d'une adresse a suivre : chaine YouTube, playlist, ou podcast."""
+    """Saisie d'une adresse a suivre : chaine, playlist, podcast, collection Arte."""
 
     def __init__(self, parent):
         super().__init__(parent, title=_("Suivre une chaîne ou un podcast"),
@@ -48,8 +48,9 @@ class AddSubscriptionDialog(wx.Dialog):
         self.txt_url.SetHint("https://www.youtube.com/@arte")
 
         lbl_help = wx.StaticText(panel, label=_(
-            "Adresse d'une chaîne YouTube, d'une playlist, ou d'un flux de "
-            "podcast. La page d'accueil d'un podcast convient aussi : "
+            "Adresse d'une chaîne YouTube, d'une playlist, d'un flux de "
+            "podcast, ou d'une collection Arte (la page d'un festival ou "
+            "d'un magazine). La page d'accueil d'un podcast convient aussi : "
             "DownAccess y cherche le flux."))
 
         lbl_fmt = wx.StaticText(panel, label=_("Format des téléchargements :"))
@@ -69,9 +70,9 @@ class AddSubscriptionDialog(wx.Dialog):
             label=_("Considérer les publications déjà en ligne comme des nouveautés"),
             name=_("Considérer les publications déjà en ligne comme des nouveautés"))
         self.chk_catch_up.SetToolTip(_(
-            "Pour rattraper le passé d'une chaîne ou d'un podcast que vous "
-            "découvrez. Sans cette option, DownAccess ne vous signale que ce "
-            "qui sera publié à partir de maintenant."))
+            "Pour rattraper le passé de ce que vous découvrez. Sans cette "
+            "option, DownAccess ne vous signale que ce qui sera publié à "
+            "partir de maintenant."))
 
         btns = wx.StdDialogButtonSizer()
         self.btn_ok = wx.Button(panel, wx.ID_OK, label=_("Suivre"))

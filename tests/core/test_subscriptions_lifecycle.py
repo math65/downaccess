@@ -212,3 +212,102 @@ class TestPersistance:
         fichiers = {p.name for p in (appdata / "DownAccess").iterdir()}
         assert "subscriptions.json" in fichiers
         assert not any(f.endswith(".tmp") for f in fichiers)
+
+
+# --- Collections Arte ---------------------------------------------------------
+
+COLLECTION = "https://www.arte.tv/fr/videos/RC-014468/cabaret-vert/"
+
+VIDEOS_ARTE = [
+    {"title": "Speed — Cabaret Vert 2026",
+     "webpage_url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+     "_published": "2026-08-20T15:00:00Z", "_summary": "Punk australien."},
+    {"title": "Ofenbach — Cabaret Vert 2026",
+     "webpage_url": "https://www.arte.tv/fr/videos/133232-006-A/ofenbach/",
+     "_published": "2026-08-23T17:00:00Z", "_summary": ""},
+]
+
+
+@pytest.fixture
+def arte_fige(monkeypatch):
+    """Remplace l'API d'Arte par une collection qu'on pilote depuis le test.
+
+    `_http_get` est neutralise : une collection Arte n'a pas de flux, elle ne
+    doit passer par aucune requete de flux.
+    """
+    etat = {"titre": "Cabaret Vert", "videos": list(VIDEOS_ARTE)}
+    import app.core.site_search as site_search
+
+    monkeypatch.setattr(site_search, "arte_program",
+                        lambda url: (etat["titre"], etat["videos"]))
+    monkeypatch.setattr(site_search, "arte_collection_entries",
+                        lambda url: etat["videos"])
+
+    def pas_de_flux(url):
+        raise AssertionError("une collection Arte n'a pas de flux a telecharger")
+
+    monkeypatch.setattr(subs, "_http_get", pas_de_flux)
+    return etat
+
+
+class TestCollectionArte:
+    """Arte ne publie aucun flux : ses collections se suivent via son API."""
+
+    def test_reconnue_comme_collection(self, arte_fige):
+        feed, kind, titre = subs.resolve_feed(COLLECTION)
+        assert kind == subs.KIND_ARTE
+        assert titre == "Cabaret Vert"
+        assert feed == COLLECTION
+
+    def test_libelle_de_type(self):
+        assert abonnement(kind=subs.KIND_ARTE).kind_label() == "Collection Arte"
+
+    def test_abonnement_complet(self, arte_fige):
+        sub = subs.create(COLLECTION)
+        assert sub.title == "Cabaret Vert"
+        assert sub.kind == subs.KIND_ARTE
+        assert len(sub.seen_ids) == 2
+        assert subs.check(sub) == []
+
+    def test_identifiant_stable_et_non_l_adresse(self, arte_fige):
+        """L'id Arte survit a un changement de langue ou de slug dans l'URL ;
+        l'adresse, non. Sans ca, une video deja vue reapparaitrait."""
+        sub = subs.create(COLLECTION)
+        assert "133232-001-A" in sub.seen_ids
+
+    def test_nouvelle_video_detectee(self, arte_fige):
+        sub = subs.create(COLLECTION)
+        arte_fige["videos"].append({
+            "title": "Marguerite — Cabaret Vert 2026",
+            "webpage_url": "https://www.arte.tv/fr/videos/133232-004-A/marguerite/",
+            "_published": "2026-08-25T10:00:00Z",
+        })
+        neuf = subs.check(sub)
+        assert [e.title for e in neuf] == ["Marguerite — Cabaret Vert 2026"]
+        assert neuf[0].url.endswith("/marguerite/")
+
+    def test_la_plus_recente_d_abord(self, arte_fige):
+        sub = subs.create(COLLECTION, catch_up=True)
+        titres = [e.title for e in subs.check(sub)]
+        assert titres[0].startswith("Ofenbach")      # 23/08 avant 20/08
+        assert subs.check(sub)[0].published_label() == "23/08/2026"
+
+    def test_resume_conserve(self, arte_fige):
+        sub = subs.create(COLLECTION, catch_up=True)
+        speed = next(e for e in subs.check(sub) if e.title.startswith("Speed"))
+        assert speed.summary == "Punk australien."
+
+    def test_collection_vide_le_dit(self, arte_fige):
+        arte_fige["videos"] = []
+        with pytest.raises(subs.FeedError):
+            subs.resolve_feed(COLLECTION)
+
+    def test_repli_sur_l_api_web_sans_jeton(self, arte_fige, monkeypatch):
+        """Jeton indisponible : mieux vaut suivre une partie de la collection
+        que de refuser l'abonnement."""
+        import app.core.site_search as site_search
+        monkeypatch.setattr(site_search, "arte_program", lambda url: ("", []))
+        _feed, kind, titre = subs.resolve_feed(COLLECTION)
+        assert kind == subs.KIND_ARTE
+        assert titre == ""                     # l'appelant retombe sur l'URL
+        assert len(subs.create(COLLECTION).seen_ids) == 2

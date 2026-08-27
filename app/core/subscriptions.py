@@ -10,6 +10,10 @@ flux RSS par nature. Une verification coute quelques kilo-octets et une seule
 requete, sans quota ni defi JavaScript. C'est ce qui rend une verification a
 chaque lancement acceptable.
 
+Arte ne publie aucun flux, mais expose une API qui liste les videos d'une
+collection : un festival ou un magazine se suit donc comme le reste (cf.
+`_arte_collection_feed`). Pour l'utilisateur, la difference n'existe pas.
+
 Stockage : subscriptions.json dans le dossier de configuration.
 """
 
@@ -47,6 +51,7 @@ _UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 
 KIND_YOUTUBE = "youtube"
 KIND_PODCAST = "podcast"
+KIND_ARTE = "arte"
 
 _NS = {
     "atom":  "http://www.w3.org/2005/Atom",
@@ -104,7 +109,11 @@ class Subscription:
     seen_ids: list[str] = field(default_factory=list)
 
     def kind_label(self) -> str:
-        return _("Chaîne") if self.kind == KIND_YOUTUBE else _("Podcast")
+        if self.kind == KIND_YOUTUBE:
+            return _("Chaîne")
+        if self.kind == KIND_ARTE:
+            return _("Collection Arte")
+        return _("Podcast")
 
     def last_checked_label(self) -> str:
         if not self.last_checked:
@@ -328,14 +337,61 @@ def _feed_from_html(html: str, base_url: str) -> str:
     return ""
 
 
+def _arte_collection_feed(url: str) -> tuple[str, list[FeedEntry]]:
+    """Les videos d'une collection Arte, presentees comme un flux.
+
+    Arte ne publie aucun flux RSS. On interroge donc son API — la meme qui
+    nomme deja les entrees d'une collection — et on convertit chaque video en
+    entree de flux. L'identifiant Arte (« 133232-001-A ») sert d'identifiant
+    d'entree : il est stable, donc une video deja vue ne reapparait jamais.
+    """
+    from app.core import site_search
+
+    titre, videos = site_search.arte_program(url)
+    if not videos:
+        # Jeton indisponible : l'API web ne couvre pas toute une grande
+        # collection, mais mieux vaut suivre une partie que rien.
+        videos = site_search.arte_collection_entries(url)
+    if not videos:
+        raise FeedError(_("Aucune vidéo n'a été trouvée dans cette collection Arte."))
+
+    entries = [
+        FeedEntry(
+            entry_id=(site_search.arte_video_id(video.get("webpage_url") or "")
+                      or (video.get("webpage_url") or "")),
+            title=video.get("title") or "",
+            url=video.get("webpage_url") or "",
+            published=_iso(video.get("_published") or ""),
+            summary=video.get("_summary") or "",
+        )
+        for video in videos if video.get("webpage_url")
+    ]
+    # La plus recente d'abord, comme un flux : celles sans date passent apres.
+    entries.sort(key=lambda e: e.published, reverse=True)
+    return titre, entries
+
+
+def fetch_entries(feed_url: str, kind: str) -> tuple[str, list[FeedEntry]]:
+    """(titre, entrees) d'une source suivie, quelle que soit sa nature."""
+    if kind == KIND_ARTE:
+        return _arte_collection_feed(feed_url)
+    return parse_feed(_http_get(feed_url))
+
+
 def resolve_feed(url: str) -> tuple[str, str, str]:
     """URL saisie -> (adresse du flux, type, titre).
 
     Accepte une chaine YouTube sous toutes ses formes (@identifiant, /channel/,
-    /c/, /user/), une playlist, un flux RSS direct, ou n'importe quelle page
-    qui declare un flux dans son en-tete.
+    /c/, /user/), une playlist, une collection Arte, un flux RSS direct, ou
+    n'importe quelle page qui declare un flux dans son en-tete.
     """
     url = _normalize_url(url)
+
+    # 0. Collection Arte : pas de flux RSS, mais une API qui liste ses videos.
+    from app.core.site_search import arte_collection_id
+    if arte_collection_id(url):
+        titre, _entries = _arte_collection_feed(url)
+        return url, KIND_ARTE, titre
 
     # 1. Identifiant deja present dans l'URL : aucune requete de decouverte.
     feed_url = _youtube_feed_from_url(url)
@@ -392,7 +448,7 @@ def create(url: str, title: str = "", format_spec: str = "",
     les faire reapparaitre.
     """
     feed_url, kind, feed_title = resolve_feed(url)
-    _title, entries = parse_feed(_http_get(feed_url))
+    _title, entries = fetch_entries(feed_url, kind)
     now = datetime.now(UTC).isoformat()
     return Subscription(
         sub_id=str(uuid.uuid4()),
@@ -415,7 +471,7 @@ def check(sub: Subscription) -> list[FeedEntry]:
     Ne modifie pas l'abonnement : c'est l'appelant qui decide quand marquer
     comme vu, pour que fermer la fenetre ne fasse pas perdre les nouveautes.
     """
-    _title, entries = parse_feed(_http_get(sub.feed_url))
+    _title, entries = fetch_entries(sub.feed_url, sub.kind)
     seen = set(sub.seen_ids)
     return [e for e in entries if e.entry_id not in seen]
 

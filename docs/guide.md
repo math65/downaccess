@@ -178,7 +178,7 @@ DownAccess reconnaît les adresses même si le fichier contient d'autres lignes 
 |---|---|
 | Ajouter une ou plusieurs URL | Ctrl+N |
 | Télécharger seulement un extrait | Ctrl+E |
-| Abonnements (chaînes et podcasts) | Ctrl+B |
+| Abonnements (chaînes, podcasts, collections Arte) | Ctrl+B |
 | Coller une URL depuis le presse-papiers | Ctrl+V |
 | Activer/désactiver la surveillance du presse-papiers | Ctrl+Shift+V |
 
@@ -515,7 +515,8 @@ Cliquez sur **Suivre une chaîne...** puis collez une adresse. DownAccess accept
 - l'adresse d'une **chaîne YouTube** sous toutes ses formes (avec un @, avec /channel/, avec /c/ ou /user/) ;
 - l'adresse d'une **playlist YouTube** ;
 - l'adresse d'un **flux de podcast** (le fichier .xml ou .rss) ;
-- la **page d'accueil d'un podcast** : DownAccess y cherche lui-même le flux.
+- la **page d'accueil d'un podcast** : DownAccess y cherche lui-même le flux ;
+- l'adresse d'une **collection Arte** : la page d'un festival, d'une série ou d'un magazine. Vous la trouvez en parcourant Arte depuis la recherche (Ctrl+F) : les entrées de type « playlist » sont des collections. Suivre le festival Le Cabaret Vert, par exemple, vous signale chaque concert mis en ligne.
 
 Vous choisissez ensuite le format des téléchargements pour cette source (ou **Format par défaut des préférences**, pour que vos abonnements suivent vos préférences générales si vous en changez un jour), et vous pouvez cocher **Télécharger automatiquement les nouveautés**.
 
@@ -542,6 +543,8 @@ Le bouton **Vérifier maintenant** interroge tous vos abonnements sans attendre 
 ### Pourquoi c'est rapide
 
 DownAccess utilise les **flux** publiés par les sites, pas une exploration complète de la chaîne. Une vérification coûte quelques kilo-octets et une seule requête par abonnement, même pour une chaîne qui compte des milliers de vidéos. C'est ce qui permet de relever vos abonnements à chaque lancement sans ralentir le démarrage.
+
+Arte ne publie pas de flux : pour ses collections, DownAccess interroge directement le catalogue du site. Le principe et le coût restent les mêmes, et vous ne voyez aucune différence.
 
 ## Se connecter à un site et contenu protégé
 
@@ -990,7 +993,7 @@ Voici tous les raccourcis disponibles dans DownAccess.
 | **F1** | Ouvrir le guide d'utilisation |
 | **Ctrl+N** | Ajouter une ou plusieurs URLs |
 | **Ctrl+E** | Télécharger seulement un extrait d'une vidéo |
-| **Ctrl+B** | Abonnements : chaînes et podcasts suivis |
+| **Ctrl+B** | Abonnements : chaînes, podcasts et collections suivis |
 | **Ctrl+F** | Rechercher des vidéos ou musiques (YouTube, SoundCloud, etc.) |
 | **Ctrl+G** | Extraction guidée (navigateur intégré) |
 | **Ctrl+V** | Coller une URL depuis le presse-papiers |

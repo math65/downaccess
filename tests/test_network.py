@@ -127,6 +127,19 @@ class TestContratArte:
         assert result["total_count"] > 20
         assert all(e["title"] and e["webpage_url"] for e in result["entries"])
 
+    def test_une_collection_se_suit_comme_un_flux(self):
+        """Contrat de l'abonnement : la collection doit se resoudre en un
+        « flux » dont chaque entree porte un identifiant stable et une adresse."""
+        feed, kind, titre = repond(
+            lambda: subs.resolve_feed(COLLECTION_ARTE), "Arte")
+        assert kind == subs.KIND_ARTE
+        assert titre
+        _t, entries = repond(
+            lambda: subs.fetch_entries(feed, kind), "Arte")
+        assert len(entries) >= 5
+        assert all(e.entry_id and e.url and e.title for e in entries)
+        assert len({e.entry_id for e in entries}) == len(entries)
+
     def test_le_titre_distinctif_est_dans_alt_title(self):
         """Contrat cote yt-dlp : sur Arte, `title` porte le nom du programme et
         `alt_title` celui de l'episode. C'est sur quoi repose le nom de fichier."""

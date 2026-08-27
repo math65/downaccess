@@ -398,21 +398,28 @@ def _arte_program_entry(item: dict) -> dict | None:
         "webpage_url": url,
         "_dl_type": "video",
         "_summary": _clean_summary(item.get("shortDescription")),
+        # Date de publication : la mise en ligne d'abord (c'est le moment ou la
+        # video devient regardable), la diffusion antenne ensuite. Un concert
+        # d'ARTE Concert n'a jamais de date d'antenne, une emission de television
+        # n'a pas toujours de date de mise en ligne.
+        "_published": (item.get("videoRightsBegin") or item.get("broadcastBegin")
+                       or item.get("firstBroadcastDate") or item.get("creationDate")
+                       or ""),
     }
 
 
-def arte_program_entries(url: str) -> list[dict]:
-    """Videos d'une collection Arte via l'API programmes — liste COMPLETE.
+def arte_program(url: str) -> tuple[str, list[dict]]:
+    """Collection Arte via l'API programmes : (titre, videos) — liste COMPLETE.
 
     C'est la source de yt-dlp lui-meme : les entrees se rapprochent donc une a
-    une, sans trou, quelle que soit la taille de la collection. Renvoie une
-    liste vide (jamais d'exception) si le jeton manque ou si l'API refuse :
+    une, sans trou, quelle que soit la taille de la collection. Renvoie
+    `("", [])` (jamais d'exception) si le jeton manque ou si l'API refuse :
     l'appelant se rabat alors sur l'API web.
     """
     ident = arte_collection_id(url)
     token = _arte_api_token()
     if not ident or not token:
-        return []
+        return "", []
     lang, code = ident
     try:
         resp = cffi_requests.get(
@@ -424,9 +431,15 @@ def arte_program_entries(url: str) -> list[dict]:
         resp.raise_for_status()
         programs = (resp.json() or {}).get("programs") or []
     except Exception:
-        return []
-    videos = (programs[0] if programs else {}).get("videos") or []
-    return [e for e in (_arte_program_entry(v) for v in videos) if e]
+        return "", []
+    program = programs[0] if programs else {}
+    videos = program.get("videos") or []
+    return (program.get("title") or ""),           [e for e in (_arte_program_entry(v) for v in videos) if e]
+
+
+def arte_program_entries(url: str) -> list[dict]:
+    """Videos d'une collection Arte (cf. `arte_program`)."""
+    return arte_program(url)[1]
 
 
 def arte_collection_entries(url: str) -> list[dict]:

@@ -49,7 +49,7 @@ msgstr "Action after download:"
 #: app/ui/main_window.py:1935 app/ui/playlist_dialog.py:141
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:160
-#: app/ui/subscriptions_dialog.py:78
+#: app/ui/subscriptions_dialog.py:79
 msgid "Annuler"
 msgstr "Cancel"
 
@@ -58,7 +58,7 @@ msgid "Aucun avertissement n'est actuellement masqué."
 msgstr "No warning is currently hidden."
 
 #: app/ui/search_dialog.py:629 app/ui/settings_dialog.py:697
-#: app/ui/subscriptions_dialog.py:306
+#: app/ui/subscriptions_dialog.py:307
 msgid "Aucune sélection"
 msgstr "No selection"
 
@@ -590,12 +590,12 @@ msgstr ""
 msgid "Charger un fichier texte contenant une URL par ligne"
 msgstr "Load a text file with one URL per line"
 
-#: app/core/subscriptions.py:107 app/ui/search_dialog.py:50
+#: app/core/subscriptions.py:113 app/ui/search_dialog.py:50
 msgid "Chaîne"
 msgstr "Channel"
 
 #: app/ui/history_dialog.py:167 app/ui/main_window.py:2272
-#: app/ui/subscriptions_dialog.py:311
+#: app/ui/subscriptions_dialog.py:312
 msgid "Confirmer"
 msgstr "Confirm"
 
@@ -717,7 +717,7 @@ msgstr "Guided extraction — How it works"
 #: app/ui/error_dialog.py:46 app/ui/error_dialog.py:47
 #: app/ui/login_dialog.py:110 app/ui/main_window.py:2493
 #: app/ui/player_dialog.py:119 app/ui/report_dialog.py:123
-#: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:167
+#: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:168
 #: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:305
 #: app/ui/warning_dialog.py:41 app/ui/warning_dialog.py:42
 msgid "Fermer"
@@ -1402,7 +1402,7 @@ msgstr "Detected media:"
 msgid "Résolution de l'URL en cours…"
 msgstr "Resolving URL…"
 
-#: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:154
+#: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:155
 #: app/ui/uge_dialog.py:285
 msgid "Type"
 msgstr "Type"
@@ -1842,7 +1842,7 @@ msgid "File de téléchargement"
 msgstr "Download queue"
 
 #: app/ui/download_list.py:41 app/ui/history_dialog.py:52
-#: app/ui/subscriptions_dialog.py:155
+#: app/ui/subscriptions_dialog.py:156
 msgid "Format"
 msgstr "Format"
 
@@ -3161,7 +3161,7 @@ msgstr "{minutes} min {seconds} s"
 msgid "{seconds} s"
 msgstr "{seconds} s"
 
-#: app/ui/settings_dialog.py:265 app/ui/subscriptions_dialog.py:156
+#: app/ui/settings_dialog.py:265 app/ui/subscriptions_dialog.py:157
 msgid "Automatique"
 msgstr "Automatic"
 
@@ -3595,27 +3595,19 @@ msgstr "Su&bscriptions..."
 msgid "A&bonnements...\tCtrl+B"
 msgstr "Su&bscriptions...\tCtrl+B"
 
-#: app/ui/subscriptions_dialog.py:289
+#: app/ui/subscriptions_dialog.py:290
 msgid "Abonnement ajouté"
 msgstr "Subscription added"
 
-#: app/ui/subscriptions_dialog.py:130 app/ui/subscriptions_dialog.py:151
+#: app/ui/subscriptions_dialog.py:131 app/ui/subscriptions_dialog.py:152
 msgid "Abonnements"
 msgstr "Subscriptions"
 
-#: app/ui/subscriptions_dialog.py:50
-msgid ""
-"Adresse d'une chaîne YouTube, d'une playlist, ou d'un flux de podcast. La "
-"page d'accueil d'un podcast convient aussi : DownAccess y cherche le flux."
-msgstr ""
-"The address of a YouTube channel, a playlist, or a podcast feed. A podcast's"
-" home page works too: DownAccess looks for the feed there."
-
-#: app/core/subscriptions.py:190 app/core/subscriptions.py:194
+#: app/core/subscriptions.py:199 app/core/subscriptions.py:203
 msgid "Adresse injoignable : {error}"
 msgstr "Address unreachable: {error}"
 
-#: app/ui/subscriptions_dialog.py:102
+#: app/ui/subscriptions_dialog.py:103
 msgid "Adresse manquante"
 msgstr "Address missing"
 
@@ -3631,11 +3623,11 @@ msgstr "Address to follow:"
 msgid "Annoncer vocalement les nouveautés des abonnements"
 msgstr "Announce subscription news out loud"
 
-#: app/ui/subscriptions_dialog.py:334
+#: app/ui/subscriptions_dialog.py:335
 msgid "Aucun abonnement"
 msgstr "No subscriptions"
 
-#: app/core/subscriptions.py:372
+#: app/core/subscriptions.py:428
 msgid "Aucun flux n'a été trouvé à cette adresse."
 msgstr "No feed was found at this address."
 
@@ -3643,15 +3635,15 @@ msgstr "No feed was found at this address."
 msgid "Aucun résumé disponible."
 msgstr "No summary available."
 
-#: app/core/subscriptions.py:209
+#: app/core/subscriptions.py:218
 msgid "Aucune adresse indiquée."
 msgstr "No address given."
 
-#: app/ui/subscriptions_dialog.py:362
+#: app/ui/subscriptions_dialog.py:363
 msgid "Aucune nouveauté pour l'instant."
 msgstr "Nothing new for now."
 
-#: app/ui/subscriptions_dialog.py:358
+#: app/ui/subscriptions_dialog.py:359
 msgid ""
 "Aucune nouveauté.\n"
 "\n"
@@ -3663,19 +3655,19 @@ msgstr ""
 "Some subscriptions could not be checked:\n"
 "{errors}"
 
-#: app/core/subscriptions.py:288
+#: app/core/subscriptions.py:297
 msgid "Ce document n'est pas un flux RSS ou Atom."
 msgstr "This document is not an RSS or Atom feed."
 
-#: app/core/subscriptions.py:248
+#: app/core/subscriptions.py:257
 msgid "Ce flux contient une déclaration non autorisée."
 msgstr "This feed contains a declaration that is not allowed."
 
-#: app/core/subscriptions.py:292
+#: app/core/subscriptions.py:301
 msgid "Ce flux ne contient aucune entrée exploitable."
 msgstr "This feed contains no usable entries."
 
-#: app/ui/subscriptions_dialog.py:157
+#: app/ui/subscriptions_dialog.py:158
 msgid "Dernière vérification"
 msgstr "Last checked"
 
@@ -3721,19 +3713,19 @@ msgstr ""
 "Ctrl+P           Preferences\n"
 "Alt+F4           Quit"
 
-#: app/core/subscriptions.py:272
+#: app/core/subscriptions.py:281
 msgid "Flux RSS sans canal."
 msgstr "RSS feed with no channel."
 
-#: app/ui/subscriptions_dialog.py:299
+#: app/ui/subscriptions_dialog.py:300
 msgid "Flux introuvable"
 msgstr "Feed not found"
 
-#: app/ui/subscriptions_dialog.py:57
+#: app/ui/subscriptions_dialog.py:58
 msgid "Format des téléchargements"
 msgstr "Download format"
 
-#: app/ui/subscriptions_dialog.py:55
+#: app/ui/subscriptions_dialog.py:56
 msgid "Format des téléchargements :"
 msgstr "Download format:"
 
@@ -3741,7 +3733,7 @@ msgstr "Download format:"
 msgid "Format par défaut des préférences"
 msgstr "Default format from preferences"
 
-#: app/ui/subscriptions_dialog.py:296
+#: app/ui/subscriptions_dialog.py:297
 msgid ""
 "Impossible de suivre cette adresse.\n"
 "\n"
@@ -3755,23 +3747,23 @@ msgstr ""
 "\n"
 "Check the address, or try the channel's home page instead."
 
-#: app/ui/subscriptions_dialog.py:101
+#: app/ui/subscriptions_dialog.py:102
 msgid "Indiquez l'adresse à suivre."
 msgstr "Enter the address to follow."
 
-#: app/core/subscriptions.py:186
+#: app/core/subscriptions.py:195
 msgid "Le serveur a répondu {code} ({reason})."
 msgstr "The server replied {code} ({reason})."
 
-#: app/ui/subscriptions_dialog.py:161
+#: app/ui/subscriptions_dialog.py:162
 msgid "Ne plus suivre"
 msgstr "Stop following"
 
-#: app/ui/subscriptions_dialog.py:310
+#: app/ui/subscriptions_dialog.py:311
 msgid "Ne plus suivre « {title} » ?"
 msgstr "Stop following \"{title}\"?"
 
-#: app/ui/subscriptions_dialog.py:153
+#: app/ui/subscriptions_dialog.py:154
 msgid "Nom"
 msgstr "Name"
 
@@ -3783,11 +3775,11 @@ msgstr "New items"
 msgid "Nouveautés de vos abonnements"
 msgstr "New from your subscriptions"
 
-#: app/core/subscriptions.py:107
+#: app/core/subscriptions.py:116
 msgid "Podcast"
 msgstr "Podcast"
 
-#: app/ui/subscriptions_dialog.py:239
+#: app/ui/subscriptions_dialog.py:240
 msgid "Recherche du flux..."
 msgstr "Looking for the feed..."
 
@@ -3799,7 +3791,7 @@ msgstr "Check subscriptions at startup"
 msgid "Résumé"
 msgstr "Summary"
 
-#: app/ui/subscriptions_dialog.py:63
+#: app/ui/subscriptions_dialog.py:64
 msgid ""
 "Sans cette option, DownAccess vous montre les nouveautés et vous choisissez "
 "ce que vous voulez."
@@ -3807,7 +3799,7 @@ msgstr ""
 "Without this option, DownAccess shows you what is new and you choose what "
 "you want."
 
-#: app/core/subscriptions.py:213
+#: app/core/subscriptions.py:222
 msgid "Seules les adresses http et https sont acceptées."
 msgstr "Only http and https addresses are accepted."
 
@@ -3815,7 +3807,7 @@ msgstr "Only http and https addresses are accepted."
 msgid "Source"
 msgstr "Source"
 
-#: app/ui/subscriptions_dialog.py:77
+#: app/ui/subscriptions_dialog.py:78
 msgid "Suivre"
 msgstr "Follow"
 
@@ -3827,7 +3819,7 @@ msgstr "Follow channels and podcasts, and see what is new"
 msgid "Suivre une chaîne ou un podcast"
 msgstr "Follow a channel or a podcast"
 
-#: app/ui/subscriptions_dialog.py:160
+#: app/ui/subscriptions_dialog.py:161
 msgid "Suivre une chaîne..."
 msgstr "Follow a channel..."
 
@@ -3835,7 +3827,7 @@ msgstr "Follow a channel..."
 msgid "Sélectionnez ce que vous voulez télécharger ({count} nouveautés) :"
 msgstr "Select what you want to download ({count} new items):"
 
-#: app/ui/subscriptions_dialog.py:305
+#: app/ui/subscriptions_dialog.py:306
 msgid "Sélectionnez d'abord un abonnement."
 msgstr "Select a subscription first."
 
@@ -3843,23 +3835,23 @@ msgstr "Select a subscription first."
 msgid "Tout marquer comme vu"
 msgstr "Mark all as seen"
 
-#: app/ui/subscriptions_dialog.py:61 app/ui/subscriptions_dialog.py:62
+#: app/ui/subscriptions_dialog.py:62 app/ui/subscriptions_dialog.py:63
 msgid "Télécharger automatiquement les nouveautés"
 msgstr "Download new items automatically"
 
-#: app/ui/subscriptions_dialog.py:165
+#: app/ui/subscriptions_dialog.py:166
 msgid "Voir les nouveautés"
 msgstr "See what is new"
 
-#: app/ui/subscriptions_dialog.py:164
+#: app/ui/subscriptions_dialog.py:165
 msgid "Voir les {n} nouveautés"
 msgstr "See the {n} new items"
 
-#: app/ui/subscriptions_dialog.py:203 app/ui/subscriptions_dialog.py:333
+#: app/ui/subscriptions_dialog.py:204 app/ui/subscriptions_dialog.py:334
 msgid "Vous ne suivez encore aucune chaîne ni podcast."
 msgstr "You are not following any channel or podcast yet."
 
-#: app/ui/subscriptions_dialog.py:286
+#: app/ui/subscriptions_dialog.py:287
 msgid ""
 "Vous suivez maintenant « {title} ».\n"
 "\n"
@@ -3869,11 +3861,11 @@ msgstr ""
 "\n"
 "DownAccess will tell you about anything published from now on."
 
-#: app/ui/subscriptions_dialog.py:337
+#: app/ui/subscriptions_dialog.py:338
 msgid "Vérification en cours..."
 msgstr "Checking..."
 
-#: app/ui/subscriptions_dialog.py:360 app/ui/subscriptions_dialog.py:363
+#: app/ui/subscriptions_dialog.py:361 app/ui/subscriptions_dialog.py:364
 msgid "Vérification terminée"
 msgstr "Check finished"
 
@@ -3885,23 +3877,23 @@ msgstr ""
 "Quietly checks the channels and podcasts you follow at startup. The number "
 "of new items appears in the File menu, without interrupting anything."
 
-#: app/ui/subscriptions_dialog.py:162
+#: app/ui/subscriptions_dialog.py:163
 msgid "Vérifier maintenant"
 msgstr "Check now"
 
-#: app/core/subscriptions.py:111
+#: app/core/subscriptions.py:120
 msgid "jamais"
 msgstr "never"
 
-#: app/ui/subscriptions_dialog.py:215
+#: app/ui/subscriptions_dialog.py:216
 msgid "non"
 msgstr "no"
 
-#: app/ui/subscriptions_dialog.py:215
+#: app/ui/subscriptions_dialog.py:216
 msgid "oui"
 msgstr "yes"
 
-#: app/ui/subscriptions_dialog.py:204
+#: app/ui/subscriptions_dialog.py:205
 msgid "{n} abonnements :"
 msgstr "{n} subscriptions:"
 
@@ -3947,24 +3939,15 @@ msgstr "When the video has chapters:"
 msgid "Traitement des chapitres"
 msgstr "Chapter handling"
 
-#: app/ui/subscriptions_dialog.py:270
+#: app/ui/subscriptions_dialog.py:271
 msgid "Beaucoup de publications à télécharger"
 msgstr "A lot to download"
 
-#: app/ui/subscriptions_dialog.py:69 app/ui/subscriptions_dialog.py:70
+#: app/ui/subscriptions_dialog.py:70 app/ui/subscriptions_dialog.py:71
 msgid "Considérer les publications déjà en ligne comme des nouveautés"
 msgstr "Treat everything already online as new"
 
-#: app/ui/subscriptions_dialog.py:71
-msgid ""
-"Pour rattraper le passé d'une chaîne ou d'un podcast que vous découvrez. "
-"Sans cette option, DownAccess ne vous signale que ce qui sera publié à "
-"partir de maintenant."
-msgstr ""
-"To catch up on a channel or podcast you have just discovered. Without this "
-"option, DownAccess only tells you about what is published from now on."
-
-#: app/ui/subscriptions_dialog.py:281
+#: app/ui/subscriptions_dialog.py:282
 msgid ""
 "Vous suivez maintenant « {title} ».\n"
 "\n"
@@ -3974,7 +3957,7 @@ msgstr ""
 "\n"
 "{n} items already online are waiting for you: open “See what's new” to choose."
 
-#: app/ui/subscriptions_dialog.py:263
+#: app/ui/subscriptions_dialog.py:264
 msgid ""
 "« {title} » compte déjà {n} publications en ligne, et vous avez demandé le téléchargement automatique : elles partiront toutes en téléchargement, ce qui peut occuper beaucoup de place.\n"
 "\n"
@@ -4011,3 +3994,29 @@ msgstr ""
 #: app/core/site_search.py:86
 msgid "Concerts et spectacles"
 msgstr "Concerts and live performances"
+
+#: app/ui/subscriptions_dialog.py:50
+msgid ""
+"Adresse d'une chaîne YouTube, d'une playlist, d'un flux de podcast, ou d'une"
+" collection Arte (la page d'un festival ou d'un magazine). La page d'accueil"
+" d'un podcast convient aussi : DownAccess y cherche le flux."
+msgstr ""
+"Address of a YouTube channel, a playlist, a podcast feed, or an Arte "
+"collection (the page of a festival or a magazine). A podcast's home page "
+"works too: DownAccess looks for the feed there."
+
+#: app/core/subscriptions.py:356
+msgid "Aucune vidéo n'a été trouvée dans cette collection Arte."
+msgstr "No video was found in this Arte collection."
+
+#: app/core/subscriptions.py:115
+msgid "Collection Arte"
+msgstr "Arte collection"
+
+#: app/ui/subscriptions_dialog.py:72
+msgid ""
+"Pour rattraper le passé de ce que vous découvrez. Sans cette option, "
+"DownAccess ne vous signale que ce qui sera publié à partir de maintenant."
+msgstr ""
+"To catch up on the past of something you have just discovered. Without this "
+"option, DownAccess only tells you about what gets published from now on."

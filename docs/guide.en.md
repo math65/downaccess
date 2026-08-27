@@ -178,7 +178,7 @@ DownAccess recognizes the addresses even if the file contains other lines of tex
 |---|---|
 | Add one or more URLs | Ctrl+N |
 | Download only an extract | Ctrl+E |
-| Subscriptions (channels and podcasts) | Ctrl+B |
+| Subscriptions (channels, podcasts, Arte collections) | Ctrl+B |
 | Paste a URL from the clipboard | Ctrl+V |
 | Turn clipboard monitoring on/off | Ctrl+Shift+V |
 
@@ -515,7 +515,8 @@ Click **Follow a channel...** and paste an address. DownAccess accepts:
 - the address of a **YouTube channel** in any of its forms (with an @, with /channel/, with /c/ or /user/);
 - the address of a **YouTube playlist**;
 - the address of a **podcast feed** (the .xml or .rss file);
-- a **podcast's home page**: DownAccess looks for the feed itself.
+- a **podcast's home page**: DownAccess looks for the feed itself;
+- the address of an **Arte collection**: the page of a festival, a series or a magazine. You find it by browsing Arte from the search window (Ctrl+F): entries of type "playlist" are collections. Following the Le Cabaret Vert festival, for instance, tells you about every concert put online.
 
 You then choose the download format for that source (or **Default format from preferences**, so your subscriptions follow your general preferences if you ever change them), and you can tick **Download new items automatically**.
 
@@ -542,6 +543,8 @@ The **Check now** button queries all your subscriptions without waiting for the 
 ### Why it is fast
 
 DownAccess uses the **feeds** published by the sites, not a full crawl of the channel. One check costs a few kilobytes and a single request per subscription, even for a channel with thousands of videos. That is what makes it possible to check your subscriptions at every launch without slowing the startup down.
+
+Arte publishes no feed: for its collections, DownAccess queries the site's catalogue directly. The principle and the cost stay the same, and you see no difference.
 
 ## Logging in to a Site and Protected Content
 
@@ -989,7 +992,7 @@ Here are all the shortcuts available in DownAccess.
 |---|---|
 | **Ctrl+N** | Add one or more URLs |
 | **Ctrl+E** | Download only an extract of a video |
-| **Ctrl+B** | Subscriptions: channels and podcasts you follow |
+| **Ctrl+B** | Subscriptions: channels, podcasts and collections you follow |
 | **Ctrl+F** | Search for videos or music (YouTube, SoundCloud, etc.) |
 | **Ctrl+G** | Guided extraction (built-in browser) |
 | **Ctrl+V** | Paste a URL from the clipboard |

@@ -98,6 +98,18 @@ class TestListeAbonnements:
         assert dlg.lst.GetItemText(0, 4)          # derniere verification
         dlg.Destroy()
 
+    def test_une_collection_arte_s_annonce_comme_telle(self, frame, appdata,
+                                                       monkeypatch):
+        """Le type est lu par le lecteur d'ecran : « Collection Arte » doit
+        distinguer un festival suivi d'une chaine YouTube."""
+        from app.core import subscriptions as subs
+        monkeypatch.setattr(subs, "load", lambda: [
+            abonnement(title="Cabaret Vert", kind=subs.KIND_ARTE)])
+        dlg = SubscriptionsDialog(frame)
+        assert dlg.lst.GetItemText(0, 0) == "Cabaret Vert"
+        assert "Arte" in dlg.lst.GetItemText(0, 1)
+        dlg.Destroy()
+
     def test_bouton_nouveautes_inactif_sans_rien(self, frame, appdata, monkeypatch):
         from app.core import subscriptions as subs
         monkeypatch.setattr(subs, "load", lambda: [abonnement()])
