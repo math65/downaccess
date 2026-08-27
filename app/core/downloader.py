@@ -65,6 +65,56 @@ _YT_CHANNEL_TABS = ("videos", "shorts", "streams", "playlists",
                     "featured", "community", "about", "live", "podcasts")
 
 
+# Sites ou yt-dlp met le nom du PROGRAMME dans `title` et celui de l'episode
+# dans `alt_title`. Arte : l'extracteur fait `title = subtitle or title` et
+# `alt_title = title` (yt_dlp/extractor/arte.py). Sur un festival, le
+# sous-titre de la page est commun a toutes les videos (« Cabaret Vert 2026 »)
+# et le nom du groupe est dans alt_title : sans lui, les six concerts portent
+# le meme nom de fichier, yt-dlp voit le fichier deja present et un seul
+# survit. Mesure sur arte.tv/fr/videos/133232-00X-A le 2026-08-27.
+_ALT_TITLE_HOSTS = ("arte.tv",)
+
+
+def _uses_alt_title(url: str) -> bool:
+    """Vrai si l'hote place le titre distinctif dans `alt_title`."""
+    try:
+        host = urlparse(url).netloc.lower().split(":")[0]
+    except ValueError:
+        return False
+    return any(host == h or host.endswith("." + h) for h in _ALT_TITLE_HOSTS)
+
+
+def _title_template(url: str, budget: int) -> str:
+    """Gabarit yt-dlp du titre dans le nom de fichier, borne a `budget` car.
+
+    Sur les hotes de `_ALT_TITLE_HOSTS`, prefixe le titre par `alt_title` quand
+    il existe — ce qui donne le meme libelle que la liste de recherche
+    (« Ofenbach - Cabaret Vert 2026 ») et distingue deux episodes du meme
+    programme. La syntaxe `%(champ&remplacement|defaut)s` de yt-dlp n'ajoute
+    rien quand `alt_title` est vide.
+    """
+    if not _uses_alt_title(url):
+        return f"%(title).{budget}s"
+    alt = max(15, budget // 3)
+    rest = budget - alt - len(" - ")
+    if rest < 15:
+        return f"%(title).{budget}s"
+    return f"%(alt_title&{{:.{alt}}} - |)s%(title).{rest}s"
+
+
+def _display_title(info: dict, url: str = "") -> str:
+    """Titre affiche pour une video, aligne sur le nom de fichier.
+
+    Meme regle que `_title_template` : sur Arte, la file d'attente affichait
+    « Cabaret Vert 2026 » pour les six concerts d'un festival.
+    """
+    title = info.get("title") or ""
+    alt = (info.get("alt_title") or "").strip()
+    if alt and _uses_alt_title(info.get("webpage_url") or url):
+        return f"{alt} - {title}" if title else alt
+    return title
+
+
 def _normalize_youtube_channel_url(url: str) -> str:
     """Réécrit les URLs de chaîne YouTube vers l'onglet « Vidéos ».
 
@@ -558,7 +608,7 @@ class Downloader:
         return DownloadInfo(
             download_id=download_id,
             url=url,
-            title=info.get("title") or url,
+            title=_display_title(info, url) or url,
             site=info.get("extractor_key") or info.get("extractor") or "—",
             fmt=_describe_format(info),
             duration=float(info.get("duration") or 0),
@@ -669,7 +719,8 @@ class Downloader:
                        f" a {_timecode_for_filename(section[1])}]")
             _trim_len = max(50, _trim_len - len(_suffix))
 
-        name_part = f"{_num_prefix}%(title).{_trim_len}s{_suffix}.%(ext)s"
+        name_part = (f"{_num_prefix}{_title_template(url, _trim_len)}"
+                     f"{_suffix}.%(ext)s")
         outtmpl = f"{_rel_dir}/{name_part}" if _rel_dir else name_part
 
         # Decoupe par chapitres : yt-dlp nomme les morceaux avec le gabarit
@@ -680,7 +731,7 @@ class Downloader:
         split_chapters = chapters_mode == "split" and not section
         if split_chapters:
             _part = max(25, (_trim_len - 12) // 2)
-            _chapter_name = (f"{_num_prefix}%(title).{_part}s"
+            _chapter_name = (f"{_num_prefix}{_title_template(url, _part)}"
                              f" - %(section_number)03d %(section_title).{_part}s.%(ext)s")
             outtmpl = {
                 "default": outtmpl,
@@ -1301,7 +1352,14 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
             opts["format"] = f"bestvideo[ext=mp4]+{ag}/bestvideo+{ag}/best"
             opts["merge_output_format"] = "mp4"
         else:
-            opts["format"] = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+            # Le repli « bestvideo+bestaudio » (sans contrainte d'extension) est
+            # indispensable : sur Arte, le flux audio HLS est annonce en
+            # ext=mp4, jamais en m4a, et aucun format ne porte a la fois
+            # l'image et le son — sans lui, choisir MP4 echouait sur « Requested
+            # format is not available ». Le post-processeur remet le conteneur
+            # en MP4 de toute facon.
+            opts["format"] = ("bestvideo[ext=mp4]+bestaudio[ext=m4a]/"
+                              "bestvideo+bestaudio/best[ext=mp4]/best")
         opts["postprocessors"] = [{
             "key": "FFmpegVideoConvertor",
             "preferedformat": "mp4",

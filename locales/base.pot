@@ -349,7 +349,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:1015 app/core/downloader.py:1018
+#: app/core/downloader.py:1066 app/core/downloader.py:1069
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -578,7 +578,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:360
+#: app/core/downloader.py:410
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -644,7 +644,7 @@ msgid ""
 "Voulez-vous récupérer la liste complète via le navigateur ? Cela peut prendre un moment pour les grandes playlists."
 msgstr ""
 
-#: app/core/downloader.py:327
+#: app/core/downloader.py:377
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -1191,7 +1191,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1607
+#: app/core/downloader.py:1665
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1231,11 +1231,11 @@ msgstr ""
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
-#: app/core/downloader.py:271
+#: app/core/downloader.py:321
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:274
+#: app/core/downloader.py:324
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1467,7 +1467,7 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:288
+#: app/core/downloader.py:338
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
@@ -1538,7 +1538,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:350
+#: app/core/downloader.py:400
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1610,7 +1610,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1595
+#: app/core/downloader.py:1653
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1708,7 +1708,7 @@ msgstr ""
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
-#: app/core/downloader.py:340
+#: app/core/downloader.py:390
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -1916,7 +1916,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:280
+#: app/core/downloader.py:330
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3266,7 +3266,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:299
+#: app/core/downloader.py:349
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -3428,7 +3428,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:1458
+#: app/core/downloader.py:1516
 msgid "fin"
 msgstr ""
 
@@ -3606,15 +3606,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:264 app/ui/format_dialog.py:165
+#: app/core/downloader.py:314 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:263 app/ui/format_dialog.py:163
+#: app/core/downloader.py:313 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:261 app/ui/format_dialog.py:161
+#: app/core/downloader.py:311 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr ""
 

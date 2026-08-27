@@ -3,6 +3,7 @@
 import pytest
 
 from app.core.downloader import (
+    _display_title,
     _domain_from_url,
     _fmt_size,
     _normalize_youtube_channel_url,
@@ -10,6 +11,7 @@ from app.core.downloader import (
     _should_use_cookies,
     _target_ext,
     _timecode_for_filename,
+    _title_template,
     estimate_total_bytes,
     format_timecode,
     parse_timecode,
@@ -174,3 +176,84 @@ class TestDomainesEtCookies:
 
     def test_liste_vide(self):
         assert not _should_use_cookies({"cookie_sites": []}, "https://youtube.com/x")
+
+
+class TestTitreDistinctifArte:
+    """Deux videos du meme programme Arte doivent donner deux fichiers.
+
+    Regression signalee le 2026-08-26 : les six concerts du festival
+    Cabaret Vert arrivaient tous sous le nom « Cabaret Vert 2026 », donc un
+    seul fichier survivait. L'extracteur Arte de yt-dlp expose le SOUS-TITRE
+    de la page comme `title` (commun a tout le festival) et le titre reel du
+    concert comme `alt_title`.
+    """
+
+    ARTE = "https://www.arte.tv/fr/videos/133232-006-A/ofenbach/"
+
+    def test_arte_prefixe_le_titre_par_alt_title(self):
+        assert _title_template(self.ARTE, 100).startswith("%(alt_title&")
+
+    @pytest.mark.parametrize("url", [
+        "https://www.youtube.com/watch?v=abc123",
+        "https://www.france.tv/france-2/journal-20h/1234-episode.html",
+    ])
+    def test_les_autres_sites_gardent_le_titre_seul(self, url):
+        assert _title_template(url, 100) == "%(title).100s"
+
+    def test_repli_sur_le_titre_seul_quand_le_budget_est_minuscule(self):
+        """Chemin deja tres long : mieux vaut un titre court qu'un nom tronque
+        des deux cotes."""
+        assert _title_template(self.ARTE, 30) == "%(title).30s"
+
+    def test_budget_respecte(self):
+        """Garde-fou MAX_PATH : le gabarit ne doit pas depasser son budget."""
+        import yt_dlp
+        tmpl = _title_template(self.ARTE, 60) + ".%(ext)s"
+        info = {"title": "T" * 200, "alt_title": "A" * 200, "ext": "mp4"}
+        with yt_dlp.YoutubeDL({"quiet": True, "outtmpl": tmpl}) as ydl:
+            nom = ydl.prepare_filename(info)
+        assert len(nom) <= 60 + len(".mp4")
+
+    def test_deux_concerts_donnent_deux_fichiers(self):
+        """Le vrai symptome : meme `title`, `alt_title` different."""
+        import yt_dlp
+        tmpl = _title_template(self.ARTE, 100) + ".%(ext)s"
+        noms = set()
+        for groupe in ("Ofenbach", "Ultra Vomit", "Body Count & Ice-T"):
+            info = {"title": "Cabaret Vert 2026", "alt_title": groupe, "ext": "mp4"}
+            with yt_dlp.YoutubeDL({"quiet": True, "outtmpl": tmpl}) as ydl:
+                noms.add(ydl.prepare_filename(info))
+        assert len(noms) == 3
+        assert any(n.startswith("Ofenbach - Cabaret Vert 2026") for n in noms)
+
+    def test_sans_alt_title_le_nom_ne_change_pas(self):
+        """Une video Arte hors collection garde son nom d'avant le correctif."""
+        import yt_dlp
+        tmpl = _title_template(self.ARTE, 100) + ".%(ext)s"
+        info = {"title": "La loi de Teheran", "alt_title": None, "ext": "mp4"}
+        with yt_dlp.YoutubeDL({"quiet": True, "outtmpl": tmpl}) as ydl:
+            assert ydl.prepare_filename(info) == "La loi de Teheran.mp4"
+
+
+class TestTitreAffiche:
+    """La file d'attente doit afficher ce que portera le fichier."""
+
+    def test_arte_affiche_le_nom_du_concert(self):
+        info = {"title": "Cabaret Vert 2026", "alt_title": "Ofenbach",
+                "webpage_url": "https://www.arte.tv/fr/videos/133232-006-A/ofenbach/"}
+        assert _display_title(info) == "Ofenbach - Cabaret Vert 2026"
+
+    def test_url_de_repli_quand_yt_dlp_ne_donne_pas_la_page(self):
+        info = {"title": "Cabaret Vert 2026", "alt_title": "Ofenbach"}
+        url = "https://www.arte.tv/fr/videos/133232-006-A/ofenbach/"
+        assert _display_title(info, url) == "Ofenbach - Cabaret Vert 2026"
+
+    def test_ailleurs_le_titre_reste_intact(self):
+        info = {"title": "Ma video", "alt_title": "Autre chose",
+                "webpage_url": "https://www.youtube.com/watch?v=abc"}
+        assert _display_title(info) == "Ma video"
+
+    def test_sans_alt_title(self):
+        info = {"title": "La loi de Teheran", "alt_title": "",
+                "webpage_url": "https://www.arte.tv/fr/videos/1-A/x/"}
+        assert _display_title(info) == "La loi de Teheran"

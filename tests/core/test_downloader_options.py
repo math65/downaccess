@@ -42,6 +42,14 @@ class TestFormats:
         _apply_format(opts, "mp4")
         assert keys_of(opts) == ["FFmpegVideoConvertor"]
 
+    def test_mp4_se_replie_sur_n_importe_quelle_extension(self):
+        """Arte annonce son flux audio HLS en ext=mp4 (jamais m4a) et n'offre
+        aucun format image+son : sans repli, choisir MP4 echouait sur
+        « Requested format is not available »."""
+        opts = {}
+        _apply_format(opts, "mp4")
+        assert "bestvideo+bestaudio" in opts["format"]
+
     def test_format_manuel_ne_pose_aucun_traitement(self):
         opts = {}
         _apply_format(opts, "manual", format_id="137+140")
