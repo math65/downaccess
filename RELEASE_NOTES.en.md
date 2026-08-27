@@ -24,6 +24,8 @@ Subscribe once to a channel, a podcast or an Arte collection (Ctrl+B). At every 
 
 Just discovered a channel and want to catch up on its past? A tick box offers that as you subscribe.
 
+A **Subscriptions** tab in Preferences settles the rest: check at startup or not, at most once a day, open the new items window straight away or keep the quiet counter, announce new items out loud, and the format offered for your next subscriptions.
+
 ### Arte, rebuilt from the ground up
 
 Arte's concerts and live performances were out of reach from DownAccess. They now have their own category, with more than two hundred programmes: festivals, recordings, music. Follow a festival like a channel, and every concert put online is brought to you.

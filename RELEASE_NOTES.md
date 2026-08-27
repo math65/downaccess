@@ -24,6 +24,8 @@ Abonnez-vous une fois à une chaîne, à un podcast ou à une collection Arte (C
 
 Vous découvrez une chaîne aujourd'hui et voulez rattraper son passé ? Une case le propose au moment de vous abonner.
 
+Un onglet **Abonnements** dans les Préférences règle tout le reste : relever ou non au lancement, au plus une fois par jour, ouvrir directement la fenêtre des nouveautés ou se contenter du compteur discret, les annoncer vocalement, et le format proposé pour vos prochains abonnements.
+
 ### Arte, revu de fond en comble
 
 Les concerts et les spectacles d'Arte étaient inatteignables depuis DownAccess. Ils ont maintenant leur catégorie, avec plus de deux cents programmes : festivals, captations, musique. Suivez un festival comme une chaîne, et chaque concert mis en ligne vous est signalé.

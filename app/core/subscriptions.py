@@ -491,6 +491,25 @@ def touch(sub: Subscription) -> None:
     sub.last_checked = datetime.now(UTC).isoformat()
 
 
+def checked_today(subs: list[Subscription]) -> bool:
+    """Vrai si un releve a deja eu lieu aujourd'hui.
+
+    Pour qui ouvre DownAccess dix fois par jour : le catalogue d'une chaine ne
+    bouge pas entre deux lancements. On se fie a la verification la plus
+    recente, sans stocker de date supplementaire — chaque abonnement porte
+    deja la sienne.
+    """
+    aujourdhui = datetime.now(UTC).date()
+    for sub in subs:
+        try:
+            vu = datetime.fromisoformat(sub.last_checked)
+        except (TypeError, ValueError):
+            continue
+        if vu.date() == aujourdhui:
+            return True
+    return False
+
+
 def check_all(subs: list[Subscription]) -> tuple[dict[str, list[FeedEntry]], list[str]]:
     """Verifie tous les abonnements. Retourne ({sub_id: nouveautes}, erreurs).
 

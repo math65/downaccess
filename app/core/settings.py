@@ -30,6 +30,9 @@ DEFAULTS: dict = {
                                    # ignore = aucun repere
     "subscriptions_check_on_start": True,   # relever les abonnements au lancement
     "subscriptions_announce": False,        # annoncer vocalement les nouveautes
+    "subscriptions_on_new": "counter",      # au lancement : counter | window
+    "subscriptions_daily_only": False,      # ne pas relever plus d'une fois par jour
+    "subscriptions_default_format": "",     # format des nouveaux abonnements ("" = preferences)
                                             # (silencieux par defaut, cf. regle UX)
     "organize_by_site": False,
     "organize_by_playlist": False,

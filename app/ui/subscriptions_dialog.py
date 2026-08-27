@@ -56,7 +56,12 @@ class AddSubscriptionDialog(wx.Dialog):
         lbl_fmt = wx.StaticText(panel, label=_("Format des téléchargements :"))
         self.choice_fmt = wx.Choice(panel, choices=_format_labels(),
                                     name=_("Format des téléchargements"))
-        self.choice_fmt.SetSelection(0)
+        # Preselection du format choisi dans les preferences (onglet
+        # Abonnements) : qui suit dix podcasts ne veut pas le repeter dix fois.
+        from app.core import settings as cfg
+        defaut = cfg.load().get("subscriptions_default_format", "")
+        self.choice_fmt.SetSelection(FORMAT_CODES.index(defaut)
+                                     if defaut in FORMAT_CODES else 0)
 
         self.chk_auto = wx.CheckBox(
             panel, label=_("Télécharger automatiquement les nouveautés"),

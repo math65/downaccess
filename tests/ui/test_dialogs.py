@@ -201,3 +201,50 @@ class TestListePlaylist:
         assert "vimeo.com" not in libelles[1]          # repli generique
         assert libelles[2] == "3. Ofenbach — Cabaret Vert 2026"
         dlg.Destroy()
+
+
+class TestOngletAbonnements:
+    """Les reglages d'abonnement vivaient dans l'onglet General, entre le choix
+    du navigateur et une option d'interception : introuvables pour la fonction
+    la plus visible de l'application."""
+
+    def test_l_onglet_existe(self, frame):
+        dlg = SettingsDialog(frame, dict(DEFAULTS))
+        titres = [dlg.notebook.GetPageText(i)
+                  for i in range(dlg.notebook.GetPageCount())]
+        assert any("bonnement" in t or "ubscription" in t for t in titres)
+        dlg.Destroy()
+
+    def test_les_cinq_reglages_sont_lus_et_ecrits(self, frame):
+        reglages = dict(DEFAULTS)
+        reglages.update({"subscriptions_check_on_start": False,
+                         "subscriptions_daily_only": True,
+                         "subscriptions_on_new": "window",
+                         "subscriptions_announce": True,
+                         "subscriptions_default_format": "mp3"})
+        dlg = SettingsDialog(frame, reglages)
+        valeurs = dlg._collect_values()
+        assert valeurs["subscriptions_check_on_start"] is False
+        assert valeurs["subscriptions_daily_only"] is True
+        assert valeurs["subscriptions_on_new"] == "window"
+        assert valeurs["subscriptions_announce"] is True
+        assert valeurs["subscriptions_default_format"] == "mp3"
+        dlg.Destroy()
+
+    def test_valeur_inconnue_retombe_sur_le_defaut(self, frame):
+        """Fichier de reglages d'une version future ou abime."""
+        reglages = dict(DEFAULTS)
+        reglages["subscriptions_default_format"] = "format_inexistant"
+        reglages["subscriptions_on_new"] = "n_importe_quoi"
+        dlg = SettingsDialog(frame, reglages)
+        valeurs = dlg._collect_values()
+        assert valeurs["subscriptions_default_format"] == ""
+        assert valeurs["subscriptions_on_new"] == "counter"
+        dlg.Destroy()
+
+    def test_controles_de_l_onglet_tous_nommes(self, frame):
+        """Un controle sans nom n'est pas annonce par le lecteur d'ecran."""
+        dlg = SettingsDialog(frame, dict(DEFAULTS))
+        muets = nommes(dlg._page_subs)
+        assert muets == [], [type(c).__name__ for c in muets]
+        dlg.Destroy()

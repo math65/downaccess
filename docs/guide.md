@@ -530,7 +530,7 @@ Si vous cochez cette case **en même temps** que le téléchargement automatique
 
 ### Voir les nouveautés
 
-Au lancement, DownAccess relève discrètement vos abonnements. Rien ne s'affiche, rien ne vous interrompt : le nombre de nouveautés apparaît simplement dans l'entrée de menu, qui devient par exemple **Abonnements (3 nouveautés)...**. Si vous préférez l'entendre, cochez **Annoncer vocalement les nouveautés des abonnements** dans les préférences (onglet Général).
+Au lancement, DownAccess relève discrètement vos abonnements. Rien ne s'affiche, rien ne vous interrompt : le nombre de nouveautés apparaît simplement dans l'entrée de menu, qui devient par exemple **Abonnements (3 nouveautés)...**. Tout ce comportement se règle dans les préférences, onglet **Abonnements** : vous pouvez demander que la fenêtre des nouveautés s'ouvre directement au démarrage, vous les faire annoncer vocalement, espacer le relevé à une fois par jour, ou le désactiver.
 
 La fenêtre **Nouveautés de vos abonnements** présente tout ce qui est arrivé, toutes sources confondues : le titre, la source, la date, et un **résumé** de l'élément sur lequel vous êtes positionné. Chaque ligne porte une case à cocher, cochée par défaut. Trois issues :
 
@@ -754,6 +754,20 @@ Une case à cocher, **cochée** par défaut : **Utiliser le titre de la page com
 #### Avertissements
 
 Le bouton **Réinitialiser tous les avertissements** réaffiche les messages d'avertissement que vous aviez choisi de masquer (par exemple en cochant une case « Ne plus afficher »). Si aucun avertissement n'est masqué, DownAccess vous l'indique. Sinon, il vous confirme combien d'avertissements ont été réactivés.
+
+### Onglet Abonnements
+
+Cet onglet décide de ce qui se passe au lancement pour les chaînes, podcasts et collections que vous suivez.
+
+**Relever les abonnements au lancement** — coché par défaut. DownAccess vérifie discrètement vos sources à chaque démarrage. Décochez si vous préférez ne relever que sur demande, avec le bouton **Vérifier maintenant** de la fenêtre Abonnements.
+
+**Au plus une fois par jour** — décoché par défaut. Si vous ouvrez DownAccess plusieurs fois dans la journée, le relevé n'a lieu qu'au premier lancement. Le catalogue d'une chaîne ne bouge pas entre deux ouvertures.
+
+**Quand il y a du nouveau au démarrage** — deux choix. *Ne rien afficher* (par défaut) : le nombre apparaît dans le menu Fichier et rien ne vous interrompt. *Ouvrir la fenêtre des nouveautés* : la liste s'ouvre d'elle-même, prête à cocher.
+
+**Annoncer vocalement les nouveautés** — décoché par défaut. Pour être prévenu sans regarder le menu. Sans effet si aucun lecteur d'écran n'est actif.
+
+**Format des nouveaux abonnements** — le format proposé quand vous suivez une nouvelle source. Chaque abonnement garde ensuite son propre format, modifiable à tout moment.
 
 ### Onglet Formats
 

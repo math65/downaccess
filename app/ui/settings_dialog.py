@@ -7,6 +7,10 @@ from app.core import speech
 from app.core import i18n
 from app.core.browser import available_browsers
 from app.core.ffmpeg_utils import get_ffmpeg_path
+# Formats proposes pour un abonnement : meme liste que la fenetre Abonnements,
+# pour qu'un ajout de format n'ait a se faire qu'a un seul endroit.
+from app.ui.subscriptions_dialog import FORMAT_CODES as SUBSCRIPTION_FORMAT_CODES
+from app.ui.subscriptions_dialog import _format_labels as _subscription_format_labels
 
 # Cles internes (jamais traduites). Memes codes que add_url_dialog (format par
 # defaut) ; « manual » et « subtitles_only » ne sont pas des defauts utiles.
@@ -142,12 +146,14 @@ class SettingsDialog(wx.Dialog):
 
         self._page_general   = self._build_page_general()
         self._page_formats   = self._build_page_formats()
+        self._page_subs      = self._build_page_subscriptions()
         self._page_subtitles = self._build_page_subtitles()
         self._page_network   = self._build_page_network()
         self._page_advanced  = self._build_page_advanced()
 
         self.notebook.AddPage(self._page_general,   _("Général"))
         self.notebook.AddPage(self._page_formats,   _("Formats"))
+        self.notebook.AddPage(self._page_subs,      _("Abonnements"))
         self.notebook.AddPage(self._page_subtitles, _("Sous-titres"))
         self.notebook.AddPage(self._page_network,   _("Réseau"))
         self.notebook.AddPage(self._page_advanced,  _("Avancé"))
@@ -268,17 +274,6 @@ class SettingsDialog(wx.Dialog):
             "DownAccess ouvre le navigateur dans un profil séparé de votre "
             "navigation habituelle. Vous vous connectez aux sites une seule "
             "fois : la connexion est conservée pour les fois suivantes."))
-        self.chk_subs_start = wx.CheckBox(page,
-            label=_("Relever les abonnements au lancement"),
-            name=_("Relever les abonnements au lancement"))
-        self.chk_subs_start.SetToolTip(
-            _("Vérifie discrètement vos chaînes et podcasts suivis au démarrage. "
-              "Le nombre de nouveautés apparaît dans le menu Fichier, sans rien "
-              "interrompre."))
-        self.chk_subs_announce = wx.CheckBox(page,
-            label=_("Annoncer vocalement les nouveautés des abonnements"),
-            name=_("Annoncer vocalement les nouveautés des abonnements"))
-
         self.chk_intercept_title = wx.CheckBox(page,
             label=_("Utiliser le titre de la page comme nom de fichier (interception)"),
             name=_("Utiliser le titre de la page comme nom de fichier"))
@@ -311,11 +306,83 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(lbl_browser,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.choice_browser,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_browser_hint,           0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
-        sizer.Add(self.chk_subs_start,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
-        sizer.Add(self.chk_subs_announce,     0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_intercept_title,   0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_warn,                   0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.btn_reset_warnings,    0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+
+        page.SetSizer(sizer)
+        return page
+
+    # ---- Onglet Abonnements ----
+
+    def _build_page_subscriptions(self) -> wx.Panel:
+        """Tout ce qui touche aux chaines, podcasts et collections suivis.
+
+        Ces reglages vivaient dans l'onglet General, coinces entre le choix du
+        navigateur et une option d'interception : personne ne les trouvait,
+        alors qu'ils decident de ce qui se passe a chaque lancement.
+        """
+        page = wx.Panel(self.notebook)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.chk_subs_start = wx.CheckBox(
+            page,
+            label=_("Relever les abonnements au lancement"),
+            name=_("Relever les abonnements au lancement"))
+        self.chk_subs_start.SetToolTip(_(
+            "Vérifie discrètement vos chaînes, podcasts et collections suivis "
+            "au démarrage. Décochez pour ne relever que sur demande, depuis la "
+            "fenêtre Abonnements."))
+
+        self.chk_subs_daily = wx.CheckBox(
+            page,
+            label=_("Au plus une fois par jour"),
+            name=_("Au plus une fois par jour"))
+        self.chk_subs_daily.SetToolTip(_(
+            "Si vous ouvrez DownAccess plusieurs fois dans la journée, le "
+            "relevé n'a lieu qu'au premier lancement."))
+
+        self.radio_subs_new = wx.RadioBox(
+            page,
+            label=_("Quand il y a du nouveau au démarrage"),
+            choices=[_("Ne rien afficher : le nombre apparaît dans le menu Fichier"),
+                     _("Ouvrir la fenêtre des nouveautés")],
+            majorDimension=1,
+            style=wx.RA_SPECIFY_COLS,
+            name=_("Quand il y a du nouveau au démarrage"))
+
+        self.chk_subs_announce = wx.CheckBox(
+            page,
+            label=_("Annoncer vocalement les nouveautés"),
+            name=_("Annoncer vocalement les nouveautés"))
+        self.chk_subs_announce.SetToolTip(_(
+            "Pour être prévenu sans regarder le menu. Sans effet si aucun "
+            "lecteur d'écran n'est actif."))
+
+        lbl_fmt = wx.StaticText(page, label=_(
+            "Format des nouveaux abonnements :"))
+        self.choice_subs_fmt = wx.Choice(
+            page, choices=_subscription_format_labels(),
+            name=_("Format des nouveaux abonnements"))
+        lbl_fmt_hint = wx.StaticText(page, label=_(
+            "Proposé par défaut quand vous suivez une nouvelle source. Chaque "
+            "abonnement garde ensuite son propre format."))
+
+        for widget, marge in ((self.chk_subs_start, 12),
+                              (self.chk_subs_daily, 4),
+                              (self.radio_subs_new, 12),
+                              (self.chk_subs_announce, 12),
+                              (lbl_fmt, 12),
+                              (self.choice_subs_fmt, 6),
+                              (lbl_fmt_hint, 4)):
+            sizer.Add(widget, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, marge)
+
+        # Ordre de tabulation explicite : le relevé d'abord, ses consequences
+        # ensuite.
+        self.chk_subs_daily.MoveAfterInTabOrder(self.chk_subs_start)
+        self.radio_subs_new.MoveAfterInTabOrder(self.chk_subs_daily)
+        self.chk_subs_announce.MoveAfterInTabOrder(self.radio_subs_new)
+        self.choice_subs_fmt.MoveAfterInTabOrder(self.chk_subs_announce)
 
         page.SetSizer(sizer)
         return page
@@ -557,7 +624,14 @@ class SettingsDialog(wx.Dialog):
             self._browser_codes.index(browser) if browser in self._browser_codes else 0)
         self.chk_intercept_title.SetValue(s.get("intercept_use_page_title", True))
         self.chk_subs_start.SetValue(bool(s.get("subscriptions_check_on_start", True)))
+        self.chk_subs_daily.SetValue(bool(s.get("subscriptions_daily_only", False)))
+        self.radio_subs_new.SetSelection(
+            1 if s.get("subscriptions_on_new") == "window" else 0)
         self.chk_subs_announce.SetValue(bool(s.get("subscriptions_announce", False)))
+        fmt = s.get("subscriptions_default_format", "")
+        self.choice_subs_fmt.SetSelection(
+            SUBSCRIPTION_FORMAT_CODES.index(fmt)
+            if fmt in SUBSCRIPTION_FORMAT_CODES else 0)
         announce = s.get("download_announcements", "always")
         ann_idx = ANNOUNCE_CHOICES.index(announce) if announce in ANNOUNCE_CHOICES else 0
         self.radio_announce.SetSelection(ann_idx)
@@ -621,7 +695,14 @@ class SettingsDialog(wx.Dialog):
         s["browser_choice"] = self._browser_codes[max(0, self.choice_browser.GetSelection())]
         s["intercept_use_page_title"] = self.chk_intercept_title.GetValue()
         s["subscriptions_check_on_start"] = self.chk_subs_start.GetValue()
+        s["subscriptions_daily_only"] = self.chk_subs_daily.GetValue()
+        s["subscriptions_on_new"] = ("window" if self.radio_subs_new.GetSelection() == 1
+                                     else "counter")
         s["subscriptions_announce"] = self.chk_subs_announce.GetValue()
+        idx = self.choice_subs_fmt.GetSelection()
+        s["subscriptions_default_format"] = (
+            SUBSCRIPTION_FORMAT_CODES[idx]
+            if 0 <= idx < len(SUBSCRIPTION_FORMAT_CODES) else "")
         s["download_announcements"]   = ANNOUNCE_CHOICES[self.radio_announce.GetSelection()]
 
         # Formats

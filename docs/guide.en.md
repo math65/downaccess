@@ -530,7 +530,7 @@ If you tick this box **at the same time** as automatic downloading, DownAccess w
 
 ### Seeing what is new
 
-At startup, DownAccess quietly checks your subscriptions. Nothing appears, nothing interrupts you: the number of new items simply shows up in the menu entry, which becomes for example **Subscriptions (3 new)...**. If you would rather hear it, tick **Announce subscription news out loud** in the preferences (General tab).
+At startup, DownAccess quietly checks your subscriptions. Nothing appears, nothing interrupts you: the number of new items simply shows up in the menu entry, which becomes for example **Subscriptions (3 new)...**. All of this is configurable in the preferences, **Subscriptions** tab: you can ask for the new items window to open straight away at startup, have new items announced out loud, space the check out to once a day, or turn it off.
 
 The **New from your subscriptions** window shows everything that has arrived, from all sources together: the title, the source, the date, and a **summary** of the item you are on. Each row has a checkbox, ticked by default. Three ways out:
 
@@ -754,6 +754,21 @@ One checkbox, **checked** by default: **Use the page title as the file name (int
 #### Warnings
 
 The **Reset all warnings** button shows again the warning messages you had chosen to hide (for example by ticking a "Don't show again" box). If no warning is hidden, DownAccess tells you so. Otherwise, it confirms how many warnings have been re-enabled.
+
+### Subscriptions tab
+
+This tab decides what happens at startup for the channels, podcasts and collections you follow.
+
+**Check subscriptions at startup** — ticked by default. DownAccess quietly checks your sources at every launch. Untick it if you would rather check only on request, with the **Check now** button in the Subscriptions window.
+
+**At most once a day** — unticked by default. If you open DownAccess several times a day, the check only happens on the first launch. A channel's catalogue does not move between two openings.
+
+**When there is something new at startup** — two choices. *Show nothing* (the default): the number appears in the File menu and nothing interrupts you. *Open the new items window*: the list opens by itself, ready to tick.
+
+**Announce new items out loud** — unticked by default. To be told without looking at the menu. Has no effect if no screen reader is running.
+
+**Format for new subscriptions** — the format offered when you follow a new source. Each subscription then keeps its own format, which you can change at any time.
+
 
 ### Formats tab
 

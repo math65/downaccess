@@ -501,6 +501,10 @@ class MainWindow(wx.Frame):
         subs_list = subs_mod.load()
         if not subs_list:
             return
+        if (self.settings.get("subscriptions_daily_only", False)
+                and subs_mod.checked_today(subs_list)):
+            _log.info("Releve des abonnements deja fait aujourd'hui, ignore")
+            return
 
         def worker() -> None:
             # Rien de ce qui se passe ici ne doit pouvoir empecher l'annonce des
@@ -558,6 +562,12 @@ class MainWindow(wx.Frame):
             if self.settings.get("subscriptions_announce", False):
                 speech.speak(_("{n} nouveautés dans vos abonnements.").format(n=pending),
                              interrupt=False)
+            # Presentation immediate, si l'utilisateur l'a demandee. Par defaut
+            # le demarrage n'interrompt personne : seul le compteur du menu
+            # change. La fenetre passe par CallAfter pour ne jamais se
+            # superposer a l'annonce de lancement, deja modale.
+            if self.settings.get("subscriptions_on_new") == "window":
+                wx.CallAfter(self._show_new_items, manual, subs_list)
 
     # ------------------------------------------------------------------
     # Menu contextuel de la file (clic droit / touche Menu)

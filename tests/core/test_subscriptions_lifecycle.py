@@ -313,6 +313,37 @@ class TestCollectionArte:
         assert len(subs.create(COLLECTION).seen_ids) == 2
 
 
+class TestReleveUneFoisParJour:
+    """Reglage « au plus une fois par jour » : qui ouvre l'app dix fois dans la
+    journee n'a pas besoin de dix releves — le catalogue d'une chaine ne bouge
+    pas entre deux lancements."""
+
+    def test_deja_releve_aujourd_hui(self):
+        from datetime import UTC, datetime
+        sub = abonnement(last_checked=datetime.now(UTC).isoformat())
+        assert subs.checked_today([sub])
+
+    def test_releve_d_hier(self):
+        from datetime import UTC, datetime, timedelta
+        hier = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+        assert not subs.checked_today([abonnement(last_checked=hier)])
+
+    def test_jamais_releve(self):
+        assert not subs.checked_today([abonnement(last_checked="")])
+        assert not subs.checked_today([])
+
+    def test_date_illisible_ne_bloque_pas_le_releve(self):
+        """Un fichier abime ne doit pas priver l'utilisateur de ses nouveautes."""
+        assert not subs.checked_today([abonnement(last_checked="n'importe quoi")])
+
+    def test_un_seul_abonnement_recent_suffit(self):
+        from datetime import UTC, datetime, timedelta
+        vieux = (datetime.now(UTC) - timedelta(days=30)).isoformat()
+        recent = datetime.now(UTC).isoformat()
+        assert subs.checked_today([abonnement(sub_id="a", last_checked=vieux),
+                                   abonnement(sub_id="b", last_checked=recent)])
+
+
 class TestReleveAuLancement:
     """Le relevé du démarrage tourne dans un thread : rien de ce qui s'y passe
     ne doit pouvoir empêcher l'application de démarrer ni les nouveautés
