@@ -9,7 +9,10 @@ from app.core.site_search import (
     _clean_summary,
     _page_slice,
     _slugify,
+    _arte_api_token,
+    _arte_program_entry,
     arte_collection_id,
+    arte_program_entries,
     arte_video_id,
     categories,
     supports_browse,
@@ -189,3 +192,70 @@ class TestCollectionArte:
         assert arte_video_id(
             "https://www.arte.tv/de/videos/133232-001-a/speed/") == "133232-001-A"
         assert arte_video_id("https://www.arte.tv/fr/videos/RC-014468/x/") == ""
+
+
+class TestProgrammeArte:
+    """Source complete des titres d'une collection : l'API « programmes »."""
+
+    COLLECTION = "https://www.arte.tv/fr/videos/RC-014468/cabaret-vert/"
+
+    def test_le_jeton_se_lit_toujours_dans_yt_dlp(self):
+        """Garde-fou : DownAccess emprunte le jeton a yt-dlp plutot que de le
+        figer. Si yt-dlp renomme l'attribut, on veut le savoir ici — pas par un
+        utilisateur devant une liste d'URL brutes."""
+        assert _arte_api_token()
+
+    def test_normalisation_d_une_video(self):
+        entree = _arte_program_entry({
+            "kind": "SHOW",
+            "title": "ARTE Reportage",
+            "subtitle": "Afghanistan / Sud-Liban",
+            "url": "https://www.arte.tv/fr/videos/124239-072-A/arte-reportage/",
+            "durationSeconds": "3175",       # l'API renvoie une chaine
+            "shortDescription": "Depuis le retour des talibans...",
+            "programId": "124239-072-A",
+        })
+        assert entree["title"] == "ARTE Reportage — Afghanistan / Sud-Liban"
+        assert entree["duration"] == 3175
+        assert entree["_summary"].startswith("Depuis le retour")
+
+    def test_sans_sous_titre(self):
+        entree = _arte_program_entry({
+            "kind": "SHOW", "title": "Speed",
+            "url": "https://www.arte.tv/fr/videos/133232-001-A/speed/",
+        })
+        assert entree["title"] == "Speed"
+        assert entree["duration"] is None
+
+    @pytest.mark.parametrize("item", [
+        {"kind": "TRAILER", "title": "Bande-annonce", "url": "https://x/1"},  # pas une emission
+        {"kind": "SHOW", "title": "Sans adresse"},                            # inexploitable
+    ])
+    def test_ecarte_ce_qui_n_est_pas_telechargeable(self, item):
+        assert _arte_program_entry(item) is None
+
+    def test_sans_jeton_pas_de_requete(self, monkeypatch):
+        """Repli silencieux : l'appelant passe alors a l'API web."""
+        import app.core.site_search as site_search
+        monkeypatch.setattr(site_search, "_arte_api_token", lambda: "")
+        monkeypatch.setattr(site_search.cffi_requests, "get", _interdit)
+        assert arte_program_entries(self.COLLECTION) == []
+
+    def test_api_en_erreur_ne_remonte_pas(self, monkeypatch):
+        import app.core.site_search as site_search
+        monkeypatch.setattr(site_search, "_arte_api_token", lambda: "jeton")
+        monkeypatch.setattr(site_search.cffi_requests, "get", _explose)
+        assert arte_program_entries(self.COLLECTION) == []
+
+    def test_hors_collection_pas_de_requete(self, monkeypatch):
+        import app.core.site_search as site_search
+        monkeypatch.setattr(site_search.cffi_requests, "get", _interdit)
+        assert arte_program_entries("https://www.youtube.com/watch?v=a") == []
+
+
+def _interdit(*args, **kwargs):
+    raise AssertionError("aucune requete ne devait partir")
+
+
+def _explose(*args, **kwargs):
+    raise OSError("API injoignable")

@@ -38,6 +38,10 @@ _FRANCETV_CATEGORY_URL = "https://api-mobile.yatta.francetv.fr/apps/categories/{
 # Arte : API "web" (api.arte.tv) — pas de jeton requis, contrairement à l'API "app".
 _ARTE_PAGE_URL = "https://api.arte.tv/api/emac/v4/{lang}/web/pages/{code}/"
 _ARTE_COLLECTION_URL = "https://api.arte.tv/api/emac/v4/{lang}/web/collections/{code}/"
+# API « programmes » : la seule qui renvoie TOUTE la liste d'une collection
+# (celle-la meme que yt-dlp utilise pour construire la playlist), mais elle
+# exige un jeton — cf. `_arte_api_token`.
+_ARTE_PROGRAM_URL = "https://api.arte.tv/api/opa/v3/programs/{lang}/{code}"
 _ARTE_LANGS = ("fr", "de", "en", "es", "it", "pl")
 
 _TIMEOUT = 20
@@ -322,16 +326,88 @@ def arte_video_id(url: str) -> str:
     return match[1].upper() if match else ""
 
 
-def arte_collection_entries(url: str) -> list[dict]:
-    """Videos d'une collection Arte, decrites par l'API EMAC.
+def _arte_api_token() -> str:
+    """Jeton de l'API « programmes » d'Arte, emprunte a yt-dlp.
 
-    Meme normalisation que la recherche (`_arte_entry`), donc meme libelle
-    « titre — sous-titre » que dans la liste de resultats. La page de collection
-    empile plusieurs rails (episodes recents, sous-collections...) : on les
-    aplatit tous et on suit leur pagination, comme pour le parcours par
-    categorie. Une grande collection d'archives n'est pas forcement exposee en
-    entier — l'appelant garde alors ses entrees non decrites.
+    Arte exige un Bearer sur cette API. Plutot que de figer le jeton ici — ou
+    il vieillirait entre deux versions de DownAccess — on lit celui de yt-dlp,
+    dont l'extracteur de collections se sert deja. DownAccess suit le canal
+    nightly et met yt-dlp a jour tout seul : le jour ou Arte le renouvelle, le
+    notre suit sans qu'on ait rien a publier. Et si Arte le revoquait sans
+    prevenir, yt-dlp ne saurait de toute facon plus lister la collection.
     """
+    try:
+        from yt_dlp.extractor.arte import ArteTVPlaylistIE
+        return getattr(ArteTVPlaylistIE, "_API_TOKEN", "") or ""
+    except Exception:
+        return ""
+
+
+def _arte_program_entry(item: dict) -> dict | None:
+    """Normalise une video de l'API programmes (forme differente de l'API web)."""
+    url = item.get("url")
+    if not url or item.get("kind") != "SHOW":
+        return None
+    title = item.get("title") or "?"
+    subtitle = item.get("subtitle")
+    duree = item.get("durationSeconds")
+    return {
+        "title": f"{title} — {subtitle}" if subtitle else title,
+        "id": str(item.get("programId") or item.get("id") or url),
+        "duration": int(duree) if str(duree or "").isdigit() else None,
+        "uploader": "Arte",
+        "webpage_url": url,
+        "_dl_type": "video",
+        "_summary": _clean_summary(item.get("shortDescription")),
+    }
+
+
+def arte_program_entries(url: str) -> list[dict]:
+    """Videos d'une collection Arte via l'API programmes — liste COMPLETE.
+
+    C'est la source de yt-dlp lui-meme : les entrees se rapprochent donc une a
+    une, sans trou, quelle que soit la taille de la collection. Renvoie une
+    liste vide (jamais d'exception) si le jeton manque ou si l'API refuse :
+    l'appelant se rabat alors sur l'API web.
+    """
+    ident = arte_collection_id(url)
+    token = _arte_api_token()
+    if not ident or not token:
+        return []
+    lang, code = ident
+    try:
+        resp = cffi_requests.get(
+            _ARTE_PROGRAM_URL.format(lang=lang, code=code),
+            headers={"Authorization": f"Bearer {token}"},
+            impersonate="chrome",
+            timeout=_TIMEOUT,
+        )
+        resp.raise_for_status()
+        programs = (resp.json() or {}).get("programs") or []
+    except Exception:
+        return []
+    videos = (programs[0] if programs else {}).get("videos") or []
+    return [e for e in (_arte_program_entry(v) for v in videos) if e]
+
+
+def arte_collection_entries(url: str) -> list[dict]:
+    """Videos d'une collection Arte, pour nommer les entrees d'une playlist.
+
+    Deux sources, dans cet ordre :
+    1. l'API « programmes » (`arte_program_entries`), qui renvoie la collection
+       entiere — c'est celle que yt-dlp interroge pour construire la liste ;
+    2. a defaut, l'API web des collections, sans jeton, mais qui n'expose que
+       la mise en page du site : les episodes recents et quelques rails. Sur un
+       magazine d'archives elle n'en couvre qu'une partie (mesure : 51 des 100
+       emissions d'ARTE Reportage), l'appelant garde alors ses entrees non
+       decrites.
+
+    Meme normalisation que la recherche des deux cotes : le libelle affiche est
+    le meme que dans la liste de resultats.
+    """
+    completes = arte_program_entries(url)
+    if completes:
+        return completes
     ident = arte_collection_id(url)
     if not ident:
         return []

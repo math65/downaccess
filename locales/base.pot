@@ -186,7 +186,7 @@ msgstr ""
 msgid "Activer l'interception des requêtes média"
 msgstr ""
 
-#: app/core/site_search.py:58
+#: app/core/site_search.py:62
 msgid "Actualités et société"
 msgstr ""
 
@@ -369,7 +369,7 @@ msgstr ""
 msgid "Aperçu — {title}"
 msgstr ""
 
-#: app/core/site_search.py:72
+#: app/core/site_search.py:76
 msgid "Arts et spectacles"
 msgstr ""
 
@@ -750,7 +750,7 @@ msgid ""
 "celles à télécharger."
 msgstr ""
 
-#: app/core/site_search.py:70
+#: app/core/site_search.py:74
 msgid "Cinéma"
 msgstr ""
 
@@ -873,7 +873,7 @@ msgstr ""
 msgid "Créer un fichier par chapitre"
 msgstr ""
 
-#: app/core/site_search.py:62
+#: app/core/site_search.py:66
 msgid "Culture pop"
 msgstr ""
 
@@ -901,7 +901,7 @@ msgstr ""
 msgid "Diagnostic en cours…"
 msgstr ""
 
-#: app/core/site_search.py:55 app/core/site_search.py:69
+#: app/core/site_search.py:59 app/core/site_search.py:73
 msgid "Documentaires"
 msgstr ""
 
@@ -1354,7 +1354,7 @@ msgstr ""
 msgid "File de téléchargement"
 msgstr ""
 
-#: app/core/site_search.py:56
+#: app/core/site_search.py:60
 msgid "Films"
 msgstr ""
 
@@ -1455,7 +1455,7 @@ msgstr ""
 msgid "Général"
 msgstr ""
 
-#: app/core/site_search.py:60
+#: app/core/site_search.py:64
 msgid "Histoire"
 msgstr ""
 
@@ -1658,7 +1658,7 @@ msgstr ""
 msgid "Jamais"
 msgstr ""
 
-#: app/core/site_search.py:63
+#: app/core/site_search.py:67
 msgid "Jeunesse"
 msgstr ""
 
@@ -2644,7 +2644,7 @@ msgid ""
 "ce que vous voulez."
 msgstr ""
 
-#: app/core/site_search.py:59
+#: app/core/site_search.py:63
 msgid "Sciences"
 msgstr ""
 
@@ -2711,7 +2711,7 @@ msgstr ""
 msgid "Sous-titres uniquement"
 msgstr ""
 
-#: app/core/site_search.py:73
+#: app/core/site_search.py:77
 msgid "Sport"
 msgstr ""
 
@@ -2820,7 +2820,7 @@ msgstr ""
 msgid "Sélectionnez un site à supprimer."
 msgstr ""
 
-#: app/core/site_search.py:57 app/core/site_search.py:71
+#: app/core/site_search.py:61 app/core/site_search.py:75
 msgid "Séries et fictions"
 msgstr ""
 
@@ -3711,7 +3711,7 @@ msgstr ""
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr ""
 
-#: app/core/site_search.py:61
+#: app/core/site_search.py:65
 msgid "Émissions"
 msgstr ""
 
