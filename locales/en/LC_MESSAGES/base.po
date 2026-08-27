@@ -46,7 +46,7 @@ msgstr "Action after download:"
 #: app/ui/guided_login_dialog.py:87 app/ui/guided_login_dialog.py:88
 #: app/ui/login_required_dialog.py:59 app/ui/login_required_dialog.py:60
 #: app/ui/main_window.py:1290 app/ui/main_window.py:1547
-#: app/ui/main_window.py:1935 app/ui/playlist_dialog.py:102
+#: app/ui/main_window.py:1935 app/ui/playlist_dialog.py:141
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:160
 #: app/ui/subscriptions_dialog.py:78
@@ -1526,17 +1526,17 @@ msgid "Sélectionnez un résultat."
 msgstr "Select a result."
 
 #: app/ui/download_list.py:39 app/ui/history_dialog.py:50
-#: app/ui/new_items_dialog.py:46 app/ui/playlist_dialog.py:57
+#: app/ui/new_items_dialog.py:46 app/ui/playlist_dialog.py:94
 #: app/ui/search_dialog.py:297
 msgid "Titre"
 msgstr "Title"
 
-#: app/ui/new_items_dialog.py:57 app/ui/playlist_dialog.py:67
+#: app/ui/new_items_dialog.py:57 app/ui/playlist_dialog.py:106
 #: app/ui/search_dialog.py:339
 msgid "Tout désélectionner"
 msgstr "Deselect all"
 
-#: app/ui/new_items_dialog.py:56 app/ui/playlist_dialog.py:66
+#: app/ui/new_items_dialog.py:56 app/ui/playlist_dialog.py:105
 #: app/ui/search_dialog.py:338
 msgid "Tout sélectionner"
 msgstr "Select all"
@@ -1545,7 +1545,7 @@ msgstr "Select all"
 msgid "Téléchargement volumineux"
 msgstr "Large download"
 
-#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:101
+#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:140
 #: app/ui/search_dialog.py:361
 msgid "Télécharger la sélection"
 msgstr "Download selection"
@@ -1776,11 +1776,11 @@ msgstr "In progress"
 msgid "En pause"
 msgstr "Paused"
 
-#: app/ui/playlist_dialog.py:60
+#: app/ui/playlist_dialog.py:99
 msgid "Entrée {n}"
 msgstr "Entry {n}"
 
-#: app/ui/playlist_dialog.py:54
+#: app/ui/playlist_dialog.py:91
 msgid "Entrées de la playlist"
 msgstr "Playlist entries"
 
@@ -1870,7 +1870,7 @@ msgstr "Unable to extract streaming URL."
 msgid "Impossible de déterminer le domaine du site."
 msgstr "Unable to determine the site domain."
 
-#: app/ui/playlist_dialog.py:68
+#: app/ui/playlist_dialog.py:107
 msgid "Inverser la sélection"
 msgstr "Invert selection"
 
@@ -1975,7 +1975,7 @@ msgstr "Update now"
 msgid "Mise à jour disponible — DownAccess {version}"
 msgstr "Update available — DownAccess {version}"
 
-#: app/ui/playlist_dialog.py:80
+#: app/ui/playlist_dialog.py:119
 msgid "Ne pas numéroter"
 msgstr "Do not number"
 
@@ -1995,15 +1995,15 @@ msgstr "Release notes"
 msgid "Notes de version :"
 msgstr "Release notes:"
 
-#: app/ui/playlist_dialog.py:78
+#: app/ui/playlist_dialog.py:117
 msgid "Numéro dans la playlist (position originale)"
 msgstr "Number in playlist (original position)"
 
-#: app/ui/playlist_dialog.py:79
+#: app/ui/playlist_dialog.py:118
 msgid "Numéro séquentiel (1, 2, 3...)"
 msgstr "Sequential number (1, 2, 3...)"
 
-#: app/ui/playlist_dialog.py:76 app/ui/playlist_dialog.py:84
+#: app/ui/playlist_dialog.py:115 app/ui/playlist_dialog.py:123
 msgid "Numérotation des fichiers"
 msgstr "File numbering"
 
@@ -2031,7 +2031,7 @@ msgstr "Open &file"
 msgid "Pause."
 msgstr "Pause."
 
-#: app/ui/playlist_dialog.py:24
+#: app/ui/playlist_dialog.py:61
 msgid "Playlist — {title}"
 msgstr "Playlist — {title}"
 
@@ -2141,7 +2141,7 @@ msgstr ""
 msgid "Sélection du format pour {title}. {count} formats disponibles."
 msgstr "Format selection for {title}. {count} formats available."
 
-#: app/ui/playlist_dialog.py:167
+#: app/ui/playlist_dialog.py:206
 msgid "Sélection vide"
 msgstr "Empty selection"
 
@@ -2149,7 +2149,7 @@ msgstr "Empty selection"
 msgid "Sélectionnez le format à télécharger :"
 msgstr "Select the format to download:"
 
-#: app/ui/playlist_dialog.py:48
+#: app/ui/playlist_dialog.py:85
 msgid "Sélectionnez les vidéos à télécharger ({count} entrées) :"
 msgstr "Select the videos to download ({count} entries):"
 
@@ -2213,7 +2213,7 @@ msgstr "Please enter your email address."
 msgid "Veuillez saisir au moins une URL."
 msgstr "Please enter at least one URL."
 
-#: app/ui/playlist_dialog.py:164 app/ui/playlist_dialog.py:166
+#: app/ui/playlist_dialog.py:203 app/ui/playlist_dialog.py:205
 msgid "Veuillez sélectionner au moins une entrée."
 msgstr "Please select at least one entry."
 
@@ -2253,15 +2253,15 @@ msgstr "unknown"
 msgid "{count} entrée(s)"
 msgstr "{count} entries"
 
-#: app/core/downloader.py:264 app/ui/format_dialog.py:165
+#: app/core/downloader.py:364 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr "{n:.0f} KB"
 
-#: app/core/downloader.py:263 app/ui/format_dialog.py:163
+#: app/core/downloader.py:363 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr "{n:.0f} MB"
 
-#: app/core/downloader.py:261 app/ui/format_dialog.py:161
+#: app/core/downloader.py:361 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr "{n:.1f} GB"
 
@@ -2269,7 +2269,7 @@ msgstr "{n:.1f} GB"
 msgid "{n} o"
 msgstr "{n} B"
 
-#: app/ui/playlist_dialog.py:183
+#: app/ui/playlist_dialog.py:222
 msgid "{selected} / {total} vidéo(s) sélectionnée(s)"
 msgstr "{selected} / {total} videos selected"
 
@@ -2281,7 +2281,7 @@ msgstr "Failed"
 msgid "⚠ Mode manuel disponible pour une seule URL à la fois."
 msgstr "⚠ Manual mode is available for only one URL at a time."
 
-#: app/core/downloader.py:1015 app/core/downloader.py:1018
+#: app/core/downloader.py:1117 app/core/downloader.py:1120
 msgid "Annulé par l'utilisateur"
 msgstr "Cancelled by user"
 
@@ -2299,7 +2299,7 @@ msgstr "HTTP error {code}."
 msgid "Erreur inconnue."
 msgstr "Unknown error."
 
-#: app/core/downloader.py:1607
+#: app/core/downloader.py:1716
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
@@ -2331,7 +2331,7 @@ msgstr ""
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr "Unable to check the version (connection unavailable)."
 
-#: app/core/downloader.py:1595
+#: app/core/downloader.py:1704
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
@@ -2457,7 +2457,7 @@ msgid ""
 "fenêtre."
 msgstr "The DownAccess browser is open. Sign in, then close this window."
 
-#: app/core/downloader.py:360
+#: app/core/downloader.py:460
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -2515,7 +2515,7 @@ msgid ""
 "vidéos."
 msgstr "DownAccess will remember your sign-in to {site} for future videos."
 
-#: app/core/downloader.py:350
+#: app/core/downloader.py:450
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -3186,11 +3186,11 @@ msgstr "Browser to use:"
 msgid "(pas de résumé disponible)"
 msgstr "(no summary available)"
 
-#: app/core/site_search.py:57
+#: app/core/site_search.py:79
 msgid "Actualités et société"
 msgstr "News & society"
 
-#: app/core/site_search.py:71
+#: app/core/site_search.py:97
 msgid "Arts et spectacles"
 msgstr "Arts & performance"
 
@@ -3222,15 +3222,15 @@ msgstr "Loading the {category} category…"
 msgid "Chargement de {category} sur {site}…"
 msgstr "Loading {category} on {site}…"
 
-#: app/core/site_search.py:69
+#: app/core/site_search.py:95
 msgid "Cinéma"
 msgstr "Film"
 
-#: app/core/site_search.py:61
+#: app/core/site_search.py:87
 msgid "Culture pop"
 msgstr "Pop culture"
 
-#: app/core/site_search.py:54 app/core/site_search.py:68
+#: app/core/site_search.py:76 app/core/site_search.py:94
 msgid "Documentaires"
 msgstr "Documentaries"
 
@@ -3238,11 +3238,11 @@ msgstr "Documentaries"
 msgid "En continu (la suite se charge en arrivant en bas de la liste)"
 msgstr "Continuous (more results load as you reach the bottom of the list)"
 
-#: app/core/site_search.py:55
+#: app/core/site_search.py:77
 msgid "Films"
 msgstr "Films"
 
-#: app/core/site_search.py:59
+#: app/core/site_search.py:81
 msgid "Histoire"
 msgstr "History"
 
@@ -3256,7 +3256,7 @@ msgstr ""
 "\n"
 "{error}"
 
-#: app/core/site_search.py:62
+#: app/core/site_search.py:88
 msgid "Jeunesse"
 msgstr "Children"
 
@@ -3303,7 +3303,7 @@ msgstr "Browsing results"
 msgid "Retour"
 msgstr "Back"
 
-#: app/ui/playlist_dialog.py:97 app/ui/playlist_dialog.py:98
+#: app/ui/playlist_dialog.py:136 app/ui/playlist_dialog.py:137
 msgid "Retour aux résultats"
 msgstr "Back to results"
 
@@ -3331,15 +3331,15 @@ msgstr "Result summary"
 msgid "Saisissez une requête, ou choisissez une catégorie à parcourir."
 msgstr "Enter a search term, or pick a category to browse."
 
-#: app/core/site_search.py:58
+#: app/core/site_search.py:80
 msgid "Sciences"
 msgstr "Science"
 
-#: app/core/site_search.py:72
+#: app/core/site_search.py:98
 msgid "Sport"
 msgstr "Sport"
 
-#: app/core/site_search.py:56 app/core/site_search.py:70
+#: app/core/site_search.py:78 app/core/site_search.py:96
 msgid "Séries et fictions"
 msgstr "Series & fiction"
 
@@ -3363,24 +3363,24 @@ msgstr "{shown} of {total} results"
 msgid "{site} — {category}"
 msgstr "{site} — {category}"
 
-#: app/core/site_search.py:60
+#: app/core/site_search.py:82
 msgid "Émissions"
 msgstr "Programmes"
 
-#: app/core/downloader.py:271
+#: app/core/downloader.py:371
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr "Free space in \"{folder}\": {size}."
 
-#: app/core/downloader.py:274
+#: app/core/downloader.py:374
 msgid "Espace nécessaire : environ {size}."
 msgstr "Space required: about {size}."
 
-#: app/core/downloader.py:288
+#: app/core/downloader.py:388
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr "There is not enough free space on the disk to download this file."
 
-#: app/core/downloader.py:280
+#: app/core/downloader.py:380
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3388,7 +3388,7 @@ msgstr ""
 "Free up some space on this disk, or choose a different download folder in "
 "Preferences (Ctrl+P)."
 
-#: app/core/downloader.py:299
+#: app/core/downloader.py:399
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr "Your disk is full: the download could not be saved."
 
@@ -3463,7 +3463,7 @@ msgstr "Download an &extract...\tCtrl+E"
 msgid "Télécharger un extrait"
 msgstr "Download an extract"
 
-#: app/core/downloader.py:1458
+#: app/core/downloader.py:1567
 msgid "fin"
 msgstr "end"
 
@@ -3988,7 +3988,7 @@ msgstr ""
 "\n"
 "If you answer No, the subscription is still created: the {n} items will be offered to you and you choose."
 
-#: app/core/downloader.py:327
+#: app/core/downloader.py:427
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -3998,7 +3998,7 @@ msgstr ""
 "\n"
 "DownAccess cannot download it, and no setting will change that: the protection is put in place by the site. Subscription platforms (Netflix, Disney+, Prime Video) and some france.tv videos work this way."
 
-#: app/core/downloader.py:340
+#: app/core/downloader.py:440
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -4007,3 +4007,7 @@ msgstr ""
 "The Internet connection was lost during the download.\n"
 "\n"
 "DownAccess tried again without success. Check your connection, then restart the download with the F2 key."
+
+#: app/core/site_search.py:86
+msgid "Concerts et spectacles"
+msgstr "Concerts and live performances"

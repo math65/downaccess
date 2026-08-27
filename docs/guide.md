@@ -214,7 +214,7 @@ Vous n'avez pas toujours un titre précis en tête. Sur **france.tv** et **Arte*
 
 1. Choisissez **france.tv** ou **Arte** dans la liste **Site**.
 2. **Laissez le champ Recherche vide.**
-3. Choisissez une **Catégorie à parcourir** : Documentaires, Films, Séries et fictions, Sciences, Histoire, Sport... Les catégories proposées dépendent du site.
+3. Choisissez une **Catégorie à parcourir** : Documentaires, Films, Séries et fictions, Sciences, Histoire, Sport... Les catégories proposées dépendent du site. Sur **Arte**, la catégorie **Concerts et spectacles** donne accès aux captations de festivals et aux concerts.
 4. Validez avec **OK**.
 
 Les programmes de la catégorie s'affichent comme des résultats de recherche ordinaires : vous les cochez et les téléchargez de la même façon.

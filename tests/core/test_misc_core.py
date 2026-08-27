@@ -14,6 +14,8 @@ from app.core.site_search import (
     arte_collection_id,
     arte_program_entries,
     arte_video_id,
+    browse,
+    clear_browse_cache,
     categories,
     supports_browse,
 )
@@ -259,3 +261,60 @@ def _interdit(*args, **kwargs):
 
 def _explose(*args, **kwargs):
     raise OSError("API injoignable")
+
+
+class TestParcoursCategories:
+    """Le parcours par categorie interroge le site a chaque changement de page."""
+
+    def setup_method(self):
+        clear_browse_cache()
+
+    teardown_method = setup_method
+
+    def test_concerts_arte_proposes(self):
+        """Les festivals (Cabaret Vert, Eurockeennes) vivent sur ARTE Concert,
+        qui n'est pas une categorie du site mais une page a part : sans son
+        code propre, aucun concert n'etait atteignable par le parcours."""
+        codes = [code for code, _label in categories("arte")]
+        assert "ARTE_CONCERT" in codes
+
+    def test_toutes_les_categories_sont_nommees(self):
+        for site in ("arte", "francetv"):
+            for code, label in categories(site):
+                assert code and label.strip()
+
+    def test_le_catalogue_n_est_demande_qu_une_fois(self, monkeypatch):
+        """Feuilleter les pages ne doit pas rejouer tout le parcours."""
+        import app.core.site_search as site_search
+        appels = []
+
+        def faux(category, lang):
+            appels.append(category)
+            return [{"title": f"Video {i}", "id": str(i)} for i in range(25)]
+
+        monkeypatch.setattr(site_search, "_arte_browse_all", faux)
+        p1 = browse("arte", "DOR", 10, "fr", 1)
+        p2 = browse("arte", "DOR", 10, "fr", 2)
+        assert len(appels) == 1
+        assert p1["entries"] != p2["entries"]
+        assert p1["total_count"] == 25 and p1["total_pages"] == 3
+
+    def test_categories_differentes_ne_se_melangent_pas(self, monkeypatch):
+        import app.core.site_search as site_search
+        monkeypatch.setattr(
+            site_search, "_arte_browse_all",
+            lambda category, lang: [{"title": category, "id": category}])
+        assert browse("arte", "DOR", 10, "fr", 1)["entries"][0]["title"] == "DOR"
+        assert browse("arte", "CIN", 10, "fr", 1)["entries"][0]["title"] == "CIN"
+
+    def test_cache_expire(self, monkeypatch):
+        import app.core.site_search as site_search
+        appels = []
+        monkeypatch.setattr(site_search, "_arte_browse_all",
+                            lambda category, lang: appels.append(category) or [])
+        # une lecture de l'horloge par appel : la 2e arrive apres expiration
+        faux_temps = iter([0.0, site_search._BROWSE_TTL + 1.0])
+        monkeypatch.setattr(site_search.time, "monotonic", lambda: next(faux_temps))
+        browse("arte", "DOR", 10, "fr", 1)
+        browse("arte", "DOR", 10, "fr", 1)
+        assert len(appels) == 2

@@ -214,7 +214,7 @@ You do not always have a specific title in mind. On **france.tv** and **Arte**, 
 
 1. Choose **france.tv** or **Arte** from the **Site** list.
 2. **Leave the Search field empty.**
-3. Choose a **Category to browse**: Documentaries, Films, Series & fiction, Science, History, Sport... The categories offered depend on the site.
+3. Choose a **Category to browse**: Documentaries, Films, Series & fiction, Science, History, Sport... The categories offered depend on the site. On **Arte**, the **Concerts and live performances** category gives access to festival recordings and concerts.
 4. Confirm with **OK**.
 
 The programmes in that category appear like ordinary search results: you check them and download them the same way.

@@ -25,6 +25,7 @@ Aucun `import wx` ici (règle app/core).
 
 import html
 import re
+import time
 import unicodedata
 
 from curl_cffi import requests as cffi_requests
@@ -46,6 +47,22 @@ _ARTE_LANGS = ("fr", "de", "en", "es", "it", "pl")
 
 _TIMEOUT = 20
 
+# Parcours d'une categorie : nombre de requetes de pagination en plus de la
+# page elle-meme. Sans elles, « Culture pop » et « Jeunesse » ne montraient que
+# DIX videos sur 200 et 172 — leur page ne contient qu'un seul rail, pagine.
+_ARTE_BROWSE_MAX_PAGES = 8
+
+# Le catalogue d'une categorie ne bouge pas d'une minute a l'autre, et
+# l'utilisateur qui feuillette les pages de resultats redemande la meme liste a
+# chaque fois. On la garde en memoire quelques minutes.
+_BROWSE_TTL = 300.0
+_browse_cache: dict[tuple[str, str, str], tuple[float, list[dict]]] = {}
+
+
+def clear_browse_cache() -> None:
+    """Vide le cache de parcours (tests, changement de langue)."""
+    _browse_cache.clear()
+
 
 # --- Catégories de parcours --------------------------------------------------
 #
@@ -63,6 +80,10 @@ def _arte_categories() -> list[tuple[str, str]]:
         ("SCI", _("Sciences")),
         ("HIS", _("Histoire")),
         ("EMI", _("Émissions")),
+        # Le catalogue musical d'Arte (ARTE Concert) n'est pas une categorie du
+        # site mais une page a part entiere — d'ou le code different. C'est la
+        # que vivent les festivals (Cabaret Vert, Eurockeennes...).
+        ("ARTE_CONCERT", _("Concerts et spectacles")),
         ("POP", _("Culture pop")),
         ("JUN", _("Jeunesse")),
     ]
@@ -156,11 +177,29 @@ def browse(site_key: str, category: str, limit: int, lang: str, page: int = 1) -
     une requête : la pagination est donc faite côté client."""
     if not category:
         return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
-    if site_key == "francetv":
-        return _page_slice(_francetv_browse_all(category), page, limit)
-    if site_key == "arte":
-        return _page_slice(_arte_browse_all(category, lang), page, limit)
-    return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
+    if site_key not in ("francetv", "arte"):
+        return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
+    return _page_slice(_browse_all_cached(site_key, category, lang), page, limit)
+
+
+def _browse_all_cached(site_key: str, category: str, lang: str) -> list[dict]:
+    """Catalogue complet d'une categorie, garde quelques minutes.
+
+    Chaque changement de page redemandait tout le catalogue au site : une
+    requete pour france.tv, jusqu'a neuf pour Arte depuis qu'on suit la
+    pagination des rails. Le cache rend le feuilletage instantane.
+    """
+    cle = (site_key, category, lang)
+    maintenant = time.monotonic()
+    garde = _browse_cache.get(cle)
+    if garde and maintenant - garde[0] < _BROWSE_TTL:
+        return garde[1]
+    entries = (_francetv_browse_all(category) if site_key == "francetv"
+               else _arte_browse_all(category, lang))
+    if len(_browse_cache) >= 12:      # une poignee de categories suffit
+        _browse_cache.pop(next(iter(_browse_cache)), None)
+    _browse_cache[cle] = (maintenant, entries)
+    return entries
 
 
 # --- france.tv ---------------------------------------------------------------
@@ -528,10 +567,42 @@ def _arte_browse_all(code: str, lang: str) -> list[dict]:
 
     entries: list[dict] = []
     seen: set[str] = set()
-    for zone in data.get("zones", []):
-        for item in _arte_zone_items(zone):
+
+    def _collect(items: list[dict]) -> None:
+        for item in items:
             entry = _arte_entry(item)
             if entry and entry["id"] not in seen:
                 seen.add(entry["id"])
                 entries.append(entry)
+
+    # Les rails paginés, du plus gros au plus petit : sur « Culture pop » une
+    # seule zone porte les 200 vidéos de la catégorie quand les autres n'en
+    # portent que dix. On dépense le budget de requêtes là où il rapporte.
+    a_paginer: list[tuple[int, str, int]] = []
+    for zone in data.get("zones", []):
+        content = zone.get("content") or {}
+        _collect(_arte_zone_items(zone))
+        pagination = content.get("pagination") or {}
+        next_url = (pagination.get("links") or {}).get("next") or ""
+        pages = int(pagination.get("pages") or 1)
+        if next_url and pages > 1:
+            a_paginer.append((int(pagination.get("totalCount") or 0), next_url, pages))
+    a_paginer.sort(key=lambda z: z[0], reverse=True)
+
+    budget = _ARTE_BROWSE_MAX_PAGES
+    for _total, next_url, pages in a_paginer:
+        page = 2
+        while page <= pages and budget > 0:
+            budget -= 1
+            zone_url = re.sub(r"([?&]page=)\d+", rf"\g<1>{page}", next_url)
+            try:
+                more = cffi_requests.get(zone_url, impersonate="chrome",
+                                         timeout=_TIMEOUT)
+                more.raise_for_status()
+                _collect((more.json() or {}).get("data") or [])
+            except Exception:
+                break   # une page manquante ne doit pas perdre les precedentes
+            page += 1
+        if budget <= 0:
+            break
     return entries

@@ -186,7 +186,7 @@ msgstr ""
 msgid "Activer l'interception des requêtes média"
 msgstr ""
 
-#: app/core/site_search.py:62
+#: app/core/site_search.py:79
 msgid "Actualités et société"
 msgstr ""
 
@@ -369,7 +369,7 @@ msgstr ""
 msgid "Aperçu — {title}"
 msgstr ""
 
-#: app/core/site_search.py:76
+#: app/core/site_search.py:97
 msgid "Arts et spectacles"
 msgstr ""
 
@@ -750,7 +750,7 @@ msgid ""
 "celles à télécharger."
 msgstr ""
 
-#: app/core/site_search.py:74
+#: app/core/site_search.py:95
 msgid "Cinéma"
 msgstr ""
 
@@ -772,6 +772,10 @@ msgstr ""
 
 #: app/ui/report_dialog.py:74
 msgid "Commentaire (optionnel) :"
+msgstr ""
+
+#: app/core/site_search.py:86
+msgid "Concerts et spectacles"
 msgstr ""
 
 #: app/ui/confirm_dialog.py:19
@@ -873,7 +877,7 @@ msgstr ""
 msgid "Créer un fichier par chapitre"
 msgstr ""
 
-#: app/core/site_search.py:66
+#: app/core/site_search.py:87
 msgid "Culture pop"
 msgstr ""
 
@@ -901,7 +905,7 @@ msgstr ""
 msgid "Diagnostic en cours…"
 msgstr ""
 
-#: app/core/site_search.py:59 app/core/site_search.py:73
+#: app/core/site_search.py:76 app/core/site_search.py:94
 msgid "Documentaires"
 msgstr ""
 
@@ -1354,7 +1358,7 @@ msgstr ""
 msgid "File de téléchargement"
 msgstr ""
 
-#: app/core/site_search.py:60
+#: app/core/site_search.py:77
 msgid "Films"
 msgstr ""
 
@@ -1455,7 +1459,7 @@ msgstr ""
 msgid "Général"
 msgstr ""
 
-#: app/core/site_search.py:64
+#: app/core/site_search.py:81
 msgid "Histoire"
 msgstr ""
 
@@ -1658,7 +1662,7 @@ msgstr ""
 msgid "Jamais"
 msgstr ""
 
-#: app/core/site_search.py:67
+#: app/core/site_search.py:88
 msgid "Jeunesse"
 msgstr ""
 
@@ -2644,7 +2648,7 @@ msgid ""
 "ce que vous voulez."
 msgstr ""
 
-#: app/core/site_search.py:63
+#: app/core/site_search.py:80
 msgid "Sciences"
 msgstr ""
 
@@ -2711,7 +2715,7 @@ msgstr ""
 msgid "Sous-titres uniquement"
 msgstr ""
 
-#: app/core/site_search.py:77
+#: app/core/site_search.py:98
 msgid "Sport"
 msgstr ""
 
@@ -2820,7 +2824,7 @@ msgstr ""
 msgid "Sélectionnez un site à supprimer."
 msgstr ""
 
-#: app/core/site_search.py:61 app/core/site_search.py:75
+#: app/core/site_search.py:78 app/core/site_search.py:96
 msgid "Séries et fictions"
 msgstr ""
 
@@ -3711,7 +3715,7 @@ msgstr ""
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr ""
 
-#: app/core/site_search.py:65
+#: app/core/site_search.py:82
 msgid "Émissions"
 msgstr ""
 

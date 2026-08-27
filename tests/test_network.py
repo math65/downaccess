@@ -14,7 +14,7 @@ d'echouer : c'est une information sur le reseau, pas sur le code.
 
 import pytest
 
-from app.core import subscriptions as subs
+from app.core import site_search, subscriptions as subs
 from app.core.transcript import TranscriptError, fetch_transcript
 
 pytestmark = pytest.mark.network
@@ -22,6 +22,7 @@ pytestmark = pytest.mark.network
 CHAINE_YOUTUBE = "https://www.youtube.com/@Arte"
 PODCAST = "https://podcasts.files.bbci.co.uk/p02nq0gn.rss"
 VIDEO_AVEC_SOUS_TITRES = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+COLLECTION_ARTE = "https://www.arte.tv/fr/videos/RC-014468/cabaret-vert/"
 
 
 def joignable(action, quoi):
@@ -80,3 +81,62 @@ class TestContratDesSousTitres:
         assert len(texte) > 50
         assert "-->" not in texte
         assert "WEBVTT" not in texte
+
+
+def repond(action, quoi):
+    """Execute `action`, ou s'abstient si le site distant ne repond pas."""
+    try:
+        return action()
+    except Exception as exc:                       # reseau, 5xx, geoblocage...
+        pytest.skip(f"{quoi} injoignable pour l'instant : {exc}")
+
+
+class TestContratArte:
+    """Arte n'a pas d'API documentee : ces contrats sont deduits de mesures.
+
+    Ils ne verifient pas qu'Arte est en ligne, mais que la forme de ses
+    reponses n'a pas change — le jour ou elle change, l'utilisateur voit des
+    listes vides ou des URL brutes, et ce n'est pas a lui de nous le dire.
+    """
+
+    def test_le_jeton_emprunte_a_yt_dlp_est_toujours_accepte(self):
+        """Le jeton vit dans yt-dlp, mis a jour chaque nuit. S'il est revoque,
+        les collections perdent leurs titres — on veut le savoir avant."""
+        entries = repond(
+            lambda: site_search.arte_program_entries(COLLECTION_ARTE),
+            "l'API programmes d'Arte")
+        assert entries, "l'API programmes ne renvoie plus rien (jeton revoque ?)"
+        assert all(e["title"] and e["webpage_url"] for e in entries)
+
+    def test_une_collection_est_decrite_en_entier(self):
+        """Chaque video de la collection doit pouvoir etre nommee : c'est ce
+        qui distingue deux concerts d'un meme festival."""
+        entries = repond(
+            lambda: site_search.arte_collection_entries(COLLECTION_ARTE),
+            "les collections Arte")
+        titres = {e["title"] for e in entries}
+        assert len(titres) == len(entries), "des titres en double"
+        assert any("Cabaret Vert" in t for t in titres)
+
+    def test_la_page_des_concerts_existe_toujours(self):
+        """ARTE Concert est une page a part, pas une categorie du site : son
+        code est le seul chemin vers les festivals."""
+        result = repond(
+            lambda: site_search.browse("arte", "ARTE_CONCERT", 20, "fr", 1),
+            "ARTE Concert")
+        assert result["total_count"] > 20
+        assert all(e["title"] and e["webpage_url"] for e in result["entries"])
+
+    def test_le_titre_distinctif_est_dans_alt_title(self):
+        """Contrat cote yt-dlp : sur Arte, `title` porte le nom du programme et
+        `alt_title` celui de l'episode. C'est sur quoi repose le nom de fichier."""
+        import yt_dlp
+        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
+                               "skip_download": True}) as ydl:
+            info = repond(
+                lambda: ydl.extract_info(
+                    "https://www.arte.tv/fr/videos/133232-006-A/ofenbach/",
+                    download=False),
+                "arte.tv")
+        assert info["title"] and info["alt_title"]
+        assert info["alt_title"] not in info["title"]
