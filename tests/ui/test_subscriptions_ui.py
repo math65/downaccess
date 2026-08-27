@@ -180,3 +180,95 @@ class TestNouveautes:
         dlg = NewItemsDialog(frame, [("Podcast", entree(1), "mp3")])
         assert dlg.get_selected()[0][2] == "mp3"
         dlg.Destroy()
+
+
+class TestRoutageAuDemarrage:
+    """Ce que devient une nouveaute relevee au lancement.
+
+    On appelle la methode sur un objet minimal plutot que de construire toute
+    la fenetre principale : ce qui est teste ici, c'est l'aiguillage — file
+    d'attente, compteur du menu, ou ouverture de la fenetre — pas l'interface.
+    """
+
+    class Fausse:
+        def __init__(self, **reglages):
+            from app.core.settings import DEFAULTS
+            self.settings = dict(DEFAULTS)
+            self.settings.update(reglages)
+            self._pending_new_items = {}
+            self.enfilees = []
+            self.compteur = None
+            self.statuts = []
+            self.fenetre_ouverte = []
+
+        def _enqueue_url(self, url, fmt, **kw):
+            self.enfilees.append((url, fmt))
+
+        def _update_subscriptions_label(self, n):
+            self.compteur = n
+
+        def set_status(self, message):
+            self.statuts.append(message)
+
+        def _show_new_items(self, fresh, subs_list):
+            self.fenetre_ouverte.append(fresh)
+
+    def _appel(self, faux, subs_list, fresh, monkeypatch):
+        import wx
+
+        from app.ui import main_window as mw
+        monkeypatch.setattr(wx, "CallAfter",
+                            lambda fn, *a, **kw: fn(*a, **kw))
+        mw.MainWindow._on_subscriptions_checked(faux, fresh, subs_list)
+
+    def _entrees(self, n=2):
+        from app.core.subscriptions import FeedEntry
+        return [FeedEntry(entry_id=f"id{i}", title=f"Video {i}",
+                          url=f"https://exemple.test/{i}") for i in range(n)]
+
+    def test_sans_automatisme_seul_le_compteur_bouge(self, appdata, monkeypatch):
+        from app.core import subscriptions as subs
+        sub = abonnement(sub_id="s1")
+        faux = self.Fausse()
+        self._appel(faux, [sub], {"s1": self._entrees(3)}, monkeypatch)
+        assert faux.enfilees == []
+        assert faux.compteur == 3
+        assert faux.fenetre_ouverte == []
+        # Rien n'est marque vu : fermer l'application ne perd pas les nouveautes.
+        assert subs.load() == [] or sub.seen_ids == []
+
+    def test_avec_automatisme_tout_part_en_file(self, appdata, monkeypatch):
+        sub = abonnement(sub_id="s1", auto_download=True, format_spec="mp3")
+        faux = self.Fausse()
+        self._appel(faux, [sub], {"s1": self._entrees(2)}, monkeypatch)
+        assert [f for _u, f in faux.enfilees] == ["mp3", "mp3"]
+        assert faux.compteur == 0
+        assert sub.seen_ids == ["id0", "id1"]      # marque vu : pas deux fois
+
+    def test_format_de_l_abonnement_absent_suit_les_preferences(self, appdata,
+                                                                monkeypatch):
+        sub = abonnement(sub_id="s1", auto_download=True, format_spec="")
+        faux = self.Fausse(post_processing="mp4")
+        self._appel(faux, [sub], {"s1": self._entrees(1)}, monkeypatch)
+        assert faux.enfilees[0][1] == "mp4"
+
+    def test_reglage_fenetre_ouvre_la_liste(self, appdata, monkeypatch):
+        """Nouveau reglage : « Ouvrir la fenetre des nouveautes »."""
+        sub = abonnement(sub_id="s1")
+        faux = self.Fausse(subscriptions_on_new="window")
+        self._appel(faux, [sub], {"s1": self._entrees(2)}, monkeypatch)
+        assert faux.fenetre_ouverte and len(faux.fenetre_ouverte[0]["s1"]) == 2
+
+    def test_reglage_par_defaut_n_ouvre_rien(self, appdata, monkeypatch):
+        """Le demarrage ne doit interrompre personne sans qu'on l'ait demande."""
+        sub = abonnement(sub_id="s1")
+        faux = self.Fausse(subscriptions_on_new="counter")
+        self._appel(faux, [sub], {"s1": self._entrees(2)}, monkeypatch)
+        assert faux.fenetre_ouverte == []
+
+    def test_rien_de_neuf_ne_dit_rien(self, appdata, monkeypatch):
+        faux = self.Fausse(subscriptions_on_new="window")
+        self._appel(faux, [abonnement(sub_id="s1")], {}, monkeypatch)
+        assert faux.compteur == 0
+        assert faux.statuts == []
+        assert faux.fenetre_ouverte == []

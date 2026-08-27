@@ -552,6 +552,13 @@ class MainWindow(wx.Frame):
         self._pending_new_items = manual
         pending = sum(len(v) for v in manual.values())
         self._update_subscriptions_label(pending)
+        # Trace du releve : cette fonction est volontairement silencieuse a
+        # l'ecran, le journal est donc le seul endroit ou verifier qu'elle a
+        # bien tourne — et le premier reflexe sur un rapport « je ne vois
+        # jamais mes nouveautes ».
+        _log.info("Abonnements releves : %d nouveaute(s) en attente, "
+                  "%d telechargee(s) automatiquement, %d source(s) concernee(s)",
+                  pending, auto_count, len(fresh))
 
         if auto_count:
             self.set_status(_("{n} nouveautés de vos abonnements ajoutées à la file.")
