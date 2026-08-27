@@ -311,3 +311,33 @@ class TestCollectionArte:
         assert kind == subs.KIND_ARTE
         assert titre == ""                     # l'appelant retombe sur l'URL
         assert len(subs.create(COLLECTION).seen_ids) == 2
+
+
+class TestReleveAuLancement:
+    """Le relevé du démarrage tourne dans un thread : rien de ce qui s'y passe
+    ne doit pouvoir empêcher l'application de démarrer ni les nouveautés
+    d'arriver jusqu'à l'utilisateur.
+    """
+
+    def test_un_abonnement_qui_explose_n_emporte_pas_les_autres(self, monkeypatch):
+        bon = abonnement(sub_id="ok")
+        casse = abonnement(sub_id="ko", feed_url="https://exemple.test/casse")
+
+        def faux_get(url):
+            if "casse" in url:
+                raise ValueError("reponse impossible a lire")
+            return ATOM
+
+        monkeypatch.setattr(subs, "_http_get", faux_get)
+        fresh, errors = subs.check_all([casse, bon])
+        assert "ok" in fresh
+        assert len(errors) == 1
+
+    def test_un_abonnement_qui_disparait_du_reseau_est_signale(self, monkeypatch):
+        def injoignable(url):
+            raise subs.FeedError("serveur muet")
+
+        monkeypatch.setattr(subs, "_http_get", injoignable)
+        fresh, errors = subs.check_all([abonnement()])
+        assert fresh == {}
+        assert errors and "serveur muet" in errors[0]

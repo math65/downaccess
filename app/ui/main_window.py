@@ -503,8 +503,20 @@ class MainWindow(wx.Frame):
             return
 
         def worker() -> None:
-            fresh, _errors = subs_mod.check_all(subs_list)
-            subs_mod.save(subs_list)
+            # Rien de ce qui se passe ici ne doit pouvoir empecher l'annonce des
+            # nouveautes. `check_all` isole deja chaque abonnement ; restent
+            # l'ecriture du fichier (dossier en lecture seule, disque plein) et
+            # l'imprevu. Sans ce filet, le thread mourait en silence et les
+            # nouveautes n'etaient jamais presentees.
+            fresh: dict = {}
+            try:
+                fresh, _errors = subs_mod.check_all(subs_list)
+            except Exception:
+                _log.exception("Releve des abonnements interrompu")
+            try:
+                subs_mod.save(subs_list)
+            except Exception:
+                _log.exception("Abonnements non enregistres apres le releve")
             wx.CallAfter(self._on_subscriptions_checked, fresh, subs_list)
 
         threading.Thread(target=worker, daemon=True).start()
