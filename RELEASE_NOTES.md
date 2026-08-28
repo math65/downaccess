@@ -20,6 +20,18 @@ Quand une émission est refusée parce que la chaîne n'en laisse passer que le 
 
 Le message précise aussi où se choisit le format — dans la liste « Format de téléchargement » de la fenêtre d'ajout — et rappelle que modifier le format par défaut dans les Préférences ne relance pas un téléchargement déjà refusé.
 
+### Trouver une chaîne ou un podcast par son nom
+
+Pour suivre une chaîne, il fallait jusqu'ici connaître l'adresse de son flux. Celle d'un podcast, en particulier, n'est écrite nulle part : il fallait aller la chercher dans les entrailles d'une page.
+
+La fenêtre **Suivre une chaîne...** propose maintenant un bouton **Rechercher une chaîne ou un podcast...**. Tapez un nom, choisissez où chercher — chaînes YouTube, collections Arte ou podcasts — et prenez dans la liste : l'adresse se remplit toute seule. Le nombre d'abonnés (pour une chaîne) et le nombre d'épisodes (pour un podcast) vous aident à reconnaître la bonne, au milieu des copies.
+
+Le champ d'adresse reste là pour qui a déjà le lien sous la main.
+
+Et DownAccess refuse désormais de suivre deux fois la même source : elle vous serait sinon annoncée en double à chaque nouveauté.
+
+Merci à Véronique.
+
 ### Note
 
 Le contenu protégé par DRM (Netflix, Disney+, Prime Video) n'est pas pris en charge. Cette protection est posée par les plateformes : aucune application ne peut la contourner. Sur M6, seule la bande-son échappe au verrou.

@@ -512,13 +512,29 @@ Quatre boutons accompagnent la liste : **Suivre une chaîne...**, **Ne plus suiv
 
 ### S'abonner
 
-Cliquez sur **Suivre une chaîne...** puis collez une adresse. DownAccess accepte :
+Cliquez sur **Suivre une chaîne...**. Deux façons de désigner ce que vous voulez suivre : le chercher par son nom, ou coller son adresse.
+
+#### Chercher par le nom
+
+Le bouton **Rechercher une chaîne ou un podcast...** ouvre une fenêtre de recherche, sur le modèle de celle des médias (Ctrl+F). Tapez un nom, choisissez où chercher — **Chaînes YouTube**, **Collections Arte** ou **Podcasts** — et validez.
+
+La liste des résultats donne, pour chacun, son nom, qui le publie, et un repère utile : le nombre d'abonnés pour une chaîne YouTube, le nombre d'épisodes pour un podcast. Ce nombre d'abonnés vaut la peine d'être regardé : les chaînes copiant le nom d'une chaîne connue sont légion, et c'est ce qui les distingue de l'originale.
+
+Choisissez une ligne, et l'adresse se met toute seule dans le champ de la fenêtre précédente. Vous gardez la main sur le format et sur le rattrapage : rien n'est créé tant que vous n'avez pas cliqué **Suivre**.
+
+Pour les podcasts, DownAccess cherche l'adresse du flux au moment où vous choisissez : c'est ce qui prend une seconde ou deux avant que la fenêtre ne se referme. Si cette adresse reste introuvable, DownAccess vous le dit au lieu de vous laisser avec un abonnement vide, et vous pouvez toujours saisir l'adresse à la main.
+
+#### Coller une adresse
+
+Si vous connaissez déjà l'adresse, collez-la directement dans le champ. DownAccess accepte :
 
 - l'adresse d'une **chaîne YouTube** sous toutes ses formes (avec un @, avec /channel/, avec /c/ ou /user/) ;
 - l'adresse d'une **playlist YouTube** ;
 - l'adresse d'un **flux de podcast** (le fichier .xml ou .rss) ;
 - la **page d'accueil d'un podcast** : DownAccess y cherche lui-même le flux ;
 - l'adresse d'une **collection Arte** : la page d'un festival, d'une série ou d'un magazine. Vous la trouvez en parcourant Arte depuis la recherche (Ctrl+F) : les entrées de type « playlist » sont des collections. Suivre le festival Le Cabaret Vert, par exemple, vous signale chaque concert mis en ligne.
+
+Vous ne pouvez pas suivre deux fois la même source : si vous vous abonnez à quelque chose que vous suivez déjà, DownAccess vous le signale et ne crée pas de doublon — sans quoi chaque nouveauté vous serait proposée en double.
 
 Vous choisissez ensuite le format des téléchargements pour cette source (ou **Format par défaut des préférences**, pour que vos abonnements suivent vos préférences générales si vous en changez un jour), et vous pouvez cocher **Télécharger automatiquement les nouveautés**.
 

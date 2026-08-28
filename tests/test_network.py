@@ -14,7 +14,7 @@ d'echouer : c'est une information sur le reseau, pas sur le code.
 
 import pytest
 
-from app.core import site_search, subscriptions as subs
+from app.core import feed_search, site_search, subscriptions as subs
 from app.core.transcript import TranscriptError, fetch_transcript
 
 pytestmark = pytest.mark.network
@@ -170,3 +170,78 @@ class TestContratM6:
                                "skip_download": True}) as ydl:
             info = repond(lambda: ydl.extract_info(EPISODE_M6, download=False), "m6.fr")
         assert video_is_drm_locked(info), "M6 semble telechargeable : revoir le garde-fou"
+
+
+class TestContratRechercheAbonnement:
+    """La recherche d'une source a suivre depend de trois services tiers.
+
+    Chacun peut changer sans prevenir : le filtre « chaines » de YouTube, la
+    presence des collections dans la recherche Arte, et surtout l'adresse du
+    flux dans la page d'un podcast Apple — que l'API, elle, ne donne pas. Ces
+    tests disent lequel a bouge le jour ou la recherche ne rend plus rien.
+    """
+
+    def _cherche(self, source, terme):
+        try:
+            return feed_search.search(source, terme, 8)
+        except feed_search.SearchError as exc:
+            pytest.skip(f"{source} injoignable pour l'instant : {exc}")
+
+    def test_les_chaines_youtube_restent_filtrables(self):
+        resultats = self._cherche(feed_search.SOURCE_YOUTUBE, "arte")
+        assert resultats, "le filtre « chaines » ne rend plus rien"
+        # Des chaines, pas des videos : c'est tout l'interet du filtre.
+        assert all("/channel/" in r["url"] or "/@" in r["url"]
+                   for r in resultats)
+
+    def test_une_chaine_trouvee_est_suivable(self):
+        """Le lien entre les deux moities : ce que la recherche rend doit
+        passer tel quel dans `resolve_feed`."""
+        resultats = self._cherche(feed_search.SOURCE_YOUTUBE, "arte")
+        feed, kind, titre = joignable(
+            lambda: subs.resolve_feed(resultats[0]["url"]), "YouTube")
+        assert kind == subs.KIND_YOUTUBE and titre
+        assert "feeds/videos.xml" in feed
+
+    def test_arte_rend_toujours_des_collections(self):
+        resultats = self._cherche(feed_search.SOURCE_ARTE, "karambolage")
+        assert resultats, "la recherche Arte ne rend plus de collection"
+        assert site_search.arte_collection_id(resultats[0]["url"])
+
+    def test_une_collection_trouvee_est_suivable(self):
+        resultats = self._cherche(feed_search.SOURCE_ARTE, "karambolage")
+        _feed, kind, titre = joignable(
+            lambda: subs.resolve_feed(resultats[0]["url"]), "Arte")
+        assert kind == subs.KIND_ARTE and titre
+
+    def test_apple_trouve_les_podcasts_francais(self):
+        resultats = self._cherche(feed_search.SOURCE_PODCAST,
+                                  "affaires sensibles")
+        assert resultats, "la recherche de podcasts ne rend plus rien"
+        assert resultats[0]["title"]
+
+    def test_l_adresse_du_flux_reste_lisible_dans_la_page(self):
+        """Le point fragile de la fonction : Apple ne publie pas cette adresse
+        dans son API pour les podcasts de Radio France, seulement dans la page.
+        Si ce test tombe, c'est la page qui a change de forme."""
+        resultats = self._cherche(feed_search.SOURCE_PODCAST,
+                                  "affaires sensibles")
+        try:
+            feed_url = feed_search.resolve(resultats[0])
+        except feed_search.SearchError as exc:
+            pytest.skip(f"Apple injoignable pour l'instant : {exc}")
+        assert feed_url.startswith("http")
+        titre, entrees = joignable(
+            lambda: subs.parse_feed(subs._http_get(feed_url)), "le podcast")
+        assert titre and entrees, "l'adresse trouvee doit etre un vrai flux"
+
+    def test_un_podcast_trouve_devient_un_abonnement(self):
+        """Bout en bout : ce que la recherche rend doit pouvoir etre suivi."""
+        resultats = self._cherche(feed_search.SOURCE_PODCAST, "the daily")
+        try:
+            feed_url = feed_search.resolve(resultats[0])
+        except feed_search.SearchError as exc:
+            pytest.skip(f"Apple injoignable pour l'instant : {exc}")
+        sub = joignable(lambda: subs.create(feed_url), "le podcast")
+        assert sub.title and sub.feed_url
+        assert sub.kind in (subs.KIND_PODCAST, subs.KIND_YOUTUBE)

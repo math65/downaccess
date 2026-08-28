@@ -512,7 +512,21 @@ Four buttons go with the list: **Follow a channel...**, **Stop following**, **Ch
 
 ### Subscribing
 
-Click **Follow a channel...** and paste an address. DownAccess accepts:
+Click **Follow a channel...**. There are two ways to point at what you want to follow: search for it by name, or paste its address.
+
+#### Search by name
+
+The **Search for a channel or a podcast...** button opens a search window, built like the one for media (Ctrl+F). Type a name, choose where to search — **YouTube channels**, **Arte collections** or **Podcasts** — and confirm.
+
+The result list gives, for each one, its name, who publishes it, and a useful marker: the number of subscribers for a YouTube channel, the number of episodes for a podcast. That subscriber count is worth a look: channels copying the name of a well-known one are everywhere, and this is what tells them apart from the original.
+
+Choose a line, and the address lands by itself in the field of the previous window. You stay in charge of the format and of catching up: nothing is created until you click **Follow**.
+
+For podcasts, DownAccess looks for the feed address at the moment you choose: that is what takes a second or two before the window closes. If that address cannot be found, DownAccess says so instead of leaving you with an empty subscription, and you can always type the address yourself.
+
+#### Paste an address
+
+If you already know the address, paste it straight into the field. DownAccess accepts:
 
 - the address of a **YouTube channel** in any of its forms (with an @, with /channel/, with /c/ or /user/);
 - the address of a **YouTube playlist**;

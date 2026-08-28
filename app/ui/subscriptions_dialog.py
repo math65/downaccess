@@ -9,6 +9,7 @@ import threading
 
 import wx
 
+from app.core import speech
 from app.core import subscriptions as subs
 from app.core.i18n import _translate as _
 
@@ -47,11 +48,18 @@ class AddSubscriptionDialog(wx.Dialog):
         self.txt_url = wx.TextCtrl(panel, name=_("Adresse à suivre"))
         self.txt_url.SetHint("https://www.youtube.com/@arte")
 
+        # Chercher par le nom evite d'avoir a connaitre l'adresse — celle du
+        # flux d'un podcast n'est trouvable nulle part pour qui ne lit pas le
+        # code source d'une page (demande de Veronique, 2026-08-28).
+        self.btn_search = wx.Button(
+            panel, label=_("Rechercher une chaîne ou un podcast..."),
+            name=_("Rechercher une chaîne ou un podcast"))
+
         lbl_help = wx.StaticText(panel, label=_(
-            "Adresse d'une chaîne YouTube, d'une playlist, d'un flux de "
-            "podcast, ou d'une collection Arte (la page d'un festival ou "
-            "d'un magazine). La page d'accueil d'un podcast convient aussi : "
-            "DownAccess y cherche le flux."))
+            "Cherchez par le nom, ou collez directement l'adresse : chaîne "
+            "YouTube, playlist, flux de podcast, ou collection Arte (la page "
+            "d'un festival ou d'un magazine). La page d'accueil d'un podcast "
+            "convient aussi : DownAccess y cherche le flux."))
 
         lbl_fmt = wx.StaticText(panel, label=_("Format des téléchargements :"))
         self.choice_fmt = wx.Choice(panel, choices=_format_labels(),
@@ -87,6 +95,7 @@ class AddSubscriptionDialog(wx.Dialog):
         btns.Realize()
 
         for widget, flag in ((lbl_url, wx.TOP), (self.txt_url, wx.TOP),
+                             (self.btn_search, wx.TOP),
                              (lbl_help, wx.TOP), (lbl_fmt, wx.TOP),
                              (self.choice_fmt, wx.TOP), (self.chk_auto, wx.TOP),
                              (self.chk_catch_up, wx.TOP)):
@@ -94,13 +103,38 @@ class AddSubscriptionDialog(wx.Dialog):
         sizer.Add(btns, 0, wx.EXPAND | wx.ALL, 12)
         panel.SetSizer(sizer)
 
-        self.choice_fmt.MoveAfterInTabOrder(self.txt_url)
+        self.btn_search.MoveAfterInTabOrder(self.txt_url)
+        self.choice_fmt.MoveAfterInTabOrder(self.btn_search)
         self.chk_auto.MoveAfterInTabOrder(self.choice_fmt)
         self.chk_catch_up.MoveAfterInTabOrder(self.chk_auto)
         self.btn_ok.MoveAfterInTabOrder(self.chk_catch_up)
         self.txt_url.SetFocus()
 
         self.Bind(wx.EVT_BUTTON, self._on_ok, id=wx.ID_OK)
+        self.btn_search.Bind(wx.EVT_BUTTON, self._on_search)
+
+    def _on_search(self, _event) -> None:
+        """Recherche par nom : le resultat retenu remplit le champ d'adresse.
+
+        On ne cree pas l'abonnement dans la foulee : l'utilisateur garde la
+        main sur le format et le rattrapage, qui sont dans cette fenetre-ci.
+        """
+        from app.ui.subscription_search_dialog import SubscriptionSearchDialog
+
+        with SubscriptionSearchDialog(self) as dlg:
+            if dlg.ShowModal() != wx.ID_OK or not dlg.get_url():
+                self.txt_url.SetFocus()
+                return
+            self.txt_url.SetValue(dlg.get_url())
+            titre = dlg.get_title()
+
+        # Le champ retrouve le focus avec l'adresse dedans : le lecteur d'ecran
+        # annonce ce qui vient d'etre choisi, et il reste modifiable.
+        self.txt_url.SetInsertionPointEnd()
+        self.txt_url.SetFocus()
+        if titre:
+            speech.speak(_("« {title} » choisi.").format(title=titre),
+                         interrupt=False)
 
     def _on_ok(self, _event) -> None:
         if not self.txt_url.GetValue().strip():
@@ -262,6 +296,24 @@ class SubscriptionsDialog(wx.Dialog):
 
     def _on_add_done(self, sub, en_attente: int = 0) -> None:
         self._set_busy(False)
+
+        # Deja suivi : sans ce garde-fou, chaque nouveaute serait proposee (ou
+        # telechargee) en double. Le risque a augmente avec la recherche par
+        # nom, qui rend l'ajout assez facile pour qu'on le refasse sans y
+        # penser. On compare les flux, pas les adresses saisies : la meme
+        # chaine s'ecrit @arte, /channel/UC..., ou /c/arte.
+        deja = next((a for a in self._subs if a.feed_url == sub.feed_url), None)
+        if deja is not None:
+            wx.MessageBox(
+                _("Vous suivez déjà « {title} ».\n\nRien n'a "
+                  "été ajouté : vos réglages pour cet abonnement sont "
+                  "inchangés.").format(title=deja.title),
+                _("Abonnement déjà suivi"), wx.OK | wx.ICON_INFORMATION, self)
+            index = self._subs.index(deja)
+            self.lst.Select(index)
+            self.lst.Focus(index)
+            self.lst.SetFocus()
+            return
         # Rattrapage + telechargement automatique : tout le catalogue partirait
         # en file sans que rien ne soit demande. On chiffre avant d'engager.
         if sub.auto_download and en_attente > 1:
