@@ -1,6 +1,6 @@
 [Setup]
 AppName=DownAccess
-AppVersion=0.2.1
+AppVersion=0.2.2
 AppPublisher=math65
 AppPublisherURL=https://github.com/math65/downaccess
 AppSupportURL=https://github.com/math65/downaccess/issues
