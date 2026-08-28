@@ -1,14 +1,24 @@
-## DownAccess 0.2.1
+## DownAccess 0.2.2
 
-### M6 programmes, at least in sound
+### The format you chose is the one that applies
 
-M6 locks the picture of its programmes, but leaves the soundtrack accessible. Since the previous release, DownAccess refused these videos rather than leave you with an audio file instead of your programme. Unfortunately, it refused them even when you asked for the sound on purpose — taking away the only access that was left.
+Guided extraction always added your media as video, even when you had chosen **Audio MP3** or **Audio M4A** as the default format in Preferences. On an M6 programme, where the channel only lets the sound through, DownAccess therefore refused the download — on the grounds that only the sound was available, which was exactly what you had asked for.
 
-Choose **Audio MP3** or **Audio M4A** from the "Download format" list, and the programme comes through. The refusal now applies only to video requests, and its message tells you what to do instead.
+Media found by guided extraction now follow your default format, like every other way of adding a link.
 
-The picture stays out of reach: it is a protection put in place by the channel, and no setting will change that.
+Thanks to Sèb and Véronique.
 
-Thanks to Véronique.
+### An error report no longer brings back the sound instead of the programme
+
+When you send a report, DownAccess replays the download to capture a detailed log. On a programme whose picture is locked, that replay fetched the soundtrack and told you the download had succeeded — when you had asked for the whole programme.
+
+The replay no longer happens when it cannot lead anywhere: picture locked by the site, or disk full. Your report is still sent, with the original error.
+
+### A button to get the sound on the spot
+
+When a programme is refused because the channel only lets its sound through, the message now offers a **Download the sound (MP3)** button. One click is enough: no need to add the link again.
+
+The message also says where the format is chosen — in the "Download format" list of the Add window — and points out that changing the default format in Preferences does not restart a download that was already refused.
 
 ### Note
 

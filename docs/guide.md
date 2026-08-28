@@ -36,7 +36,7 @@ L'objectif est simple : télécharger vos médias préférés sans jamais avoir 
 
 DownAccess ne peut pas télécharger les contenus protégés par des verrous numériques (DRM). Cela concerne notamment les services de streaming par abonnement comme **Netflix, Disney+ et Prime Video**, ainsi que les replays de **M6** (M6+, ex-6play). Ces plateformes chiffrent leurs vidéos pour empêcher tout enregistrement : aucune application, y compris DownAccess, ne peut les contourner.
 
-Certains sites laissent malgré tout la bande-son accessible. DownAccess vous prévient alors au lieu de vous livrer un fichier audio à la place de votre émission.
+Certains sites laissent malgré tout la bande-son accessible : c'est le cas de M6, dont l'image est verrouillée mais pas le son. DownAccess vous prévient alors au lieu de vous livrer un fichier audio à la place de votre émission, et vous propose dans le même message de **télécharger le son (MP3)**. Vous pouvez aussi choisir d'emblée **Audio MP3** ou **Audio M4A** dans la liste « Format de téléchargement » au moment d'ajouter le lien.
 
 En dehors de ces services protégés, l'immense majorité des sites vidéo et audio publics fonctionnent.
 

@@ -44,7 +44,11 @@ from app.core import app_updater
 from app.core import announce
 from app.core import amc_integration
 from app.core import browser
-from app.core.downloader import DownloadInfo, DownloadProgress
+from app.core.downloader import (
+    DownloadInfo,
+    DownloadProgress,
+    drm_locked_video_message,
+)
 from app.core.ffmpeg_utils import get_ffmpeg_path
 from app.core.queue_manager import QueueManager
 from app.ui.add_url_dialog import AddUrlDialog, FORMAT_MANUAL
@@ -726,11 +730,45 @@ class MainWindow(wx.Frame):
                 self._on_login_required(download_id)
             return
 
-        dlg = ErrorDialog(self, message)
+        # Image verrouillee, son accessible : proposer la bande-son sur place.
+        # Le message explique deja la marche a suivre, mais la refaire a la
+        # main coute un aller-retour — et deux testeurs sont alles changer le
+        # format dans les Preferences, ce qui ne relance pas celui-ci.
+        offre_audio = message == drm_locked_video_message()
+
+        dlg = ErrorDialog(self, message, audio_offer=offre_audio)
         dlg.ShowModal()
-        if dlg.wants_report():
-            self._start_error_report(download_id, message)
+        veut_audio  = dlg.wants_audio()
+        veut_rapport = dlg.wants_report()
         dlg.Destroy()
+
+        if veut_audio:
+            self._redownload_as_audio(download_id)
+        elif veut_rapport:
+            self._start_error_report(download_id, message)
+
+    def _redownload_as_audio(self, download_id: str) -> None:
+        """Relance en MP3 le telechargement refuse faute d'image accessible.
+
+        L'item echoue disparait : il est remplace par la nouvelle tentative,
+        comme pour un « Reessayer » (F2).
+        """
+        data = self._dl_data.get(download_id)
+        if not data:
+            self.set_status(_("Impossible de relancer : données introuvables."))
+            return
+        self.download_list.remove_item(download_id)
+        self._dl_data.pop(download_id, None)
+        self.set_count(self.download_list.count())
+        self._enqueue_url(
+            data["url"], "mp3",
+            referer=data.get("referer"),
+            cookies=data.get("cookies"),
+            playlist_title=data.get("playlist_title"),
+            playlist_number=data.get("playlist_number"),
+        )
+        self.set_status(_("Téléchargement relancé en MP3."))
+        wx.CallAfter(self.download_list.SetFocus)
 
     def _log_history(self, dl_data: dict, status: str, error: str = "") -> None:
         """Enregistre une entrée d'historique pour ce téléchargement."""

@@ -1,14 +1,24 @@
-## DownAccess 0.2.1
+## DownAccess 0.2.2
 
-### Les émissions de M6, au moins en son
+### Le format que vous avez choisi est bien celui qui s'applique
 
-M6 verrouille l'image de ses programmes, mais laisse la bande-son accessible. Depuis la version précédente, DownAccess refusait ces vidéos plutôt que de vous laisser repartir avec un fichier audio à la place de votre émission. Malheureusement, il les refusait aussi quand vous demandiez le son volontairement — ce qui vous retirait le seul accès qui restait.
+L'extraction guidée ajoutait toujours vos médias en vidéo, même si vous aviez choisi **Audio MP3** ou **Audio M4A** comme format par défaut dans les Préférences. Sur une émission M6, dont la chaîne ne laisse passer que le son, DownAccess refusait donc le téléchargement — au motif que seul le son était disponible, alors que c'était précisément ce que vous demandiez.
 
-Choisissez **Audio MP3** ou **Audio M4A** dans la liste « Format de téléchargement », et l'émission arrive. Le refus ne concerne plus que les demandes de vidéo, et son message vous indique désormais la marche à suivre.
+Les médias détectés par l'extraction guidée suivent désormais votre format par défaut, comme tous les autres ajouts.
 
-L'image, elle, reste hors de portée : c'est une protection posée par la chaîne, et aucun réglage n'y changera rien.
+Merci à Sèb et Véronique.
 
-Merci à Véronique.
+### Un rapport d'erreur ne ramène plus le son à la place de l'émission
+
+Quand vous envoyez un rapport, DownAccess relance le téléchargement pour capturer un journal détaillé. Sur une émission dont l'image est verrouillée, cette relance récupérait la bande-son et vous annonçait un téléchargement réussi — alors que vous aviez demandé l'émission entière.
+
+La relance n'a plus lieu quand elle ne peut rien donner : image verrouillée par le site, ou disque plein. Votre rapport part quand même, avec l'erreur d'origine.
+
+### Un bouton pour récupérer le son sur place
+
+Quand une émission est refusée parce que la chaîne n'en laisse passer que le son, le message vous propose maintenant un bouton **Télécharger le son (MP3)**. Un clic suffit : plus besoin de refaire l'ajout du lien.
+
+Le message précise aussi où se choisit le format — dans la liste « Format de téléchargement » de la fenêtre d'ajout — et rappelle que modifier le format par défaut dans les Préférences ne relance pas un téléchargement déjà refusé.
 
 ### Note
 
