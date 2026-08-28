@@ -177,6 +177,11 @@ def update_language(project_root, language_code, pot_path):
     # (une copie active + une copie obsolete), ce qui finit par polluer le
     # catalogue et masquer les vraies chaines a traduire.
     dead = [entry for entry in po_catalog if not entry.occurrences]
+    # Les entrees mises de cote par la fusion (bloc `#~`) survivent au filtre
+    # ci-dessus selon l'ordre de traitement de polib : on les retire aussi,
+    # sinon elles trainent dans le catalogue et font echouer le test qui
+    # verifie qu'aucune chaine morte ne subsiste.
+    dead += [entry for entry in po_catalog.obsolete_entries() if entry not in dead]
     for entry in dead:
         po_catalog.remove(entry)
 

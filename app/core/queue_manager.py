@@ -6,7 +6,7 @@ from collections.abc import Callable
 
 from app.core.downloader import (
     Downloader, DownloadError, DownloadInfo, DownloadProgress, LoginRequiredError,
-    estimate_total_bytes,
+    accepts_audio_only, estimate_total_bytes,
 )
 
 _log = logging.getLogger("downaccess.queue")
@@ -257,7 +257,9 @@ class QueueManager:
             try:
                 info = dl.fetch_info(dl_id, item.url, use_cookies=item.use_cookies,
                                      referer=item.referer, cookies=item.cookies,
-                                     stop_event=item.stop_event)
+                                     stop_event=item.stop_event,
+                                     accept_audio_only=accepts_audio_only(
+                                         item.format_spec, item.format_id))
                 if not info:
                     return
                 if info.is_playlist:

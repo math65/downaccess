@@ -315,3 +315,36 @@ class TestPause:
         q = manager(j)
         assert q.is_paused("inexistant") is False
         assert q.is_active("inexistant") is False
+
+
+class TestDemandeAudioSurVideoVerrouillee:
+    """M6 chiffre l'image et laisse le son : le garde-fou DRM ne doit se
+    declencher que si l'utilisateur attendait une VIDEO. Demande de Veronique
+    (2026-08-28) : recuperer ses emissions M6 « meme en audio »."""
+
+    def _capture(self, faux):
+        vus = {}
+
+        def fetch_info(self, download_id, url, **kw):
+            vus[url] = kw.get("accept_audio_only")
+            return DownloadInfo(download_id=download_id, url=url,
+                                title="Titre", site="test", raw_formats=[])
+
+        faux.fetch_info = fetch_info
+        return vus
+
+    def test_un_mp3_demande_leve_le_garde_fou(self, faux):
+        vus = self._capture(faux)
+        j = Journal()
+        q = manager(j)
+        q.add("https://m6/1", format_spec="mp3")
+        assert attendre(lambda: "https://m6/1" in vus)
+        assert vus["https://m6/1"] is True
+
+    def test_une_demande_de_video_reste_protegee(self, faux):
+        vus = self._capture(faux)
+        j = Journal()
+        q = manager(j)
+        q.add("https://m6/2", format_spec="auto")
+        assert attendre(lambda: "https://m6/2" in vus)
+        assert vus["https://m6/2"] is False

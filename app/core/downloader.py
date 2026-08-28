@@ -301,6 +301,25 @@ def is_drm_error(msg: str) -> bool:
     return "drm" in low and ("protect" in low or "protég" in low or "chiffr" in low)
 
 
+def is_audio_only_format(format_spec: str) -> bool:
+    """Vrai si l'utilisateur a demande explicitement la bande-son seule."""
+    return format_spec in ("mp3", "m4a", "amc_audio")
+
+
+def accepts_audio_only(format_spec: str, format_id: str | None = None) -> bool:
+    """Vrai si l'appelant a dit precisement ce qu'il voulait telecharger.
+
+    Le garde-fou DRM (`video_is_drm_locked`) existe pour eviter qu'une demande
+    de video se solde par un fichier audio sans un mot. Quand l'utilisateur a
+    demande MP3/M4A, les sous-titres, ou choisi un format dans la liste, il n'y
+    a plus de surprise possible : refuser lui retirerait le seul acces qui
+    reste a l'emission.
+    """
+    return (is_audio_only_format(format_spec)
+            or format_spec == "subtitles_only"
+            or bool(format_id))
+
+
 def video_is_drm_locked(info: dict) -> bool:
     """Vrai si l'IMAGE du media est verrouillee alors que le son passe.
 
@@ -324,15 +343,24 @@ def video_is_drm_locked(info: dict) -> bool:
 
 
 def drm_locked_video_message() -> str:
-    """Message pour une video dont seule la bande-son a echappe au verrou."""
+    """Message pour une video dont seule la bande-son a echappe au verrou.
+
+    Indique la sortie de secours : le son, lui, reste telechargeable si on
+    demande MP3 ou M4A. Sans cette phrase l'utilisateur croit le programme
+    definitivement hors de portee (question de Veronique, 2026-08-28).
+    """
     return _(
         "Cette vidéo est protégée contre la copie (DRM).\n\n"
         "Le site ne laisse accessible que la bande-son : l'image, elle, est "
         "verrouillée. DownAccess préfère vous le dire plutôt que de vous "
         "laisser un fichier audio à la place de votre émission.\n\n"
-        "Aucun réglage n'y changera rien, c'est une protection posée par le "
-        "site. M6, les plateformes par abonnement (Netflix, Disney+, Prime "
-        "Video) et certaines vidéos de france.tv sont dans ce cas."
+        "Si le son vous suffit, vous pouvez tout de même récupérer cette "
+        "émission : choisissez le format MP3 ou M4A, puis ajoutez le lien de "
+        "nouveau.\n\n"
+        "Pour l'image, aucun réglage n'y changera rien : c'est une protection "
+        "posée par le site. M6, les plateformes par abonnement (Netflix, "
+        "Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce "
+        "cas."
     )
 
 
@@ -562,13 +590,17 @@ class Downloader:
                    use_cookies: bool = False,
                    referer: str | None = None,
                    cookies: str | None = None,
-                   stop_event: threading.Event | None = None) -> DownloadInfo | None:
+                   stop_event: threading.Event | None = None,
+                   accept_audio_only: bool = False) -> DownloadInfo | None:
         """
         Retourne les métadonnées de l'URL sans télécharger.
         Détecte automatiquement les playlists.
         use_cookies : forcer l'utilisation des cookies (retry après erreur).
         referer / cookies : headers UGE (extraction guidée).
         stop_event  : permet d'interrompre l'attente entre deux tentatives.
+        accept_audio_only : l'appelant a demandé MP3/M4A, les sous-titres ou
+                      un format précis — un média dont seule l'image est
+                      verrouillée reste alors légitime (voir `accepts_audio_only`).
         """
         # Une chaîne / playlist « envois » -> onglet Vidéos (récupère TOUTES
         # les vidéos ; l'endpoint playlist est plafonné à 100 par YouTube)
@@ -628,7 +660,9 @@ class Downloader:
         try:
             for _attempt_no in range(1, _MAX_ATTEMPTS + 1):
                 try:
-                    return self._extract_info(download_id, url, flat_opts)
+                    return self._extract_info(
+                        download_id, url, flat_opts,
+                        accept_audio_only=accept_audio_only)
                 except yt_dlp.utils.DownloadError as exc:
                     if (_attempt_no < _MAX_ATTEMPTS
                             and is_transient_error(str(exc))
@@ -657,8 +691,8 @@ class Downloader:
                 except OSError:
                     pass
 
-    def _extract_info(self, download_id: str, url: str,
-                      flat_opts: dict) -> DownloadInfo | None:
+    def _extract_info(self, download_id: str, url: str, flat_opts: dict, *,
+                      accept_audio_only: bool = False) -> DownloadInfo | None:
         """Une passe d'analyse, sans nouvelle tentative ni nettoyage.
 
         Isole du reste pour que `fetch_info` puisse la rejouer telle quelle
@@ -695,8 +729,10 @@ class Downloader:
 
         # Image verrouillee, son accessible : sans ce garde-fou, yt-dlp
         # choisit « le meilleur format disponible » — la bande-son — et
-        # l'utilisateur recoit un .m4a a la place de son emission.
-        if video_is_drm_locked(info):
+        # l'utilisateur recoit un .m4a a la place de son emission. Mais quand
+        # il a explicitement demande MP3 ou M4A, ce fichier audio EST ce qu'il
+        # veut : refuser lui retirerait le seul acces possible a l'emission.
+        if video_is_drm_locked(info) and not accept_audio_only:
             _log.error("Image protegee par DRM id=%s url=%s", download_id, url)
             raise DownloadError(drm_locked_video_message())
 
@@ -844,7 +880,7 @@ class Downloader:
         #   - audio seul (mp3/m4a) sans pistes choisies : 1
         #   - pistes audio choisies : N (audio seul) ou N+1 (avec vidéo)
         #   - vidéo standard : 2 (vidéo + audio à fusionner)
-        audio_only = format_spec in ("mp3", "m4a", "amc_audio")
+        audio_only = is_audio_only_format(format_spec)
         if format_id or format_spec == "subtitles_only":
             total_parts = 1
         elif audio_groups:
@@ -1373,7 +1409,7 @@ def estimate_total_bytes(formats: list[dict], format_spec: str = "auto",
     progressive = [f for f in formats
                    if f.get("vcodec") not in (None, "none") and f.get("acodec") not in (None, "none")]
 
-    want_audio_only = format_spec in ("mp3", "m4a", "amc_audio")
+    want_audio_only = is_audio_only_format(format_spec)
     total = 0
 
     # Audio

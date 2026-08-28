@@ -15,6 +15,7 @@ from app.core.downloader import (
     is_disk_full_error,
     is_drm_error,
     is_network_down_error,
+    accepts_audio_only,
     video_is_drm_locked,
     is_transient_error,
     not_enough_space_message,
@@ -211,7 +212,7 @@ class TestNouvelleTentativeALAnalyse:
         import yt_dlp
         etat = {"appels": 0}
 
-        def _extract(self, download_id, url, flat_opts):
+        def _extract(self, download_id, url, flat_opts, **_kw):
             etat["appels"] += 1
             if etat["appels"] <= echecs:
                 raise yt_dlp.utils.DownloadError(DNS_RAW)
@@ -243,7 +244,7 @@ class TestNouvelleTentativeALAnalyse:
         from app.core.downloader import DownloadError, Downloader
         etat = {"appels": 0}
 
-        def _extract(self, download_id, url, flat_opts):
+        def _extract(self, download_id, url, flat_opts, **_kw):
             etat["appels"] += 1
             raise yt_dlp.utils.DownloadError(DRM_RAW)
 
@@ -259,7 +260,7 @@ class TestNouvelleTentativeALAnalyse:
         arret = threading.Event()
         etat = {"appels": 0}
 
-        def _extract(self, download_id, url, flat_opts):
+        def _extract(self, download_id, url, flat_opts, **_kw):
             import yt_dlp
             etat["appels"] += 1
             arret.set()          # l'utilisateur annule pendant l'analyse
@@ -304,6 +305,24 @@ class TestImageVerrouillee:
         """Plus rien n'a survecu au verrou : meme diagnostic."""
         assert video_is_drm_locked({"_has_drm": True, "formats": []})
 
+    def test_le_son_demande_explicitement_reste_telechargeable(self):
+        """Veronique, 2026-08-28 : elle veut ses emissions M6 « meme en audio ».
+        Refuser un MP3 demande expressement lui retirerait le seul acces qui
+        reste — le garde-fou ne vise que la demande de VIDEO."""
+        assert accepts_audio_only("mp3")
+        assert accepts_audio_only("m4a")
+        assert accepts_audio_only("amc_audio")
+        assert accepts_audio_only("subtitles_only")
+
+    def test_un_format_choisi_dans_la_liste_passe_aussi(self):
+        """Choisir soi-meme un format = aucune surprise possible."""
+        assert accepts_audio_only("manual", "audio-96k")
+
+    def test_une_demande_de_video_reste_protegee(self):
+        assert not accepts_audio_only("auto")
+        assert not accepts_audio_only("mp4")
+        assert not accepts_audio_only("manual", None)
+
     def test_message_explique_le_fichier_audio(self):
         """L'utilisateur a deja recu des .m4a : le message doit faire le lien,
         pas seulement dire « impossible »."""
@@ -311,3 +330,9 @@ class TestImageVerrouillee:
         assert "DRM" in message
         assert "bande-son" in message
         assert "M6" in message
+
+    def test_message_indique_la_sortie_de_secours(self):
+        """Sans cette phrase, l'utilisateur croit l'emission hors de portee
+        alors que le son, lui, se telecharge."""
+        message = drm_locked_video_message()
+        assert "MP3" in message and "M4A" in message

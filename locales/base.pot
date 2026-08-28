@@ -339,7 +339,7 @@ msgstr ""
 msgid "Annuler (Suppr)"
 msgstr ""
 
-#: app/ui/main_window.py:2275
+#: app/ui/main_window.py:2278
 msgid "Annuler ce téléchargement ?"
 msgstr ""
 
@@ -351,7 +351,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:1161 app/core/downloader.py:1164
+#: app/core/downloader.py:1197 app/core/downloader.py:1200
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -431,8 +431,8 @@ msgid ""
 "Ajoutez une URL via le menu Fichier, collez-la depuis le presse-papiers, glissez-déposez du texte sur cette fenêtre, ou utilisez la recherche pour trouver des médias."
 msgstr ""
 
-#: app/ui/main_window.py:2250 app/ui/main_window.py:2270
-#: app/ui/main_window.py:2317
+#: app/ui/main_window.py:2253 app/ui/main_window.py:2273
+#: app/ui/main_window.py:2320
 msgid "Aucun téléchargement sélectionné."
 msgstr ""
 
@@ -440,15 +440,15 @@ msgstr ""
 msgid "Aucune"
 msgstr ""
 
-#: app/ui/main_window.py:2439
+#: app/ui/main_window.py:2442
 msgid "Aucune URL dans le presse-papiers."
 msgstr ""
 
-#: app/ui/main_window.py:2391
+#: app/ui/main_window.py:2394
 msgid "Aucune URL détectée"
 msgstr ""
 
-#: app/ui/main_window.py:2438
+#: app/ui/main_window.py:2441
 msgid "Aucune URL valide dans le presse-papiers."
 msgstr ""
 
@@ -456,11 +456,11 @@ msgstr ""
 msgid "Aucune adresse indiquée."
 msgstr ""
 
-#: app/ui/main_window.py:2080
+#: app/ui/main_window.py:2083
 msgid "Aucune information disponible."
 msgstr ""
 
-#: app/ui/main_window.py:2547
+#: app/ui/main_window.py:2550
 msgid "Aucune mise à jour disponible"
 msgstr ""
 
@@ -588,7 +588,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:495
+#: app/core/downloader.py:523
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -622,7 +622,7 @@ msgstr ""
 msgid "Ce site ne permet que la recherche par mots-clés."
 msgstr ""
 
-#: app/ui/main_window.py:2253 app/ui/main_window.py:2254
+#: app/ui/main_window.py:2256 app/ui/main_window.py:2257
 msgid "Ce téléchargement n'est pas en cours."
 msgstr ""
 
@@ -654,20 +654,22 @@ msgid ""
 "Voulez-vous récupérer la liste complète via le navigateur ? Cela peut prendre un moment pour les grandes playlists."
 msgstr ""
 
-#: app/core/downloader.py:462
+#: app/core/downloader.py:490
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
 "DownAccess ne peut pas la télécharger, et aucun réglage n'y changera rien : c'est une protection posée par le site. Les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
-#: app/core/downloader.py:328
+#: app/core/downloader.py:352
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
 "Le site ne laisse accessible que la bande-son : l'image, elle, est verrouillée. DownAccess préfère vous le dire plutôt que de vous laisser un fichier audio à la place de votre émission.\n"
 "\n"
-"Aucun réglage n'y changera rien, c'est une protection posée par le site. M6, les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
+"Si le son vous suffit, vous pouvez tout de même récupérer cette émission : choisissez le format MP3 ou M4A, puis ajoutez le lien de nouveau.\n"
+"\n"
+"Pour l'image, aucun réglage n'y changera rien : c'est une protection posée par le site. M6, les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
 #: app/ui/audio_track_dialog.py:64
@@ -759,7 +761,7 @@ msgid ""
 " celle à télécharger."
 msgstr ""
 
-#: app/ui/main_window.py:2209
+#: app/ui/main_window.py:2212
 msgid "Choix de piste audio annulé."
 msgstr ""
 
@@ -805,12 +807,12 @@ msgstr ""
 msgid "Confirmation"
 msgstr ""
 
-#: app/ui/history_dialog.py:167 app/ui/main_window.py:2301
+#: app/ui/history_dialog.py:167 app/ui/main_window.py:2304
 #: app/ui/subscriptions_dialog.py:317
 msgid "Confirmer"
 msgstr ""
 
-#: app/ui/main_window.py:2276
+#: app/ui/main_window.py:2279
 msgid "Confirmer l'annulation"
 msgstr ""
 
@@ -944,7 +946,7 @@ msgstr ""
 msgid "Dossier introuvable"
 msgstr ""
 
-#: app/ui/main_window.py:2728
+#: app/ui/main_window.py:2731
 msgid ""
 "DownAccess\n"
 "\n"
@@ -954,7 +956,7 @@ msgid ""
 "Propulsé par yt-dlp et ffmpeg."
 msgstr ""
 
-#: app/ui/main_window.py:2543
+#: app/ui/main_window.py:2546
 msgid "DownAccess est à jour. Version {version}."
 msgstr ""
 
@@ -1013,15 +1015,15 @@ msgstr ""
 msgid "Déjà téléchargé"
 msgstr ""
 
-#: app/ui/main_window.py:2243
+#: app/ui/main_window.py:2246
 msgid "Démarrage de la file disponible en Phase 2."
 msgstr ""
 
-#: app/ui/main_window.py:2823
+#: app/ui/main_window.py:2826
 msgid "Démarrage de {count} téléchargement en attente."
 msgstr ""
 
-#: app/ui/main_window.py:2821
+#: app/ui/main_window.py:2824
 msgid "Démarrage de {count} téléchargements en attente."
 msgstr ""
 
@@ -1045,11 +1047,11 @@ msgstr ""
 msgid "Déplacer l'item sélectionné vers le haut"
 msgstr ""
 
-#: app/ui/main_window.py:2357
+#: app/ui/main_window.py:2360
 msgid "Déplacé vers le bas."
 msgstr ""
 
-#: app/ui/main_window.py:2346
+#: app/ui/main_window.py:2349
 msgid "Déplacé vers le haut."
 msgstr ""
 
@@ -1172,7 +1174,7 @@ msgstr ""
 #: app/ui/guided_login_dialog.py:175 app/ui/history_dialog.py:113
 #: app/ui/history_dialog.py:155 app/ui/login_dialog.py:170
 #: app/ui/login_dialog.py:187 app/ui/login_dialog.py:222
-#: app/ui/main_window.py:1777 app/ui/main_window.py:2074
+#: app/ui/main_window.py:1777 app/ui/main_window.py:2077
 #: app/ui/search_dialog.py:449 app/ui/settings_dialog.py:870
 msgid "Erreur"
 msgstr ""
@@ -1190,11 +1192,11 @@ msgstr ""
 msgid "Erreur d'aperçu"
 msgstr ""
 
-#: app/ui/main_window.py:2378
+#: app/ui/main_window.py:2381
 msgid "Erreur de lecture"
 msgstr ""
 
-#: app/ui/main_window.py:2599
+#: app/ui/main_window.py:2602
 msgid "Erreur de mise à jour"
 msgstr ""
 
@@ -1209,7 +1211,7 @@ msgstr ""
 msgid "Erreur de téléchargement"
 msgstr ""
 
-#: app/ui/main_window.py:2577
+#: app/ui/main_window.py:2580
 msgid "Erreur de vérification"
 msgstr ""
 
@@ -1218,7 +1220,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1760
+#: app/core/downloader.py:1796
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1238,7 +1240,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:2596
+#: app/ui/main_window.py:2599
 msgid "Erreur lors du téléchargement de la mise à jour."
 msgstr ""
 
@@ -1246,7 +1248,7 @@ msgstr ""
 msgid "Erreur lors du téléchargement."
 msgstr ""
 
-#: app/ui/main_window.py:2807
+#: app/ui/main_window.py:2810
 msgid "Erreur yt-dlp"
 msgstr ""
 
@@ -1258,11 +1260,11 @@ msgstr ""
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
-#: app/core/downloader.py:406
+#: app/core/downloader.py:434
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:409
+#: app/core/downloader.py:437
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1306,7 +1308,7 @@ msgstr ""
 msgid "Exécutable (*.exe)|*.exe|Tous les fichiers|*"
 msgstr ""
 
-#: app/ui/main_window.py:2497
+#: app/ui/main_window.py:2500
 msgid ""
 "F1               Ouvrir le guide d'utilisation\n"
 "Ctrl+N           Ajouter URL(s)\n"
@@ -1341,7 +1343,7 @@ msgstr ""
 
 #: app/ui/announcement_dialog.py:42 app/ui/contact_dialog.py:105
 #: app/ui/error_dialog.py:46 app/ui/error_dialog.py:47
-#: app/ui/login_dialog.py:110 app/ui/main_window.py:2522
+#: app/ui/login_dialog.py:110 app/ui/main_window.py:2525
 #: app/ui/player_dialog.py:119 app/ui/report_dialog.py:123
 #: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:173
 #: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:305
@@ -1373,7 +1375,7 @@ msgstr ""
 msgid "Fichier téléchargé trop petit ({size} octets) — corrompu ?"
 msgstr ""
 
-#: app/ui/main_window.py:2366
+#: app/ui/main_window.py:2369
 msgid "Fichiers texte (*.txt)|*.txt|Tous les fichiers|*"
 msgstr ""
 
@@ -1458,7 +1460,7 @@ msgstr ""
 msgid "Formats"
 msgstr ""
 
-#: app/ui/main_window.py:2087
+#: app/ui/main_window.py:2090
 msgid "Formats non disponibles, téléchargement en qualité auto."
 msgstr ""
 
@@ -1482,7 +1484,7 @@ msgstr ""
 msgid "Garder un seul fichier, avec des repères de chapitres dedans"
 msgstr ""
 
-#: app/ui/main_window.py:2722
+#: app/ui/main_window.py:2725
 msgid "Guide d'utilisation"
 msgstr ""
 
@@ -1502,12 +1504,12 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:423
+#: app/core/downloader.py:451
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
 
-#: app/ui/main_window.py:2296
+#: app/ui/main_window.py:2299
 msgid ""
 "Il y a {count} téléchargement(s) en cours ou en attente.\n"
 "\n"
@@ -1518,7 +1520,7 @@ msgstr ""
 msgid "Illimité"
 msgstr ""
 
-#: app/ui/main_window.py:2365
+#: app/ui/main_window.py:2368
 msgid "Importer une liste d'URLs"
 msgstr ""
 
@@ -1551,7 +1553,7 @@ msgid ""
 "Fermez les éventuelles fenêtres DownAccess restées ouvertes, puis réessayez."
 msgstr ""
 
-#: app/ui/main_window.py:2348 app/ui/main_window.py:2359
+#: app/ui/main_window.py:2351 app/ui/main_window.py:2362
 msgid "Impossible de déplacer."
 msgstr ""
 
@@ -1567,13 +1569,13 @@ msgstr ""
 msgid "Impossible de lancer l'installeur : {error}"
 msgstr ""
 
-#: app/ui/main_window.py:2377
+#: app/ui/main_window.py:2380
 msgid ""
 "Impossible de lire le fichier :\n"
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:485
+#: app/core/downloader.py:513
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1586,14 +1588,14 @@ msgid ""
 "Mise à jour annulée par sécurité — réessayez plus tard."
 msgstr ""
 
-#: app/ui/main_window.py:2073
+#: app/ui/main_window.py:2076
 msgid ""
 "Impossible de récupérer les formats :\n"
 "\n"
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:2071
+#: app/ui/main_window.py:2074
 msgid "Impossible de récupérer les formats."
 msgstr ""
 
@@ -1604,7 +1606,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:2321 app/ui/main_window.py:779
+#: app/ui/main_window.py:2324 app/ui/main_window.py:779
 msgid "Impossible de réessayer : données introuvables."
 msgstr ""
 
@@ -1617,18 +1619,18 @@ msgid ""
 "Vérifiez l'adresse, ou essayez celle de la page d'accueil de la chaîne."
 msgstr ""
 
-#: app/ui/main_window.py:2598
+#: app/ui/main_window.py:2601
 msgid ""
 "Impossible de télécharger la mise à jour :\n"
 "\n"
 "{error}"
 msgstr ""
 
-#: app/ui/main_window.py:2572
+#: app/ui/main_window.py:2575
 msgid "Impossible de vérifier la mise à jour."
 msgstr ""
 
-#: app/ui/main_window.py:2576
+#: app/ui/main_window.py:2579
 msgid ""
 "Impossible de vérifier la mise à jour.\n"
 "\n"
@@ -1645,7 +1647,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1748
+#: app/core/downloader.py:1784
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1743,7 +1745,7 @@ msgstr ""
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
-#: app/core/downloader.py:475
+#: app/core/downloader.py:503
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -1770,11 +1772,11 @@ msgid ""
 "appliquer le changement ?"
 msgstr ""
 
-#: app/ui/main_window.py:2290
+#: app/ui/main_window.py:2293
 msgid "La liste est déjà vide."
 msgstr ""
 
-#: app/ui/main_window.py:2806
+#: app/ui/main_window.py:2809
 msgid ""
 "La mise à jour de yt-dlp a échoué :\n"
 "\n"
@@ -1859,7 +1861,7 @@ msgstr ""
 msgid "Le fichier n'existe plus à cet emplacement."
 msgstr ""
 
-#: app/ui/main_window.py:2721
+#: app/ui/main_window.py:2724
 msgid "Le guide d'utilisation est introuvable."
 msgstr ""
 
@@ -1903,7 +1905,7 @@ msgstr ""
 msgid "Le serveur a répondu {code} ({reason})."
 msgstr ""
 
-#: app/ui/main_window.py:2390
+#: app/ui/main_window.py:2393
 msgid "Le texte déposé ne contient aucune URL valide."
 msgstr ""
 
@@ -1951,7 +1953,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:415
+#: app/core/downloader.py:443
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -1985,7 +1987,7 @@ msgstr ""
 msgid "Liste effacée."
 msgstr ""
 
-#: app/ui/main_window.py:2311 app/ui/main_window.py:2312
+#: app/ui/main_window.py:2314 app/ui/main_window.py:2315
 msgid "Liste vidée."
 msgstr ""
 
@@ -2025,11 +2027,11 @@ msgstr ""
 msgid "Mettre à jour maintenant"
 msgstr ""
 
-#: app/ui/main_window.py:2569
+#: app/ui/main_window.py:2572
 msgid "Mise à jour DownAccess {version} reportée."
 msgstr ""
 
-#: app/ui/main_window.py:2610 app/ui/main_window.py:2611
+#: app/ui/main_window.py:2613 app/ui/main_window.py:2614
 msgid "Mise à jour annulée."
 msgstr ""
 
@@ -2332,7 +2334,7 @@ msgstr ""
 msgid "Piste audio"
 msgstr ""
 
-#: app/ui/main_window.py:2180 app/ui/main_window.py:2182
+#: app/ui/main_window.py:2183 app/ui/main_window.py:2185
 msgid "Piste audio sélectionnée automatiquement : {label}"
 msgstr ""
 
@@ -2340,7 +2342,7 @@ msgstr ""
 msgid "Pistes audio"
 msgstr ""
 
-#: app/ui/main_window.py:2126
+#: app/ui/main_window.py:2129
 msgid "Pistes audio non disponibles, téléchargement standard."
 msgstr ""
 
@@ -2445,7 +2447,7 @@ msgstr ""
 msgid "Proxy SOCKS4/5 :"
 msgstr ""
 
-#: app/ui/main_window.py:2222
+#: app/ui/main_window.py:2225
 msgid "Préférences enregistrées."
 msgstr ""
 
@@ -2489,7 +2491,7 @@ msgstr ""
 msgid "Raccourcis cla&vier"
 msgstr ""
 
-#: app/ui/main_window.py:2518
+#: app/ui/main_window.py:2521
 msgid "Raccourcis clavier"
 msgstr ""
 
@@ -2513,11 +2515,11 @@ msgstr ""
 msgid "Recherche annulée."
 msgstr ""
 
-#: app/ui/main_window.py:2102
+#: app/ui/main_window.py:2105
 msgid "Recherche des pistes audio disponibles."
 msgstr ""
 
-#: app/ui/main_window.py:2101
+#: app/ui/main_window.py:2104
 msgid "Recherche des pistes audio disponibles…"
 msgstr ""
 
@@ -2826,7 +2828,7 @@ msgid ""
 "Vous serez déconnecté de ce site."
 msgstr ""
 
-#: app/ui/main_window.py:2285
+#: app/ui/main_window.py:2288
 msgid "Supprimé."
 msgstr ""
 
@@ -2836,11 +2838,11 @@ msgid ""
 "sans afficher de dialogue."
 msgstr ""
 
-#: app/ui/main_window.py:2468 app/ui/main_window.py:2469
+#: app/ui/main_window.py:2471 app/ui/main_window.py:2472
 msgid "Surveillance du presse-papiers activée."
 msgstr ""
 
-#: app/ui/main_window.py:2472 app/ui/main_window.py:2473
+#: app/ui/main_window.py:2475 app/ui/main_window.py:2476
 msgid "Surveillance du presse-papiers désactivée."
 msgstr ""
 
@@ -2848,7 +2850,7 @@ msgstr ""
 msgid "Sélection"
 msgstr ""
 
-#: app/ui/main_window.py:2096
+#: app/ui/main_window.py:2099
 msgid "Sélection de format annulée."
 msgstr ""
 
@@ -3035,7 +3037,7 @@ msgstr ""
 msgid "Téléchargement de DownAccess {version}…"
 msgstr ""
 
-#: app/ui/main_window.py:2586
+#: app/ui/main_window.py:2589
 msgid "Téléchargement de la mise à jour… {percent} %"
 msgstr ""
 
@@ -3051,19 +3053,19 @@ msgstr ""
 msgid "Téléchargement en cours…"
 msgstr ""
 
-#: app/ui/main_window.py:2264 app/ui/main_window.py:2265
+#: app/ui/main_window.py:2267 app/ui/main_window.py:2268
 msgid "Téléchargement mis en pause."
 msgstr ""
 
-#: app/ui/main_window.py:2337
+#: app/ui/main_window.py:2340
 msgid "Téléchargement relancé."
 msgstr ""
 
-#: app/ui/main_window.py:2259 app/ui/main_window.py:2260
+#: app/ui/main_window.py:2262 app/ui/main_window.py:2263
 msgid "Téléchargement repris."
 msgstr ""
 
-#: app/ui/main_window.py:2284
+#: app/ui/main_window.py:2287
 msgid "Téléchargement supprimé de la liste."
 msgstr ""
 
@@ -3091,7 +3093,7 @@ msgstr ""
 msgid "Téléchargement échoué : {error}"
 msgstr ""
 
-#: app/ui/main_window.py:2743
+#: app/ui/main_window.py:2746
 msgid "Téléchargements en cours — DownAccess"
 msgstr ""
 
@@ -3161,7 +3163,7 @@ msgstr ""
 msgid "URL copiée"
 msgstr ""
 
-#: app/ui/main_window.py:2492
+#: app/ui/main_window.py:2495
 msgid "URL détectée et ajoutée : {url}"
 msgstr ""
 
@@ -3169,7 +3171,7 @@ msgstr ""
 msgid "URL en file d'attente — mise à jour yt-dlp en cours…"
 msgstr ""
 
-#: app/ui/main_window.py:2444
+#: app/ui/main_window.py:2447
 msgid "URL ignorée (domaine seul) : {url}"
 msgstr ""
 
@@ -3281,7 +3283,7 @@ msgstr ""
 msgid "Vider tout l'historique ? Cette action est irréversible."
 msgstr ""
 
-#: app/ui/main_window.py:2300
+#: app/ui/main_window.py:2303
 msgid "Vider toute la liste ?"
 msgstr ""
 
@@ -3330,7 +3332,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:434
+#: app/core/downloader.py:462
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -3373,7 +3375,7 @@ msgid ""
 "{n} publications déjà en ligne vous attendent : ouvrez « Voir les nouveautés » pour choisir."
 msgstr ""
 
-#: app/ui/main_window.py:2546
+#: app/ui/main_window.py:2549
 msgid ""
 "Vous utilisez déjà la dernière version de DownAccess.\n"
 "\n"
@@ -3395,15 +3397,15 @@ msgid ""
 "à la somme de contrôle officielle. Mise à jour annulée par sécurité."
 msgstr ""
 
-#: app/ui/main_window.py:2533
+#: app/ui/main_window.py:2536
 msgid "Vérification de la mise à jour DownAccess…"
 msgstr ""
 
-#: app/ui/main_window.py:2534
+#: app/ui/main_window.py:2537
 msgid "Vérification de la mise à jour."
 msgstr ""
 
-#: app/ui/main_window.py:2680
+#: app/ui/main_window.py:2683
 msgid "Vérification de la version yt-dlp…"
 msgstr ""
 
@@ -3415,7 +3417,7 @@ msgstr ""
 msgid "Vérification de la version…"
 msgstr ""
 
-#: app/ui/main_window.py:2681
+#: app/ui/main_window.py:2684
 msgid "Vérification en cours."
 msgstr ""
 
@@ -3493,7 +3495,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:1611
+#: app/core/downloader.py:1647
 msgid "fin"
 msgstr ""
 
@@ -3541,56 +3543,56 @@ msgstr ""
 msgid "une playlist complète"
 msgstr ""
 
-#: app/ui/main_window.py:2798
+#: app/ui/main_window.py:2801
 msgid ""
 "yt-dlp a été installé avec succès.\n"
 "\n"
 "Version : {version}"
 msgstr ""
 
-#: app/ui/main_window.py:2790
+#: app/ui/main_window.py:2793
 msgid ""
 "yt-dlp a été mis à jour avec succès.\n"
 "\n"
 "Nouvelle version : {version}"
 msgstr ""
 
-#: app/ui/main_window.py:2782
+#: app/ui/main_window.py:2785
 msgid ""
 "yt-dlp est déjà à jour.\n"
 "\n"
 "Version actuelle : {version}"
 msgstr ""
 
-#: app/ui/main_window.py:2780
+#: app/ui/main_window.py:2783
 msgid "yt-dlp est à jour. Version {version}."
 msgstr ""
 
-#: app/ui/main_window.py:2799
+#: app/ui/main_window.py:2802
 msgid "yt-dlp installé"
 msgstr ""
 
-#: app/ui/main_window.py:2796
+#: app/ui/main_window.py:2799
 msgid "yt-dlp installé. Version {version}."
 msgstr ""
 
-#: app/ui/main_window.py:2791
+#: app/ui/main_window.py:2794
 msgid "yt-dlp mis à jour"
 msgstr ""
 
-#: app/ui/main_window.py:2788
+#: app/ui/main_window.py:2791
 msgid "yt-dlp mis à jour. Version {version}."
 msgstr ""
 
-#: app/ui/main_window.py:2783
+#: app/ui/main_window.py:2786
 msgid "yt-dlp à jour"
 msgstr ""
 
-#: app/ui/main_window.py:2455
+#: app/ui/main_window.py:2458
 msgid "{count} URL ajoutée depuis le presse-papiers."
 msgstr ""
 
-#: app/ui/main_window.py:2453
+#: app/ui/main_window.py:2456
 msgid "{count} URLs ajoutées depuis le presse-papiers."
 msgstr ""
 
@@ -3646,11 +3648,11 @@ msgstr ""
 msgid "{count} sélectionnés."
 msgstr ""
 
-#: app/ui/main_window.py:2834
+#: app/ui/main_window.py:2837
 msgid "{count} téléchargement(s)"
 msgstr ""
 
-#: app/ui/main_window.py:2742
+#: app/ui/main_window.py:2745
 msgid ""
 "{count} téléchargement(s) en cours.\n"
 "\n"
@@ -3671,15 +3673,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:399 app/ui/format_dialog.py:165
+#: app/core/downloader.py:427 app/ui/format_dialog.py:165
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:398 app/ui/format_dialog.py:163
+#: app/core/downloader.py:426 app/ui/format_dialog.py:163
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:396 app/ui/format_dialog.py:161
+#: app/core/downloader.py:424 app/ui/format_dialog.py:161
 msgid "{n:.1f} Go"
 msgstr ""
 
@@ -3760,7 +3762,7 @@ msgstr ""
 msgid "À &propos de DownAccess"
 msgstr ""
 
-#: app/ui/main_window.py:2734
+#: app/ui/main_window.py:2737
 msgid "À propos de DownAccess"
 msgstr ""
 
@@ -3772,7 +3774,7 @@ msgstr ""
 msgid "Échec de l'envoi du rapport."
 msgstr ""
 
-#: app/ui/main_window.py:2804
+#: app/ui/main_window.py:2807
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr ""
 

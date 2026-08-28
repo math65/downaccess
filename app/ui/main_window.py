@@ -2057,7 +2057,10 @@ class MainWindow(wx.Frame):
         def fetch():
             try:
                 dl = Downloader(self.settings)
-                info = dl.fetch_info("__fmt__", url)
+                # Choix manuel : l'utilisateur va designer lui-meme un format
+                # dans la liste, donc aucune surprise possible s'il ne reste
+                # que du son (M6 et ses videos verrouillees).
+                info = dl.fetch_info("__fmt__", url, accept_audio_only=True)
                 result["info"] = info
             except DownloadError as exc:
                 result["error"] = str(exc)
