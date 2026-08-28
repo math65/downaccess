@@ -42,7 +42,7 @@ msgstr "Action after download:"
 
 #: app/ui/add_url_dialog.py:140 app/ui/audio_track_dialog.py:100
 #: app/ui/confirm_dialog.py:44 app/ui/contact_dialog.py:80
-#: app/ui/contact_dialog.py:81 app/ui/format_dialog.py:69
+#: app/ui/contact_dialog.py:81 app/ui/format_dialog.py:75
 #: app/ui/guided_login_dialog.py:87 app/ui/guided_login_dialog.py:88
 #: app/ui/login_required_dialog.py:59 app/ui/login_required_dialog.py:60
 #: app/ui/main_window.py:1381 app/ui/main_window.py:1638
@@ -165,7 +165,7 @@ msgstr "Parallel fragments"
 msgid "Fragments en parallèle par téléchargement :"
 msgstr "Parallel fragments per download:"
 
-#: app/core/custom_sites.py:47 app/ui/settings_dialog.py:107
+#: app/core/custom_sites.py:62 app/ui/settings_dialog.py:107
 msgid "Français"
 msgstr "Français"
 
@@ -1692,15 +1692,15 @@ msgstr "Missing field"
 msgid "Choisir le format manuellement…"
 msgstr "Choose format manually…"
 
-#: app/ui/format_dialog.py:32
+#: app/ui/format_dialog.py:38
 msgid "Choisir le format — {title}"
 msgstr "Choose format — {title}"
 
-#: app/ui/format_dialog.py:16
+#: app/ui/format_dialog.py:17
 msgid "Codec audio"
 msgstr "Audio codec"
 
-#: app/ui/format_dialog.py:15
+#: app/ui/format_dialog.py:16
 msgid "Codec vidéo"
 msgstr "Video codec"
 
@@ -1825,7 +1825,7 @@ msgstr ""
 "Error while deleting cookies:\n"
 "{error}"
 
-#: app/ui/format_dialog.py:13
+#: app/ui/format_dialog.py:14
 msgid "Extension"
 msgstr "Extension"
 
@@ -1846,7 +1846,7 @@ msgstr "Download queue"
 msgid "Format"
 msgstr "Format"
 
-#: app/ui/format_dialog.py:12
+#: app/ui/format_dialog.py:13
 msgid "Format ID"
 msgstr "Format ID"
 
@@ -1951,7 +1951,7 @@ msgstr "Playing."
 msgid "Lecture."
 msgstr "Play."
 
-#: app/ui/format_dialog.py:62
+#: app/ui/format_dialog.py:68
 msgid "Liste des formats disponibles"
 msgstr "List of available formats"
 
@@ -1983,7 +1983,7 @@ msgstr "Do not number"
 msgid "Ne plus afficher cet avertissement"
 msgstr "Don't show this warning again"
 
-#: app/ui/format_dialog.py:18
+#: app/ui/format_dialog.py:24
 msgid "Note"
 msgstr "Note"
 
@@ -2087,7 +2087,7 @@ msgstr "Back 10 seconds"
 msgid "Reporter la mise à jour"
 msgstr "Postpone update"
 
-#: app/ui/format_dialog.py:14
+#: app/ui/format_dialog.py:15
 msgid "Résolution"
 msgstr "Resolution"
 
@@ -2137,7 +2137,7 @@ msgstr ""
 "\n"
 "You will be signed out of this site."
 
-#: app/ui/format_dialog.py:44
+#: app/ui/format_dialog.py:50
 msgid "Sélection du format pour {title}. {count} formats disponibles."
 msgstr "Format selection for {title}. {count} formats available."
 
@@ -2145,7 +2145,7 @@ msgstr "Format selection for {title}. {count} formats available."
 msgid "Sélection vide"
 msgstr "Empty selection"
 
-#: app/ui/format_dialog.py:58
+#: app/ui/format_dialog.py:64
 msgid "Sélectionnez le format à télécharger :"
 msgstr "Select the format to download:"
 
@@ -2157,7 +2157,7 @@ msgstr "Select the videos to download ({count} entries):"
 msgid "Taille"
 msgstr "Size"
 
-#: app/ui/format_dialog.py:17
+#: app/ui/format_dialog.py:23
 msgid "Taille est."
 msgstr "Est. size"
 
@@ -2173,7 +2173,7 @@ msgstr "Message type"
 msgid "Type de message :"
 msgstr "Message type:"
 
-#: app/ui/format_dialog.py:68
+#: app/ui/format_dialog.py:74
 msgid "Télécharger ce format"
 msgstr "Download this format"
 
@@ -2253,19 +2253,19 @@ msgstr "unknown"
 msgid "{count} entrée(s)"
 msgstr "{count} entries"
 
-#: app/core/downloader.py:445 app/ui/format_dialog.py:165
+#: app/core/downloader.py:445 app/ui/format_dialog.py:175
 msgid "{n:.0f} Ko"
 msgstr "{n:.0f} KB"
 
-#: app/core/downloader.py:444 app/ui/format_dialog.py:163
+#: app/core/downloader.py:444 app/ui/format_dialog.py:173
 msgid "{n:.0f} Mo"
 msgstr "{n:.0f} MB"
 
-#: app/core/downloader.py:442 app/ui/format_dialog.py:161
+#: app/core/downloader.py:442 app/ui/format_dialog.py:171
 msgid "{n:.1f} Go"
 msgstr "{n:.1f} GB"
 
-#: app/ui/format_dialog.py:166
+#: app/ui/format_dialog.py:176
 msgid "{n} o"
 msgstr "{n} B"
 
@@ -2299,7 +2299,7 @@ msgstr "HTTP error {code}."
 msgid "Erreur inconnue."
 msgstr "Unknown error."
 
-#: app/core/downloader.py:1814
+#: app/core/downloader.py:1849
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
@@ -2331,7 +2331,7 @@ msgstr ""
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr "Unable to check the version (connection unavailable)."
 
-#: app/core/downloader.py:1802
+#: app/core/downloader.py:1837
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
@@ -2905,23 +2905,23 @@ msgstr "&Cancel"
 msgid "Mise à jour annulée."
 msgstr "Update cancelled."
 
-#: app/core/custom_sites.py:48
+#: app/core/custom_sites.py:63
 msgid "Allemand"
 msgstr "German"
 
-#: app/core/custom_sites.py:49
+#: app/core/custom_sites.py:64
 msgid "Anglais"
 msgstr "English"
 
-#: app/core/custom_sites.py:54
+#: app/core/custom_sites.py:71
 msgid "Audio"
 msgstr "Audio"
 
-#: app/core/custom_sites.py:100
+#: app/core/custom_sites.py:122
 msgid "Audiodescription"
 msgstr "Audio description"
 
-#: app/core/custom_sites.py:102
+#: app/core/custom_sites.py:124
 msgid "Audiodescription ({lang})"
 msgstr "Audio description ({lang})"
 
@@ -2929,11 +2929,11 @@ msgstr "Audio description ({lang})"
 msgid "Choix de piste audio annulé."
 msgstr "Audio track selection cancelled."
 
-#: app/core/custom_sites.py:50
+#: app/core/custom_sites.py:65
 msgid "Espagnol"
 msgstr "Spanish"
 
-#: app/core/custom_sites.py:51
+#: app/core/custom_sites.py:66
 msgid "Italien"
 msgstr "Italian"
 
@@ -3463,7 +3463,7 @@ msgstr "Download an &extract...\tCtrl+E"
 msgid "Télécharger un extrait"
 msgstr "Download an extract"
 
-#: app/core/downloader.py:1665
+#: app/core/downloader.py:1700
 msgid "fin"
 msgstr "end"
 
@@ -4274,3 +4274,15 @@ msgstr "{n} episodes"
 #: app/ui/subscriptions_dialog.py:136
 msgid "« {title} » choisi."
 msgstr "“{title}” chosen."
+
+#: app/ui/format_dialog.py:22
+msgid "Langue"
+msgstr "Language"
+
+#: app/core/custom_sites.py:68
+msgid "Néerlandais"
+msgstr "Dutch"
+
+#: app/core/custom_sites.py:67
+msgid "Portugais"
+msgstr "Portuguese"

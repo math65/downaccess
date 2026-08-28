@@ -245,3 +245,48 @@ class TestContratRechercheAbonnement:
         sub = joignable(lambda: subs.create(feed_url), "le podcast")
         assert sub.title and sub.feed_url
         assert sub.kind in (subs.KIND_PODCAST, subs.KIND_YOUTUBE)
+
+
+class TestContratPistesM6:
+    """Contrat : M6 publie bien deux pistes audio de langues differentes.
+
+    C'est ce qui a fait recevoir a Veronique une serie americaine en version
+    originale (2026-08-28) : les deux pistes sortent au MEME debit, et a
+    qualite egale yt-dlp garde la derniere — l'anglaise. Si ce test tombe
+    parce qu'il n'y a plus qu'une piste, la preference de langue devient sans
+    objet ; s'il tombe parce que `language` a disparu, elle ne marche plus.
+    """
+
+    def test_deux_langues_au_meme_debit(self):
+        import yt_dlp
+
+        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
+                               "skip_download": True}) as ydl:
+            info = repond(lambda: ydl.extract_info(EPISODE_M6, download=False),
+                          "m6.fr")
+        pistes = [f for f in info["formats"]
+                  if (f.get("vcodec") or "none") == "none"]
+        langues = {f.get("language") for f in pistes}
+        assert len(pistes) >= 2, "M6 n'expose plus qu'une piste audio"
+        assert len([x for x in langues if x]) >= 2, (
+            "les pistes M6 n'annoncent plus leur langue")
+
+    def test_la_piste_francaise_est_bien_celle_retenue(self):
+        """Bout en bout : le selecteur construit par l'application doit
+        designer le francais, pas l'anglais."""
+        import yt_dlp
+
+        from app.core.downloader import _apply_format
+
+        opts = {}
+        _apply_format(opts, "mp3")
+        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
+                               "skip_download": True}) as ydl:
+            info = repond(lambda: ydl.extract_info(EPISODE_M6, download=False),
+                          "m6.fr")
+        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
+                               "skip_download": True,
+                               "format": opts["format"]}) as ydl:
+            choisi = ydl.process_ie_result(dict(info), download=False)
+        assert (choisi.get("language") or "").startswith("fr"), (
+            f"piste retenue : {choisi.get('language')}")

@@ -291,7 +291,7 @@ msgstr ""
 msgid "Ajouté à la file."
 msgstr ""
 
-#: app/core/custom_sites.py:48
+#: app/core/custom_sites.py:63
 msgid "Allemand"
 msgstr ""
 
@@ -303,7 +303,7 @@ msgstr ""
 msgid "Aller à l'adresse"
 msgstr ""
 
-#: app/core/custom_sites.py:49
+#: app/core/custom_sites.py:64
 msgid "Anglais"
 msgstr ""
 
@@ -333,7 +333,7 @@ msgstr ""
 
 #: app/ui/add_url_dialog.py:140 app/ui/audio_track_dialog.py:100
 #: app/ui/confirm_dialog.py:44 app/ui/contact_dialog.py:80
-#: app/ui/contact_dialog.py:81 app/ui/format_dialog.py:69
+#: app/ui/contact_dialog.py:81 app/ui/format_dialog.py:75
 #: app/ui/guided_login_dialog.py:87 app/ui/guided_login_dialog.py:88
 #: app/ui/login_required_dialog.py:59 app/ui/login_required_dialog.py:60
 #: app/ui/main_window.py:1381 app/ui/main_window.py:1638
@@ -511,7 +511,7 @@ msgstr ""
 msgid "Aucune vidéo n'a été trouvée dans cette collection Arte."
 msgstr ""
 
-#: app/core/custom_sites.py:54
+#: app/core/custom_sites.py:71
 msgid "Audio"
 msgstr ""
 
@@ -529,7 +529,7 @@ msgstr ""
 msgid "Audio {ext}"
 msgstr ""
 
-#: app/core/custom_sites.py:100
+#: app/core/custom_sites.py:122
 msgid "Audiodescription"
 msgstr ""
 
@@ -537,7 +537,7 @@ msgstr ""
 msgid "Audiodescription (france.tv, Arte) :"
 msgstr ""
 
-#: app/core/custom_sites.py:102
+#: app/core/custom_sites.py:124
 msgid "Audiodescription ({lang})"
 msgstr ""
 
@@ -785,7 +785,7 @@ msgstr ""
 msgid "Choisir le format manuellement…"
 msgstr ""
 
-#: app/ui/format_dialog.py:32
+#: app/ui/format_dialog.py:38
 msgid "Choisir le format — {title}"
 msgstr ""
 
@@ -817,11 +817,11 @@ msgstr ""
 msgid "Coché"
 msgstr ""
 
-#: app/ui/format_dialog.py:16
+#: app/ui/format_dialog.py:17
 msgid "Codec audio"
 msgstr ""
 
-#: app/ui/format_dialog.py:15
+#: app/ui/format_dialog.py:16
 msgid "Codec vidéo"
 msgstr ""
 
@@ -1266,7 +1266,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:1814
+#: app/core/downloader.py:1849
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1314,11 +1314,11 @@ msgstr ""
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
-#: app/core/custom_sites.py:50
+#: app/core/custom_sites.py:65
 msgid "Espagnol"
 msgstr ""
 
-#: app/ui/format_dialog.py:13
+#: app/ui/format_dialog.py:14
 msgid "Extension"
 msgstr ""
 
@@ -1458,7 +1458,7 @@ msgstr ""
 msgid "Format :"
 msgstr ""
 
-#: app/ui/format_dialog.py:12
+#: app/ui/format_dialog.py:13
 msgid "Format ID"
 msgstr ""
 
@@ -1522,7 +1522,7 @@ msgstr ""
 msgid "France Inter, Arte, un titre d'émission…"
 msgstr ""
 
-#: app/core/custom_sites.py:47 app/ui/settings_dialog.py:107
+#: app/core/custom_sites.py:62 app/ui/settings_dialog.py:107
 msgid "Français"
 msgstr ""
 
@@ -1701,7 +1701,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:1802
+#: app/core/downloader.py:1837
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1741,7 +1741,7 @@ msgstr ""
 msgid "Inverser la sélection"
 msgstr ""
 
-#: app/core/custom_sites.py:51
+#: app/core/custom_sites.py:66
 msgid "Italien"
 msgstr ""
 
@@ -1899,6 +1899,10 @@ msgstr ""
 msgid "Lancer le diagnostic et envoyer"
 msgstr ""
 
+#: app/ui/format_dialog.py:22
+msgid "Langue"
+msgstr ""
+
 #: app/ui/settings_dialog.py:189
 msgid "Langue de l'interface"
 msgstr ""
@@ -2047,7 +2051,7 @@ msgstr ""
 msgid "Lire la transcription"
 msgstr ""
 
-#: app/ui/format_dialog.py:62
+#: app/ui/format_dialog.py:68
 msgid "Liste des formats disponibles"
 msgstr ""
 
@@ -2211,7 +2215,7 @@ msgstr ""
 msgid "Non coché"
 msgstr ""
 
-#: app/ui/format_dialog.py:18
+#: app/ui/format_dialog.py:24
 msgid "Note"
 msgstr ""
 
@@ -2241,6 +2245,10 @@ msgstr ""
 
 #: app/ui/playlist_dialog.py:115 app/ui/playlist_dialog.py:123
 msgid "Numérotation des fichiers"
+msgstr ""
+
+#: app/core/custom_sites.py:68
+msgid "Néerlandais"
 msgstr ""
 
 #: app/ui/settings_dialog.py:145
@@ -2468,6 +2476,10 @@ msgstr ""
 
 #: app/core/feed_search.py:62
 msgid "Podcasts"
+msgstr ""
+
+#: app/core/custom_sites.py:67
+msgid "Portugais"
 msgstr ""
 
 #: app/ui/player_dialog.py:92
@@ -2783,7 +2795,7 @@ msgstr ""
 msgid "Réseau"
 msgstr ""
 
-#: app/ui/format_dialog.py:14
+#: app/ui/format_dialog.py:15
 msgid "Résolution"
 msgstr ""
 
@@ -2995,7 +3007,7 @@ msgstr ""
 msgid "Sélection de format annulée."
 msgstr ""
 
-#: app/ui/format_dialog.py:44
+#: app/ui/format_dialog.py:50
 msgid "Sélection du format pour {title}. {count} formats disponibles."
 msgstr ""
 
@@ -3011,7 +3023,7 @@ msgstr ""
 msgid "Sélectionnez d'abord un abonnement."
 msgstr ""
 
-#: app/ui/format_dialog.py:58
+#: app/ui/format_dialog.py:64
 msgid "Sélectionnez le format à télécharger :"
 msgstr ""
 
@@ -3035,7 +3047,7 @@ msgstr ""
 msgid "Taille"
 msgstr ""
 
-#: app/ui/format_dialog.py:17
+#: app/ui/format_dialog.py:23
 msgid "Taille est."
 msgstr ""
 
@@ -3258,7 +3270,7 @@ msgstr ""
 msgid "Télécharger automatiquement les sous-titres"
 msgstr ""
 
-#: app/ui/format_dialog.py:68
+#: app/ui/format_dialog.py:74
 msgid "Télécharger ce format"
 msgstr ""
 
@@ -3651,7 +3663,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:1665
+#: app/core/downloader.py:1700
 msgid "fin"
 msgstr ""
 
@@ -3829,15 +3841,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:445 app/ui/format_dialog.py:165
+#: app/core/downloader.py:445 app/ui/format_dialog.py:175
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:444 app/ui/format_dialog.py:163
+#: app/core/downloader.py:444 app/ui/format_dialog.py:173
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:442 app/ui/format_dialog.py:161
+#: app/core/downloader.py:442 app/ui/format_dialog.py:171
 msgid "{n:.1f} Go"
 msgstr ""
 
@@ -3873,7 +3885,7 @@ msgstr ""
 msgid "{n} nouveautés de vos abonnements ajoutées à la file."
 msgstr ""
 
-#: app/ui/format_dialog.py:166
+#: app/ui/format_dialog.py:176
 msgid "{n} o"
 msgstr ""
 

@@ -315,6 +315,16 @@ Le format proposé par défaut correspond à celui que vous avez défini dans le
 
 > **Accessibilité** : la liste déroulante porte un libellé clair, annoncé par NVDA et JAWS. Parcourez les choix avec les flèches haut et bas, puis passez au champ suivant avec Tab.
 
+### La langue de la piste sonore
+
+Certaines émissions proposent plusieurs pistes sonores : une série américaine diffusée en France est disponible en version française **et** en version originale. Les deux pistes ont souvent la même qualité, et rien ne les distingue à l'oreille avant de les avoir téléchargées.
+
+DownAccess choisit la piste correspondant à **la langue de l'application** : en français si l'interface est en français. Quand aucune piste ne correspond — le cas de l'immense majorité des vidéos, qui n'en proposent qu'une — le meilleur son disponible est pris comme avant.
+
+Si c'est la version originale que vous voulez, passez par **Choisir le format manuellement…** : la colonne **Langue** vous permet de désigner précisément la piste.
+
+Sur france.tv et Arte, ce choix vous est proposé directement au moment de l'ajout, avec l'audiodescription quand elle existe.
+
 ### La sélection manuelle du format
 
 Si vous choisissez « Choisir le format manuellement… », DownAccess interroge le site puis ouvre la fenêtre « Choisir le format ». Vous y trouvez un tableau listant tous les formats proposés, du meilleur au moins bon. Chaque ligne comporte les colonnes suivantes :
@@ -323,6 +333,7 @@ Si vous choisissez « Choisir le format manuellement… », DownAccess interroge
 - **Extension** — le type de fichier (mp4, m4a, webm…).
 - **Résolution** — la définition de l'image (par exemple 1080p), ou un tiret pour les pistes purement audio.
 - **Codec vidéo** et **Codec audio** — les technologies de compression employées.
+- **Langue** — la langue de la piste sonore, quand le site l'indique. C'est cette colonne qui distingue la version française de la version originale d'une série doublée : les deux pistes ont souvent le même débit et se ressemblent en tout point.
 - **Taille est.** — la taille estimée du fichier, quand le site la communique.
 - **Note** — une indication complémentaire fournie par le site.
 

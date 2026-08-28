@@ -23,7 +23,7 @@ class TestFormats:
     def test_auto_prend_le_meilleur(self):
         opts = {}
         _apply_format(opts, "auto")
-        assert opts["format"] == "bestvideo+bestaudio/best"
+        assert opts["format"].endswith("bestvideo+bestaudio/best")
         assert "postprocessors" not in opts
 
     def test_mp3_extrait_l_audio(self):
@@ -254,3 +254,58 @@ class TestTagsDesChapitres:
         chaps = self.fichiers(tmp_path, ["Intro"])
         assert _retag_chapters(chaps, "") == 1
         assert self.lire(chaps[0]["filepath"])["title"] == ["Intro"]
+
+
+class TestLangueDeLaPisteAudio:
+    """Quelle piste sonore part, quand le site en propose plusieurs.
+
+    M6 publie deux pistes au MEME debit pour une serie americaine : `audio1`
+    en francais, `audio2` en anglais, 96 kbit/s toutes les deux. A qualite
+    egale, yt-dlp garde la derniere — Veronique a recu ses episodes en version
+    originale, en croyant telecharger la version francaise (2026-08-28).
+    """
+
+    def test_l_audio_seul_privilegie_la_langue_de_l_interface(self):
+        opts = {}
+        _apply_format(opts, "mp3")
+        assert opts["format"].startswith("bestaudio[language^=fr]")
+
+    def test_le_repli_reste_en_place(self):
+        """Aucune piste dans la bonne langue (le cas de l'immense majorite des
+        videos) : on ne doit surtout pas echouer sur « format non disponible »."""
+        for spec in ("mp3", "m4a", "mp4", "auto", "amc_audio", "amc_video"):
+            opts = {}
+            _apply_format(opts, spec)
+            selecteur = opts["format"]
+            sans_langue = [c for c in selecteur.split("/")
+                           if "language^=" not in c]
+            assert sans_langue, f"{spec} n'a plus de repli sans langue"
+            assert selecteur.endswith("best"), spec
+
+    def test_la_video_aussi_choisit_sa_piste(self):
+        """Une serie doublee se telecharge aussi en video : meme probleme."""
+        for spec in ("mp4", "auto", "amc_video"):
+            opts = {}
+            _apply_format(opts, spec)
+            assert "language^=fr" in opts["format"], spec
+
+    def test_l_interface_anglaise_prefere_l_anglais(self, monkeypatch):
+        from app.core import downloader
+
+        monkeypatch.setattr(downloader, "preferred_audio_language",
+                            lambda: "en")
+        opts = {}
+        _apply_format(opts, "mp3")
+        assert opts["format"].startswith("bestaudio[language^=en]")
+
+    def test_un_choix_explicite_de_piste_reste_prioritaire(self):
+        """france.tv / arte : l'utilisateur a designe sa piste dans le
+        dialogue, la preference de langue n'a plus rien a y faire."""
+        opts = {}
+        _apply_format(opts, "mp3", audio_groups=[["audio-fr-ad"]])
+        assert opts["format"] == "(audio-fr-ad)"
+
+    def test_un_format_manuel_reste_intouche(self):
+        opts = {}
+        _apply_format(opts, "manual", format_id="audio1=96000")
+        assert opts["format"] == "audio1=96000"

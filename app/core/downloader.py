@@ -1451,6 +1451,31 @@ def estimate_total_bytes(formats: list[dict], format_spec: str = "auto",
     return total
 
 
+def preferred_audio_language() -> str:
+    """Langue audio a privilegier : celle de l'interface.
+
+    Certains sites publient plusieurs pistes au MEME debit — M6 expose
+    `audio1` en francais et `audio2` en anglais, tous deux a 96 kbit/s. A
+    qualite egale, yt-dlp garde la derniere : une serie americaine arrivait
+    donc en version originale, sans que rien ne le signale (Veronique,
+    2026-08-28, qui a recu ses episodes en anglais).
+
+    On ne devine pas : on suit la langue dans laquelle l'utilisateur a mis
+    l'application. Quand aucune piste ne correspond, le selecteur se replie
+    sur le choix habituel.
+    """
+    from app.core.i18n import get_current_language_code
+    return get_current_language_code() or "fr"
+
+
+def _audio_pref(lang: str, suffix: str = "") -> str:
+    """Selecteur « meilleure piste dans la langue voulue », filtre yt-dlp.
+
+    `^=` compare le debut du code : couvre « fr », « fra », « fre », « fr-FR ».
+    """
+    return f"bestaudio[language^={lang}]{suffix}"
+
+
 def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
                   audio_groups: list[list[str]] | None = None) -> None:
     """Applique le format yt-dlp et les post-processeurs selon le choix.
@@ -1461,6 +1486,8 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
     flux audio (l'utilisateur change de piste dans son lecteur). On garde la
     meilleure vidéo. Ignoré en mode manuel ou sous-titres seuls.
     """
+    lang = preferred_audio_language()
+
     # Une piste -> « (id1/id2) » ; plusieurs pistes -> « (..)+(..) » (multi-flux).
     ag = None
     if audio_groups:
@@ -1475,14 +1502,16 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
         # Format manuel spécifique
         opts["format"] = format_id
     elif format_spec == "mp3":
-        opts["format"] = ag or "bestaudio/best"
+        opts["format"] = ag or f"{_audio_pref(lang)}/bestaudio/best"
         opts["postprocessors"] = [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "mp3",
             "preferredquality": "192",
         }]
     elif format_spec == "m4a":
-        opts["format"] = ag or "bestaudio[ext=m4a]/bestaudio/best"
+        opts["format"] = ag or (f"{_audio_pref(lang, '[ext=m4a]')}/"
+                                f"{_audio_pref(lang)}/"
+                                "bestaudio[ext=m4a]/bestaudio/best")
         opts["postprocessors"] = [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "m4a",
@@ -1507,8 +1536,11 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
             # l'image et le son — sans lui, choisir MP4 echouait sur « Requested
             # format is not available ». Le post-processeur remet le conteneur
             # en MP4 de toute facon.
-            opts["format"] = ("bestvideo[ext=mp4]+bestaudio[ext=m4a]/"
-                              "bestvideo+bestaudio/best[ext=mp4]/best")
+            opts["format"] = (
+                f"bestvideo[ext=mp4]+{_audio_pref(lang, '[ext=m4a]')}/"
+                "bestvideo[ext=mp4]+bestaudio[ext=m4a]/"
+                f"bestvideo+{_audio_pref(lang)}/"
+                "bestvideo+bestaudio/best[ext=mp4]/best")
         opts["postprocessors"] = [{
             "key": "FFmpegVideoConvertor",
             "preferedformat": "mp4",
@@ -1516,7 +1548,7 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
     elif format_spec == "amc_audio":
         # Audio original (codec natif), SANS réencodage : Access Media Converter
         # convertira depuis la source pour éviter une double perte de qualité.
-        opts["format"] = ag or "bestaudio/best"
+        opts["format"] = ag or f"{_audio_pref(lang)}/bestaudio/best"
     elif format_spec == "amc_video":
         # Meilleur original (vidéo+audio), SANS réencodage : seule la fusion des
         # flux a lieu (sans perte). AMC fera la conversion ensuite.
@@ -1525,7 +1557,8 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
             opts["format"] = f"bestvideo+{ag}/best"
             opts["merge_output_format"] = "mp4"
         else:
-            opts["format"] = "bestvideo+bestaudio/best"
+            opts["format"] = (f"bestvideo+{_audio_pref(lang)}/"
+                              "bestvideo+bestaudio/best")
     elif format_spec == "subtitles_only":
         # Pas de format vidéo/audio — seuls les sous-titres seront écrits.
         # skip_download est déjà mis à True par l'appelant.
@@ -1538,8 +1571,10 @@ def _apply_format(opts: dict, format_spec: str, format_id: str | None = None,
         opts["format"] = f"bestvideo+{ag}/best"
         opts["merge_output_format"] = "mp4"
     else:
-        # Auto : meilleure qualité disponible
-        opts["format"] = "bestvideo+bestaudio/best"
+        # Auto : meilleure qualité disponible, piste audio dans la langue de
+        # l'interface quand le site en propose plusieurs.
+        opts["format"] = (f"bestvideo+{_audio_pref(lang)}/"
+                          "bestvideo+bestaudio/best")
 
 
 def _apply_subtitles(opts: dict, settings: dict) -> None:

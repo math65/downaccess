@@ -1,10 +1,11 @@
 import wx
 
 from app.core import speech
+from app.core.custom_sites import lang_name
 
 # Largeurs fixes des colonnes du tableau de formats (les libelles sont
 # resolus a la construction du dialogue via _format_columns()).
-_FORMAT_COLUMN_WIDTHS = [80, 70, 100, 110, 110, 100, 120]
+_FORMAT_COLUMN_WIDTHS = [80, 70, 100, 110, 110, 90, 100, 120]
 
 
 def _format_columns():
@@ -14,8 +15,13 @@ def _format_columns():
         (_("Résolution"),  _FORMAT_COLUMN_WIDTHS[2]),
         (_("Codec vidéo"), _FORMAT_COLUMN_WIDTHS[3]),
         (_("Codec audio"), _FORMAT_COLUMN_WIDTHS[4]),
-        (_("Taille est."), _FORMAT_COLUMN_WIDTHS[5]),
-        (_("Note"),        _FORMAT_COLUMN_WIDTHS[6]),
+        # Sans cette colonne, les deux pistes d'une serie doublee (francais et
+        # version originale, souvent au meme debit) sont indiscernables : le
+        # choix manuel ne servait a rien pour en preferer une (Veronique,
+        # 2026-08-28).
+        (_("Langue"),      _FORMAT_COLUMN_WIDTHS[5]),
+        (_("Taille est."), _FORMAT_COLUMN_WIDTHS[6]),
+        (_("Note"),        _FORMAT_COLUMN_WIDTHS[7]),
     ]
 
 
@@ -95,14 +101,18 @@ class FormatDialog(wx.Dialog):
             acodec = _short_codec(fmt.get("acodec", ""))
             size   = _fmt_size(fmt.get("filesize") or fmt.get("filesize_approx"))
             note   = fmt.get("format_note") or ""
+            # Pas de son -> pas de langue a annoncer (un flux video seul).
+            langue = (lang_name(fmt.get("language"))
+                      if fmt.get("language") else "—")
 
             self.lst.InsertItem(idx, fmt_id)
             self.lst.SetItem(idx, 1, ext)
             self.lst.SetItem(idx, 2, res)
             self.lst.SetItem(idx, 3, vcodec)
             self.lst.SetItem(idx, 4, acodec)
-            self.lst.SetItem(idx, 5, size)
-            self.lst.SetItem(idx, 6, note)
+            self.lst.SetItem(idx, 5, langue)
+            self.lst.SetItem(idx, 6, size)
+            self.lst.SetItem(idx, 7, note)
 
     def _bind_events(self) -> None:
         self.lst.Bind(wx.EVT_LIST_ITEM_SELECTED,   self._on_select)

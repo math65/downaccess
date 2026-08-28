@@ -315,6 +315,16 @@ The format offered by default matches the one you set in the preferences (see be
 
 > **Accessibility**: the drop-down list has a clear label, announced by NVDA and JAWS. Move through the choices with the up and down arrows, then move on to the next field with Tab.
 
+### The language of the soundtrack
+
+Some programmes offer several soundtracks: an American series shown in France is available in French **and** in its original version. The two tracks often have the same quality, and nothing tells them apart before you have downloaded them.
+
+DownAccess picks the track matching **the language of the application**: French when the interface is in French. When no track matches — which is the case for the vast majority of videos, as they only offer one — the best available sound is taken as before.
+
+If it is the original version you want, go through **Choose the format manually…**: the **Language** column lets you point at the exact track.
+
+On france.tv and Arte, this choice is offered to you directly when you add the link, along with audio description when it exists.
+
 ### Selecting the format manually
 
 If you choose "Choose the format manually…", DownAccess queries the site and then opens the "Choose the format" window. There you'll find a table listing all the formats on offer, from best to worst. Each row has the following columns:
@@ -323,6 +333,7 @@ If you choose "Choose the format manually…", DownAccess queries the site and t
 - **Extension** — the file type (mp4, m4a, webm…).
 - **Resolution** — the picture definition (for example 1080p), or a dash for audio-only tracks.
 - **Video codec** and **Audio codec** — the compression technologies used.
+- **Language** — the language of the soundtrack, when the site says so. This column is what tells the French version from the original version of a dubbed series: the two tracks often have the same bitrate and look identical otherwise.
 - **Est. size** — the estimated file size, when the site provides it.
 - **Note** — additional information supplied by the site.
 

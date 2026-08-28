@@ -41,7 +41,22 @@ _AD_MARKERS = (
 )
 
 
-def _lang_name(code: str | None) -> str:
+# Codes a trois lettres (ISO 639-2) vers leur equivalent a deux lettres. Les
+# sites melangent les deux : M6 annonce « fra » et « eng », Arte « fr » et
+# « de ». Sans cette table, une piste francaise s'afficherait « FRA ».
+_LANG_ALIASES = {
+    "fra": "fr", "fre": "fr", "eng": "en", "deu": "de", "ger": "de",
+    "spa": "es", "ita": "it", "por": "pt", "nld": "nl", "dut": "nl",
+}
+
+
+def normalize_lang(code: str | None) -> str:
+    """Code de langue ramene a deux lettres (« fra » -> « fr », « fr-FR » -> « fr »)."""
+    base = (code or "").strip().lower().replace("_", "-").split("-")[0]
+    return _LANG_ALIASES.get(base, base)
+
+
+def lang_name(code: str | None) -> str:
     """Nom lisible d'un code de langue (repli : code en majuscules)."""
     names = {
         "fr": _("Français"),
@@ -49,10 +64,17 @@ def _lang_name(code: str | None) -> str:
         "en": _("Anglais"),
         "es": _("Espagnol"),
         "it": _("Italien"),
+        "pt": _("Portugais"),
+        "nl": _("Néerlandais"),
     }
     if not code:
         return _("Audio")
-    return names.get(code.lower(), code.upper())
+    normalise = normalize_lang(code)
+    return names.get(normalise, (normalise or code).upper())
+
+
+def _lang_name(code: str | None) -> str:
+    return lang_name(code)
 
 
 def is_custom_site_url(url: str) -> bool:
