@@ -81,7 +81,7 @@ from app.ui.error_dialog import ErrorDialog
 from app.ui.warning_dialog import WarningDialog
 from app.ui.report_dialog import ReportDialog
 from app.core import error_reporter
-from app.core.downloader import Downloader, is_transient_error
+from app.core.downloader import Downloader, is_hopeless_error, is_transient_error
 
 APP_NAME = "DownAccess"
 
@@ -980,6 +980,84 @@ class MainWindow(wx.Frame):
         else:
             wx.CallAfter(self.download_list.SetFocus)
 
+    def _diagnostic_rerun(self, url, format_spec, format_id, referer, cookies,
+                          error_message, stop_evt, pause_evt):
+        """Rejoue le telechargement en mode verbeux pour le rapport d'erreur.
+
+        Retourne `(log, chemin_recupere)` — `chemin_recupere` non nul quand la
+        relance a finalement abouti (l'item est alors retabli dans la liste).
+
+        Certaines erreurs ne changent jamais d'avis : on ne les rejoue pas.
+        Sur une video dont seule la bande-son a echappe au verrou, la relance
+        contournait le garde-fou — pose a l'analyse, pas au telechargement —
+        et ramenait le fichier audio que ce garde-fou existe pour eviter, en
+        annoncant « le fichier est complet » (rapport Seb, 0.2.1).
+        """
+        if is_hopeless_error(error_message):
+            return (
+                "[DownAccess] Relance de diagnostic non tentée : l'erreur "
+                "signalée ne peut pas se résoudre en réessayant (image "
+                "verrouillée par le site, ou disque plein). Le rapport porte "
+                "sur l'échec initial." + "\n\n" + (error_message or ""),
+                None,
+            )
+
+        log = []
+        recovered = {"ok": False, "filepath": ""}
+
+        def _diag_progress(p):
+            if p.status == "finished" and p.filepath:
+                recovered["filepath"] = p.filepath
+
+        try:
+            downloader = Downloader(self.settings)
+            downloader.download(
+                download_id="diagnostic",
+                url=url,
+                on_progress=_diag_progress,
+                stop_event=stop_evt,
+                pause_event=pause_evt,
+                format_spec=format_spec,
+                format_id=format_id,
+                referer=referer,
+                cookies=cookies,
+                verbose=True,
+                on_verbose_log=lambda txt: log.append(txt),
+            )
+            # La relance de diagnostic reprend le .part laisse par l'echec.
+            # Si elle aboutit sans lever d'erreur, c'est que l'echec initial
+            # etait transitoire (connexion instable) et que le fichier est
+            # bien present -> on retablit l'item dans l'UI.
+            recovered["ok"] = True
+        except Exception:
+            pass
+
+        verbose = log[0] if log else ""
+        if not recovered["ok"]:
+            return verbose, None
+
+        # Qualifier honnetement l'erreur d'origine plutot que de supposer
+        # systematiquement « connexion instable » : un 403 YouTube est un refus
+        # serveur (anti-robot), pas un probleme de reseau cote utilisateur.
+        _low = (error_message or "").lower()
+        if is_transient_error(error_message):
+            _cause = (
+                "YouTube a temporairement refusé l'URL de téléchargement "
+                "(protection anti-robot d'un serveur YouTube, pas un problème "
+                "de connexion). Une nouvelle extraction a permis de récupérer "
+                "le fichier complet."
+            )
+        elif any(x in _low for x in ("timed out", "timeout", "connection",
+                                     "réseau", "reseau")):
+            _cause = ("l'erreur initiale était transitoire "
+                      "(connexion instable).")
+        else:
+            _cause = ("l'erreur initiale était temporaire ; une nouvelle "
+                      "tentative a abouti et le fichier est complet.")
+        verbose = ("[DownAccess] La relance de diagnostic a repris et "
+                   "terminé le téléchargement : " + _cause + "\n\n" + verbose)
+        return verbose, recovered["filepath"]
+
     def _open_report_form(self, download_id: str, error_message: str) -> None:
         dl_data = self._dl_data.get(download_id, {})
         url         = dl_data.get("url", "")
@@ -1001,66 +1079,12 @@ class MainWindow(wx.Frame):
             pause_evt = _th.Event()
 
             def _run_verbose():
-                log = []
-                recovered = {"ok": False, "filepath": ""}
-
-                def _diag_progress(p):
-                    if p.status == "finished" and p.filepath:
-                        recovered["filepath"] = p.filepath
-
-                try:
-                    downloader = Downloader(self.settings)
-                    downloader.download(
-                        download_id="diagnostic",
-                        url=url,
-                        on_progress=_diag_progress,
-                        stop_event=stop_evt,
-                        pause_event=pause_evt,
-                        format_spec=format_spec,
-                        format_id=format_id,
-                        referer=referer,
-                        cookies=cookies,
-                        verbose=True,
-                        on_verbose_log=lambda txt: log.append(txt),
-                    )
-                    # La relance de diagnostic reprend le .part laissé par l'échec.
-                    # Si elle aboutit sans lever d'erreur, c'est que l'échec
-                    # initial était transitoire (connexion instable) et que le
-                    # fichier est bien présent → on rétablit l'item dans l'UI.
-                    recovered["ok"] = True
-                except Exception:
-                    pass
-
-                verbose = log[0] if log else ""
-                if recovered["ok"]:
-                    # Qualifier honnêtement l'erreur d'origine plutôt que de
-                    # supposer systématiquement « connexion instable » : un 403
-                    # YouTube est un refus serveur (anti-robot), pas un problème
-                    # de réseau côté utilisateur.
-                    _low = (error_message or "").lower()
-                    if is_transient_error(error_message):
-                        _cause = (
-                            "YouTube a temporairement refusé l'URL de "
-                            "téléchargement (protection anti-robot d'un serveur "
-                            "YouTube, pas un problème de connexion). Une "
-                            "nouvelle extraction a permis de récupérer le "
-                            "fichier complet."
-                        )
-                    elif any(s in _low for s in (
-                            "timed out", "timeout", "connection",
-                            "réseau", "reseau")):
-                        _cause = ("l'erreur initiale était transitoire "
-                                  "(connexion instable).")
-                    else:
-                        _cause = ("l'erreur initiale était temporaire ; une "
-                                  "nouvelle tentative a abouti et le fichier "
-                                  "est complet.")
-                    verbose = (
-                        "[DownAccess] La relance de diagnostic a repris et "
-                        "terminé le téléchargement : " + _cause + "\n\n" + verbose
-                    )
+                verbose, recovered = self._diagnostic_rerun(
+                    url, format_spec, format_id, referer, cookies,
+                    error_message, stop_evt, pause_evt)
+                if recovered is not None:
                     wx.CallAfter(self._on_diagnostic_recovered,
-                                 download_id, recovered["filepath"])
+                                 download_id, recovered)
                 verbose_log_holder.append(verbose)
                 wx.CallAfter(_send_report)
 
@@ -1876,8 +1900,14 @@ class MainWindow(wx.Frame):
 
         dlg = UGEDialog(
             self,
+            # Format par defaut des Preferences, comme tout ajout qui ne passe
+            # pas par le dialogue. Sans ca, l'extraction guidee ajoutait
+            # toujours en « auto » : l'utilisateur qui avait choisi MP3 se
+            # voyait refuser une video M6 dont seul le son est accessible,
+            # alors qu'il avait justement demande le son (rapport Seb, 0.2.1).
             on_add_url=lambda url, referer=None, cookies=None, skip_info=False:
-                self._enqueue_url(url, referer=referer, cookies=cookies, skip_info=skip_info),
+                self._enqueue_url(url, self._default_format(), referer=referer,
+                                  cookies=cookies, skip_info=skip_info),
         )
         dlg.Show()
 

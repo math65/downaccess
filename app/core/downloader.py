@@ -355,8 +355,11 @@ def drm_locked_video_message() -> str:
         "verrouillée. DownAccess préfère vous le dire plutôt que de vous "
         "laisser un fichier audio à la place de votre émission.\n\n"
         "Si le son vous suffit, vous pouvez tout de même récupérer cette "
-        "émission : choisissez le format MP3 ou M4A, puis ajoutez le lien de "
-        "nouveau.\n\n"
+        "émission : ajoutez le lien de nouveau (Ctrl+N), puis choisissez "
+        "« Audio MP3 » ou « Audio M4A » dans la liste « Format de "
+        "téléchargement » de la fenêtre d'ajout. Modifier le format par "
+        "défaut dans les Préférences ne relance pas ce téléchargement-ci : "
+        "il faut réajouter le lien.\n\n"
         "Pour l'image, aucun réglage n'y changera rien : c'est une protection "
         "posée par le site. M6, les plateformes par abonnement (Netflix, "
         "Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce "
@@ -376,6 +379,21 @@ def is_transient_error(msg: str) -> bool:
     if is_disk_full_error(low):
         return False
     return any(p in low for p in _TRANSIENT_ERROR_PATTERNS)
+
+
+def is_hopeless_error(msg: str) -> bool:
+    """Vrai si relancer le telechargement ne peut RIEN donner de bon.
+
+    Deux cas : le verrou DRM (aucun reglage, aucune nouvelle tentative ne
+    l'ouvre) et le disque plein (la relance ne fait que reremplir le disque).
+
+    Sert a la relance de diagnostic du rapport d'erreur : sur une video dont
+    seule la bande-son a echappe au verrou, elle passait a cote du garde-fou
+    (pose a l'analyse, pas au telechargement), rapportait le .m4a que ce
+    garde-fou existe pour eviter, et annoncait « l'erreur initiale etait
+    temporaire, le fichier est complet » (rapport Seb, 0.2.1).
+    """
+    return is_drm_error(msg) or is_disk_full_error(msg)
 
 
 # ------------------------------------------------------------------

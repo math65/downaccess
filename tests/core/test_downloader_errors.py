@@ -14,6 +14,7 @@ from app.core.downloader import (
     drm_locked_video_message,
     is_disk_full_error,
     is_drm_error,
+    is_hopeless_error,
     is_network_down_error,
     accepts_audio_only,
     video_is_drm_locked,
@@ -336,3 +337,36 @@ class TestImageVerrouillee:
         alors que le son, lui, se telecharge."""
         message = drm_locked_video_message()
         assert "MP3" in message and "M4A" in message
+
+    def test_message_dit_ou_se_choisit_le_format(self):
+        """Seb, 2026-08-28 : il a lu « choisissez le format MP3 » et l'a change
+        dans les Preferences — le telechargement deja refuse ne repart pas pour
+        autant. Le message doit designer la fenetre d'ajout, et dire que
+        changer la preference ne relance pas celui-ci."""
+        message = drm_locked_video_message()
+        assert "Format de téléchargement" in message
+        assert "Préférences" in message and "relance pas" in message
+
+
+class TestErreurSansIssue:
+    """Ce qu'on ne relance jamais.
+
+    La relance de diagnostic du rapport d'erreur rejouait TOUT, y compris ce
+    qu'aucune nouvelle tentative ne peut resoudre. Sur une video dont seule la
+    bande-son a echappe au verrou, elle contournait le garde-fou (pose a
+    l'analyse, pas au telechargement) : Seb recevait le .m4a que ce garde-fou
+    existe pour eviter, et le rapport annoncait « le fichier est complet ».
+    """
+
+    def test_image_verrouillee_jamais_relancee(self):
+        assert is_hopeless_error(drm_locked_video_message())
+        assert is_hopeless_error(DRM_RAW)
+
+    def test_disque_plein_jamais_relance(self):
+        assert is_hopeless_error(DISK_FULL_RAW)
+
+    def test_une_coupure_reseau_se_relance(self):
+        """L'inverse : la relance a du sens et recupere souvent le fichier."""
+        assert not is_hopeless_error("ERROR: unable to download video data: "
+                                     "Read timed out")
+        assert not is_hopeless_error("HTTP Error 403: Forbidden")
