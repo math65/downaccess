@@ -8,10 +8,13 @@ pytestmark = pytest.mark.gui
 
 from app.core.subscriptions import FeedEntry, Subscription
 from app.ui.new_items_dialog import NewItemsDialog
+from app.ui import subscriptions_dialog as sub_dlg
 from app.ui.subscriptions_dialog import (
     FORMAT_CODES,
     AddSubscriptionDialog,
+    EditSubscriptionDialog,
     SubscriptionsDialog,
+    _format_labels,
 )
 
 
@@ -124,6 +127,141 @@ class TestListeAbonnements:
                                   pending={"s1": [entree(1), entree(2)]})
         assert dlg.btn_new.IsEnabled() is True
         assert "2" in dlg.btn_new.GetLabel()
+        dlg.Destroy()
+
+
+class TestModificationAbonnement:
+    """Changer les reglages d'un abonnement sans avoir a le recreer.
+
+    Se desabonner puis se reabonner marchait, mais faisait perdre la memoire
+    de ce qui avait deja ete vu : tout le catalogue etait reproposé.
+    """
+
+    class FauxDialogue:
+        """Remplace la fenetre de reglages : le test pilote les reponses."""
+
+        def __init__(self, fmt="", auto=False, catch_up=False, ok=True):
+            self._fmt, self._auto = fmt, auto
+            self._catch_up, self._ok = catch_up, ok
+
+        def __call__(self, parent, sub):
+            return self
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            return False
+
+        def ShowModal(self):
+            return wx.ID_OK if self._ok else wx.ID_CANCEL
+
+        def get_format(self):
+            return self._fmt
+
+        def get_auto_download(self):
+            return self._auto
+
+        def get_catch_up(self):
+            return self._catch_up
+
+    def _liste(self, frame, monkeypatch, sub):
+        from app.core import subscriptions as subs
+        monkeypatch.setattr(subs, "load", lambda: [sub])
+        enregistres = []
+        monkeypatch.setattr(subs, "save", lambda liste: enregistres.append(liste))
+        dlg = SubscriptionsDialog(frame)
+        return dlg, enregistres
+
+    def test_le_bouton_porte_une_etiquette(self, frame, appdata, monkeypatch):
+        dlg, _ = self._liste(frame, monkeypatch, abonnement())
+        assert dlg.btn_edit.GetLabel().strip()
+        dlg.Destroy()
+
+    def test_reglages_preremplis(self, frame):
+        """Ouvrir les reglages doit montrer ceux en vigueur, pas des valeurs
+        neuves : sinon on remet tout a zero sans le vouloir."""
+        dlg = EditSubscriptionDialog(
+            frame, abonnement(format_spec="mp3", auto_download=True))
+        assert dlg.get_format() == "mp3"
+        assert dlg.get_auto_download() is True
+        dlg.Destroy()
+
+    def test_focus_sur_le_contenu(self, frame):
+        dlg = EditSubscriptionDialog(frame, abonnement())
+        assert dlg.FindFocus() is dlg.choice_fmt
+        dlg.Destroy()
+
+    def test_rattrapage_jamais_coche_d_office(self, frame):
+        """Rejouer le rattrapage reproposerait tout le catalogue : ce doit
+        rester un choix explicite, meme sur un abonnement existant."""
+        dlg = EditSubscriptionDialog(frame, abonnement(auto_download=True))
+        assert dlg.get_catch_up() is False
+        dlg.Destroy()
+
+    def test_les_cases_portent_une_etiquette(self, frame):
+        dlg = EditSubscriptionDialog(frame, abonnement())
+        for case in (dlg.chk_auto, dlg.chk_catch_up):
+            assert case.GetLabel().strip()
+            assert case.GetName().strip()
+        dlg.Destroy()
+
+    def test_le_nouveau_format_est_enregistre(self, frame, appdata, monkeypatch):
+        sub = abonnement(format_spec="mp4")
+        dlg, enregistres = self._liste(frame, monkeypatch, sub)
+        monkeypatch.setattr(sub_dlg, "EditSubscriptionDialog",
+                            self.FauxDialogue(fmt="mp3", auto=True))
+        dlg._on_edit(None)
+        assert sub.format_spec == "mp3"
+        assert sub.auto_download is True
+        assert enregistres, "la modification doit etre ecrite sur le disque"
+        dlg.Destroy()
+
+    def test_la_liste_reflete_la_modification(self, frame, appdata, monkeypatch):
+        """La ligne relue par le lecteur d'ecran est le seul retour visible."""
+        sub = abonnement(format_spec="mp4")
+        dlg, _ = self._liste(frame, monkeypatch, sub)
+        monkeypatch.setattr(sub_dlg, "EditSubscriptionDialog",
+                            self.FauxDialogue(fmt="mp3", auto=True))
+        dlg._on_edit(None)
+        assert dlg.lst.GetItemText(0, 2) == _format_labels()[FORMAT_CODES.index("mp3")]
+        assert dlg.lst.GetItemText(0, 3) in ("oui", "yes")
+        dlg.Destroy()
+
+    def test_annuler_ne_change_rien(self, frame, appdata, monkeypatch):
+        sub = abonnement(format_spec="mp4", auto_download=False)
+        dlg, enregistres = self._liste(frame, monkeypatch, sub)
+        monkeypatch.setattr(sub_dlg, "EditSubscriptionDialog",
+                            self.FauxDialogue(fmt="mp3", auto=True, ok=False))
+        dlg._on_edit(None)
+        assert sub.format_spec == "mp4"
+        assert sub.auto_download is False
+        assert enregistres == []
+        dlg.Destroy()
+
+    def test_le_rattrapage_oublie_ce_qui_a_ete_vu(self, frame, appdata, monkeypatch):
+        """Sans cela, les publications anterieures a l'abonnement resteraient
+        invisibles a jamais : aucune verification ne peut les faire revenir."""
+        sub = abonnement(seen_ids=["a", "b", "c"])
+        dlg, _ = self._liste(frame, monkeypatch, sub)
+        verifications = []
+        monkeypatch.setattr(dlg, "_on_check", lambda evt: verifications.append(evt))
+        monkeypatch.setattr(sub_dlg, "EditSubscriptionDialog",
+                            self.FauxDialogue(catch_up=True))
+        dlg._on_edit(None)
+        assert sub.seen_ids == []
+        assert verifications, "le rattrapage doit enchainer sur une verification"
+        dlg.Destroy()
+
+    def test_sans_rattrapage_la_memoire_est_conservee(self, frame, appdata,
+                                                     monkeypatch):
+        sub = abonnement(seen_ids=["a", "b"])
+        dlg, _ = self._liste(frame, monkeypatch, sub)
+        monkeypatch.setattr(dlg, "_on_check", lambda evt: None)
+        monkeypatch.setattr(sub_dlg, "EditSubscriptionDialog",
+                            self.FauxDialogue(fmt="m4a"))
+        dlg._on_edit(None)
+        assert sub.seen_ids == ["a", "b"]
         dlg.Destroy()
 
 

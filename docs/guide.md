@@ -519,7 +519,7 @@ Jusqu'ici, suivre une émission voulait dire ouvrir DownAccess, retaper la reche
 
 Depuis le menu **Fichier**, choisissez **Abonnements...** (Ctrl+B). La fenêtre liste les chaînes et podcasts que vous suivez, avec pour chacun son type, le format de téléchargement, s'il est automatique, et la date de la dernière vérification.
 
-Quatre boutons accompagnent la liste : **Suivre une chaîne...**, **Ne plus suivre**, **Vérifier maintenant** et **Voir les nouveautés**.
+Cinq boutons accompagnent la liste : **Suivre une chaîne...**, **Modifier les réglages...**, **Ne plus suivre**, **Vérifier maintenant** et **Voir les nouveautés**.
 
 ### S'abonner
 
@@ -554,6 +554,18 @@ Au moment où vous vous abonnez, tout ce qui est déjà publié est considéré 
 **Pour rattraper le passé**, cochez **Considérer les publications déjà en ligne comme des nouveautés**. C'est ce qu'il vous faut quand vous découvrez un podcast dont vous voulez les anciens épisodes : la première vérification vous les proposera tous, et vous choisirez lesquels télécharger. Sans cette case, ils resteraient invisibles à jamais — aucune vérification ultérieure ne peut faire réapparaître une publication déjà considérée comme vue.
 
 Si vous cochez cette case **en même temps** que le téléchargement automatique, DownAccess vous prévient avant d'agir : il vous annonce combien de publications vont partir en téléchargement et vous demande confirmation, car un catalogue entier peut représenter plusieurs gigaoctets. En répondant Non, l'abonnement est quand même créé et les publications vous sont proposées : vous gardez la main.
+
+### Modifier un abonnement
+
+Vos choix ne sont pas gravés dans le marbre. Sélectionnez un abonnement dans la liste et cliquez sur **Modifier les réglages...** — ou, plus rapide, appuyez sur Entrée sur la ligne. La fenêtre qui s'ouvre reprend les réglages en vigueur pour cette source :
+
+- le **format des téléchargements** : passer un podcast en MP3, une chaîne en MP4, ou revenir au format par défaut de vos préférences ;
+- le **téléchargement automatique** : l'activer pour une chaîne que vous ne voulez plus rater, le désactiver pour une autre devenue trop bavarde ;
+- le **rattrapage** : cochez **Me proposer aussi les publications déjà en ligne** pour vous faire reproposer tout le catalogue d'une source que vous suivez déjà.
+
+Ce dernier point mérite un mot. Si vous vous êtes abonné sans cocher le rattrapage, les publications antérieures étaient jusqu'ici perdues pour de bon : elles étaient considérées comme vues, et aucune vérification ne pouvait les faire réapparaître. Cette case répare cela à tout moment. Dès que vous validez, DownAccess lance une vérification et vous présente ce qu'il trouve. Si l'abonnement est en téléchargement automatique, il vous prévient d'abord : un catalogue entier peut représenter plusieurs gigaoctets.
+
+Enregistrer ne perd rien : DownAccess garde la mémoire de ce que vous avez déjà vu (sauf, bien sûr, si vous demandez le rattrapage). C'est tout l'intérêt de modifier plutôt que de se désabonner puis de se réabonner, ce qui vous ferait tout reproposer.
 
 ### Voir les nouveautés
 

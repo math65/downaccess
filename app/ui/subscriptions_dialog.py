@@ -158,6 +158,89 @@ class AddSubscriptionDialog(wx.Dialog):
         return self.chk_catch_up.GetValue()
 
 
+class EditSubscriptionDialog(wx.Dialog):
+    """Reglages d'un abonnement deja suivi : format et telechargement auto.
+
+    Jusqu'ici, changer d'avis sur un abonnement demandait de ne plus le suivre
+    puis de le recreer — en perdant au passage la memoire de ce qui avait deja
+    ete vu (demande de Veronique, 2026-08-31).
+    """
+
+    def __init__(self, parent, sub):
+        super().__init__(parent,
+                         title=_("Réglages de « {title} »").format(title=sub.title),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self._sub = sub
+        self._build_ui()
+        self.SetMinSize((560, 300))
+        self.Fit()
+        self.CentreOnParent()
+
+    def _build_ui(self) -> None:
+        panel = wx.Panel(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        lbl_nom = wx.StaticText(panel, label=_("Abonnement : {title} ({kind})")
+                                .format(title=self._sub.title,
+                                        kind=self._sub.kind_label()))
+
+        lbl_fmt = wx.StaticText(panel, label=_("Format des téléchargements :"))
+        self.choice_fmt = wx.Choice(panel, choices=_format_labels(),
+                                    name=_("Format des téléchargements"))
+        self.choice_fmt.SetSelection(
+            FORMAT_CODES.index(self._sub.format_spec)
+            if self._sub.format_spec in FORMAT_CODES else 0)
+
+        self.chk_auto = wx.CheckBox(
+            panel, label=_("Télécharger automatiquement les nouveautés"),
+            name=_("Télécharger automatiquement les nouveautés"))
+        self.chk_auto.SetValue(self._sub.auto_download)
+        self.chk_auto.SetToolTip(_(
+            "Sans cette option, DownAccess vous montre les nouveautés et vous "
+            "choisissez ce que vous voulez."))
+
+        # Le rattrapage n'etait proposable qu'a la creation : sans cela, les
+        # publications anterieures a l'abonnement restaient invisibles a
+        # jamais, aucune verification ulterieure ne pouvant les faire
+        # reapparaitre. On le rend donc rejouable ici.
+        self.chk_catch_up = wx.CheckBox(
+            panel,
+            label=_("Me proposer aussi les publications déjà en ligne"),
+            name=_("Me proposer aussi les publications déjà en ligne"))
+        self.chk_catch_up.SetToolTip(_(
+            "Pour rattraper le passé d'une chaîne ou d'un podcast que vous "
+            "suivez déjà. Tout ce qui est en ligne vous sera reproposé à la "
+            "prochaine vérification."))
+
+        btns = wx.StdDialogButtonSizer()
+        self.btn_ok = wx.Button(panel, wx.ID_OK, label=_("Enregistrer"))
+        self.btn_cancel = wx.Button(panel, wx.ID_CANCEL, label=_("Annuler"))
+        btns.AddButton(self.btn_ok)
+        btns.AddButton(self.btn_cancel)
+        btns.Realize()
+
+        for widget in (lbl_nom, lbl_fmt, self.choice_fmt, self.chk_auto,
+                       self.chk_catch_up):
+            sizer.Add(widget, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        sizer.Add(btns, 0, wx.EXPAND | wx.ALL, 12)
+        panel.SetSizer(sizer)
+
+        self.chk_auto.MoveAfterInTabOrder(self.choice_fmt)
+        self.chk_catch_up.MoveAfterInTabOrder(self.chk_auto)
+        self.btn_ok.MoveAfterInTabOrder(self.chk_catch_up)
+        self.choice_fmt.SetFocus()
+
+    def get_format(self) -> str:
+        idx = self.choice_fmt.GetSelection()
+        return FORMAT_CODES[idx] if 0 <= idx < len(FORMAT_CODES) else ""
+
+    def get_auto_download(self) -> bool:
+        return self.chk_auto.GetValue()
+
+    def get_catch_up(self) -> bool:
+        return self.chk_catch_up.GetValue()
+
+
 class SubscriptionsDialog(wx.Dialog):
     """Liste des abonnements : ajouter, retirer, verifier, voir les nouveautes.
 
@@ -198,6 +281,7 @@ class SubscriptionsDialog(wx.Dialog):
         self._fill_list()
 
         self.btn_add    = wx.Button(panel, label=_("Suivre une chaîne..."))
+        self.btn_edit   = wx.Button(panel, label=_("Modifier les réglages..."))
         self.btn_remove = wx.Button(panel, label=_("Ne plus suivre"))
         self.btn_check  = wx.Button(panel, label=_("Vérifier maintenant"))
         pending_count = sum(len(v) for v in self._pending.values())
@@ -208,6 +292,7 @@ class SubscriptionsDialog(wx.Dialog):
 
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(self.btn_add, 0, wx.RIGHT, 6)
+        row.Add(self.btn_edit, 0, wx.RIGHT, 6)
         row.Add(self.btn_remove, 0, wx.RIGHT, 6)
         row.Add(self.btn_check, 0, wx.RIGHT, 6)
         row.Add(self.btn_new, 0)
@@ -220,7 +305,8 @@ class SubscriptionsDialog(wx.Dialog):
         panel.SetSizer(sizer)
 
         self.btn_add.MoveAfterInTabOrder(self.lst)
-        self.btn_remove.MoveAfterInTabOrder(self.btn_add)
+        self.btn_edit.MoveAfterInTabOrder(self.btn_add)
+        self.btn_remove.MoveAfterInTabOrder(self.btn_edit)
         self.btn_check.MoveAfterInTabOrder(self.btn_remove)
         self.btn_new.MoveAfterInTabOrder(self.btn_check)
         self.btn_close.MoveAfterInTabOrder(self.btn_new)
@@ -232,7 +318,11 @@ class SubscriptionsDialog(wx.Dialog):
 
     def _bind_events(self) -> None:
         self.btn_add.Bind(wx.EVT_BUTTON, self._on_add)
+        self.btn_edit.Bind(wx.EVT_BUTTON, self._on_edit)
         self.btn_remove.Bind(wx.EVT_BUTTON, self._on_remove)
+        # Entree ou double-clic sur une ligne ouvre ses reglages : c'est le
+        # geste attendu sur une liste, et il evite d'aller chercher le bouton.
+        self.lst.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._on_edit)
         self.btn_check.Bind(wx.EVT_BUTTON, self._on_check)
         self.btn_new.Bind(wx.EVT_BUTTON, self._on_show_pending)
 
@@ -261,7 +351,8 @@ class SubscriptionsDialog(wx.Dialog):
         return (idx, self._subs[idx]) if 0 <= idx < len(self._subs) else (-1, None)
 
     def _set_busy(self, busy: bool, message: str = "") -> None:
-        for btn in (self.btn_add, self.btn_remove, self.btn_check):
+        for btn in (self.btn_add, self.btn_edit, self.btn_remove,
+                    self.btn_check):
             btn.Enable(not busy)
         self.lbl.SetLabel(message if message else self._heading())
 
@@ -356,6 +447,60 @@ class SubscriptionsDialog(wx.Dialog):
             .format(error=message[:300]),
             _("Flux introuvable"), wx.OK | wx.ICON_WARNING, self)
         self.lst.SetFocus()
+
+    def _on_edit(self, _event) -> None:
+        """Reglages d'un abonnement existant.
+
+        Le rattrapage est le seul changement qui ne se voit pas dans la liste :
+        on enchaine donc sur une verification pour que les publications
+        reproposees arrivent tout de suite, plutot que de laisser
+        l'utilisateur deviner qu'il lui reste un bouton a presser.
+        """
+        idx, sub = self._selected()
+        if sub is None:
+            wx.MessageBox(_("Sélectionnez d'abord un abonnement."),
+                          _("Aucune sélection"), wx.OK | wx.ICON_INFORMATION, self)
+            self.lst.SetFocus()
+            return
+
+        with EditSubscriptionDialog(self, sub) as dlg:
+            if dlg.ShowModal() != wx.ID_OK:
+                self.lst.SetFocus()
+                return
+            fmt = dlg.get_format()
+            auto = dlg.get_auto_download()
+            catch_up = dlg.get_catch_up()
+
+        # Rattrapage + telechargement automatique : tout le catalogue partirait
+        # en file sans que rien ne soit demande. On previent avant d'engager.
+        if catch_up and auto:
+            reponse = wx.MessageBox(
+                _("Vous avez demandé le rattrapage des publications déjà en "
+                  "ligne, et « {title} » est en téléchargement automatique : "
+                  "tout son catalogue partira en téléchargement, ce qui peut "
+                  "occuper beaucoup de place.\n\nTout télécharger maintenant ?"
+                  "\n\nSi vous répondez Non, le rattrapage a quand même lieu : "
+                  "les publications vous seront proposées et vous choisirez.")
+                .format(title=sub.title),
+                _("Beaucoup de publications à télécharger"),
+                wx.YES_NO | wx.ICON_QUESTION, self)
+            if reponse != wx.YES:
+                auto = False
+
+        sub.format_spec = fmt
+        sub.auto_download = auto
+        if catch_up:
+            # Oublier ce qui a ete vu suffit : la prochaine verification
+            # considere tout le flux comme nouveau.
+            sub.seen_ids = []
+        subs.save(self._subs)
+        self._fill_list()
+        self.lst.Select(idx)
+        self.lst.Focus(idx)
+        self.lst.SetFocus()
+
+        if catch_up:
+            self._on_check(None)
 
     def _on_remove(self, _event) -> None:
         idx, sub = self._selected()

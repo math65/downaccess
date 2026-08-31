@@ -519,7 +519,7 @@ Until now, following a show meant opening DownAccess, typing the search again, a
 
 From the **File** menu, choose **Subscriptions...** (Ctrl+B). The window lists the channels and podcasts you follow, each with its type, download format, whether it is automatic, and when it was last checked.
 
-Four buttons go with the list: **Follow a channel...**, **Stop following**, **Check now** and **See what is new**.
+Five buttons go with the list: **Follow a channel...**, **Change settings...**, **Stop following**, **Check now** and **See what is new**.
 
 ### Subscribing
 
@@ -552,6 +552,18 @@ At the moment you subscribe, everything already published is treated as seen: su
 **To catch up on the past**, tick **Treat everything already online as new**. This is what you want when you discover a podcast and would like its earlier episodes: the first check will offer you all of them, and you choose which ones to download. Without this box they would stay invisible for ever — no later check can bring back an item that has already been treated as seen.
 
 If you tick this box **at the same time** as automatic downloading, DownAccess warns you before acting: it tells you how many items are about to start downloading and asks for confirmation, because a whole back catalogue can run to several gigabytes. If you answer No, the subscription is still created and the items are offered to you: you stay in control.
+
+### Changing a subscription
+
+Your choices are not set in stone. Select a subscription in the list and click **Change settings...** — or, quicker, press Enter on the row. The window that opens shows the settings currently in force for that source:
+
+- the **download format**: switch a podcast to MP3, a channel to MP4, or go back to the default format from your preferences;
+- **automatic downloading**: turn it on for a channel you no longer want to miss, turn it off for one that has become too talkative;
+- **catching up**: tick **Also offer me the items already online** to be offered the whole catalogue of a source you already follow.
+
+That last point deserves a word. If you subscribed without ticking catch-up, earlier items were lost for good: they counted as seen, and no later check could bring them back. This box fixes that at any time. As soon as you confirm, DownAccess runs a check and shows you what it finds. If the subscription downloads automatically, it warns you first: a whole catalogue can run to several gigabytes.
+
+Saving loses nothing: DownAccess keeps track of what you have already seen (unless, of course, you ask for the catch-up). That is the point of changing a subscription rather than unfollowing and following again, which would offer you everything all over.
 
 ### Seeing what is new
 

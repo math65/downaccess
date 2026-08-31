@@ -49,7 +49,8 @@ msgstr "Action after download:"
 #: app/ui/main_window.py:2032 app/ui/playlist_dialog.py:141
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:166
-#: app/ui/subscription_search_dialog.py:73 app/ui/subscriptions_dialog.py:92
+#: app/ui/subscription_search_dialog.py:73 app/ui/subscriptions_dialog.py:217
+#: app/ui/subscriptions_dialog.py:92
 msgid "Annuler"
 msgstr "Cancel"
 
@@ -58,7 +59,7 @@ msgid "Aucun avertissement n'est actuellement masqué."
 msgstr "No warning is currently hidden."
 
 #: app/ui/search_dialog.py:629 app/ui/settings_dialog.py:778
-#: app/ui/subscriptions_dialog.py:364
+#: app/ui/subscriptions_dialog.py:462 app/ui/subscriptions_dialog.py:509
 msgid "Aucune sélection"
 msgstr "No selection"
 
@@ -120,7 +121,7 @@ msgstr "Destination folder:"
 msgid "English"
 msgstr "English"
 
-#: app/ui/settings_dialog.py:165
+#: app/ui/settings_dialog.py:165 app/ui/subscriptions_dialog.py:216
 msgid "Enregistrer"
 msgstr "Save"
 
@@ -595,7 +596,7 @@ msgid "Chaîne"
 msgstr "Channel"
 
 #: app/ui/history_dialog.py:167 app/ui/main_window.py:2372
-#: app/ui/subscriptions_dialog.py:369
+#: app/ui/subscriptions_dialog.py:514
 msgid "Confirmer"
 msgstr "Confirm"
 
@@ -717,7 +718,7 @@ msgstr "Guided extraction — How it works"
 #: app/ui/error_dialog.py:53 app/ui/error_dialog.py:54
 #: app/ui/login_dialog.py:110 app/ui/main_window.py:2593
 #: app/ui/player_dialog.py:119 app/ui/report_dialog.py:123
-#: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:207
+#: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:291
 #: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:305
 #: app/ui/warning_dialog.py:41 app/ui/warning_dialog.py:42
 msgid "Fermer"
@@ -1402,7 +1403,7 @@ msgstr "Detected media:"
 msgid "Résolution de l'URL en cours…"
 msgstr "Resolving URL…"
 
-#: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:194
+#: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:277
 #: app/ui/uge_dialog.py:285
 msgid "Type"
 msgstr "Type"
@@ -1842,7 +1843,7 @@ msgid "File de téléchargement"
 msgstr "Download queue"
 
 #: app/ui/download_list.py:41 app/ui/history_dialog.py:52
-#: app/ui/subscriptions_dialog.py:195
+#: app/ui/subscriptions_dialog.py:278
 msgid "Format"
 msgstr "Format"
 
@@ -3161,7 +3162,7 @@ msgstr "{minutes} min {seconds} s"
 msgid "{seconds} s"
 msgstr "{seconds} s"
 
-#: app/ui/settings_dialog.py:271 app/ui/subscriptions_dialog.py:196
+#: app/ui/settings_dialog.py:271 app/ui/subscriptions_dialog.py:279
 msgid "Automatique"
 msgstr "Automatic"
 
@@ -3595,12 +3596,12 @@ msgstr "Su&bscriptions..."
 msgid "A&bonnements...\tCtrl+B"
 msgstr "Su&bscriptions...\tCtrl+B"
 
-#: app/ui/subscriptions_dialog.py:347
+#: app/ui/subscriptions_dialog.py:438
 msgid "Abonnement ajouté"
 msgstr "Subscription added"
 
-#: app/ui/settings_dialog.py:156 app/ui/subscriptions_dialog.py:170
-#: app/ui/subscriptions_dialog.py:191
+#: app/ui/settings_dialog.py:156 app/ui/subscriptions_dialog.py:253
+#: app/ui/subscriptions_dialog.py:274
 msgid "Abonnements"
 msgstr "Subscriptions"
 
@@ -3620,7 +3621,7 @@ msgstr "Address to follow"
 msgid "Adresse à suivre :"
 msgstr "Address to follow:"
 
-#: app/ui/subscriptions_dialog.py:392
+#: app/ui/subscriptions_dialog.py:537
 msgid "Aucun abonnement"
 msgstr "No subscriptions"
 
@@ -3636,11 +3637,11 @@ msgstr "No summary available."
 msgid "Aucune adresse indiquée."
 msgstr "No address given."
 
-#: app/ui/subscriptions_dialog.py:420
+#: app/ui/subscriptions_dialog.py:565
 msgid "Aucune nouveauté pour l'instant."
 msgstr "Nothing new for now."
 
-#: app/ui/subscriptions_dialog.py:416
+#: app/ui/subscriptions_dialog.py:561
 msgid ""
 "Aucune nouveauté.\n"
 "\n"
@@ -3664,7 +3665,7 @@ msgstr "This feed contains a declaration that is not allowed."
 msgid "Ce flux ne contient aucune entrée exploitable."
 msgstr "This feed contains no usable entries."
 
-#: app/ui/subscriptions_dialog.py:197
+#: app/ui/subscriptions_dialog.py:280
 msgid "Dernière vérification"
 msgstr "Last checked"
 
@@ -3714,15 +3715,15 @@ msgstr ""
 msgid "Flux RSS sans canal."
 msgstr "RSS feed with no channel."
 
-#: app/ui/subscriptions_dialog.py:357
+#: app/ui/subscriptions_dialog.py:448
 msgid "Flux introuvable"
 msgstr "Feed not found"
 
-#: app/ui/subscriptions_dialog.py:66
+#: app/ui/subscriptions_dialog.py:189 app/ui/subscriptions_dialog.py:66
 msgid "Format des téléchargements"
 msgstr "Download format"
 
-#: app/ui/subscriptions_dialog.py:64
+#: app/ui/subscriptions_dialog.py:187 app/ui/subscriptions_dialog.py:64
 msgid "Format des téléchargements :"
 msgstr "Download format:"
 
@@ -3730,7 +3731,7 @@ msgstr "Download format:"
 msgid "Format par défaut des préférences"
 msgstr "Default format from preferences"
 
-#: app/ui/subscriptions_dialog.py:354
+#: app/ui/subscriptions_dialog.py:445
 msgid ""
 "Impossible de suivre cette adresse.\n"
 "\n"
@@ -3752,15 +3753,15 @@ msgstr "Enter the address to follow."
 msgid "Le serveur a répondu {code} ({reason})."
 msgstr "The server replied {code} ({reason})."
 
-#: app/ui/subscriptions_dialog.py:201
+#: app/ui/subscriptions_dialog.py:285
 msgid "Ne plus suivre"
 msgstr "Stop following"
 
-#: app/ui/subscriptions_dialog.py:368
+#: app/ui/subscriptions_dialog.py:513
 msgid "Ne plus suivre « {title} » ?"
 msgstr "Stop following \"{title}\"?"
 
-#: app/ui/subscription_search_dialog.py:68 app/ui/subscriptions_dialog.py:193
+#: app/ui/subscription_search_dialog.py:68 app/ui/subscriptions_dialog.py:276
 msgid "Nom"
 msgstr "Name"
 
@@ -3776,7 +3777,7 @@ msgstr "New from your subscriptions"
 msgid "Podcast"
 msgstr "Podcast"
 
-#: app/ui/subscriptions_dialog.py:279
+#: app/ui/subscriptions_dialog.py:370
 msgid "Recherche du flux..."
 msgstr "Looking for the feed..."
 
@@ -3788,7 +3789,7 @@ msgstr "Check subscriptions at startup"
 msgid "Résumé"
 msgstr "Summary"
 
-#: app/ui/subscriptions_dialog.py:77
+#: app/ui/subscriptions_dialog.py:198 app/ui/subscriptions_dialog.py:77
 msgid ""
 "Sans cette option, DownAccess vous montre les nouveautés et vous choisissez "
 "ce que vous voulez."
@@ -3816,7 +3817,7 @@ msgstr "Follow channels and podcasts, and see what is new"
 msgid "Suivre une chaîne ou un podcast"
 msgstr "Follow a channel or a podcast"
 
-#: app/ui/subscriptions_dialog.py:200
+#: app/ui/subscriptions_dialog.py:283
 msgid "Suivre une chaîne..."
 msgstr "Follow a channel..."
 
@@ -3824,7 +3825,7 @@ msgstr "Follow a channel..."
 msgid "Sélectionnez ce que vous voulez télécharger ({count} nouveautés) :"
 msgstr "Select what you want to download ({count} new items):"
 
-#: app/ui/subscriptions_dialog.py:363
+#: app/ui/subscriptions_dialog.py:461 app/ui/subscriptions_dialog.py:508
 msgid "Sélectionnez d'abord un abonnement."
 msgstr "Select a subscription first."
 
@@ -3832,23 +3833,24 @@ msgstr "Select a subscription first."
 msgid "Tout marquer comme vu"
 msgstr "Mark all as seen"
 
+#: app/ui/subscriptions_dialog.py:195 app/ui/subscriptions_dialog.py:196
 #: app/ui/subscriptions_dialog.py:75 app/ui/subscriptions_dialog.py:76
 msgid "Télécharger automatiquement les nouveautés"
 msgstr "Download new items automatically"
 
-#: app/ui/subscriptions_dialog.py:205
+#: app/ui/subscriptions_dialog.py:289
 msgid "Voir les nouveautés"
 msgstr "See what is new"
 
-#: app/ui/subscriptions_dialog.py:204
+#: app/ui/subscriptions_dialog.py:288
 msgid "Voir les {n} nouveautés"
 msgstr "See the {n} new items"
 
-#: app/ui/subscriptions_dialog.py:243 app/ui/subscriptions_dialog.py:391
+#: app/ui/subscriptions_dialog.py:333 app/ui/subscriptions_dialog.py:536
 msgid "Vous ne suivez encore aucune chaîne ni podcast."
 msgstr "You are not following any channel or podcast yet."
 
-#: app/ui/subscriptions_dialog.py:344
+#: app/ui/subscriptions_dialog.py:435
 msgid ""
 "Vous suivez maintenant « {title} ».\n"
 "\n"
@@ -3858,15 +3860,15 @@ msgstr ""
 "\n"
 "DownAccess will tell you about anything published from now on."
 
-#: app/ui/subscriptions_dialog.py:395
+#: app/ui/subscriptions_dialog.py:540
 msgid "Vérification en cours..."
 msgstr "Checking..."
 
-#: app/ui/subscriptions_dialog.py:418 app/ui/subscriptions_dialog.py:421
+#: app/ui/subscriptions_dialog.py:563 app/ui/subscriptions_dialog.py:566
 msgid "Vérification terminée"
 msgstr "Check finished"
 
-#: app/ui/subscriptions_dialog.py:202
+#: app/ui/subscriptions_dialog.py:286
 msgid "Vérifier maintenant"
 msgstr "Check now"
 
@@ -3874,15 +3876,15 @@ msgstr "Check now"
 msgid "jamais"
 msgstr "never"
 
-#: app/ui/subscriptions_dialog.py:255
+#: app/ui/subscriptions_dialog.py:345
 msgid "non"
 msgstr "no"
 
-#: app/ui/subscriptions_dialog.py:255
+#: app/ui/subscriptions_dialog.py:345
 msgid "oui"
 msgstr "yes"
 
-#: app/ui/subscriptions_dialog.py:244
+#: app/ui/subscriptions_dialog.py:334
 msgid "{n} abonnements :"
 msgstr "{n} subscriptions:"
 
@@ -3928,7 +3930,7 @@ msgstr "When the video has chapters:"
 msgid "Traitement des chapitres"
 msgstr "Chapter handling"
 
-#: app/ui/subscriptions_dialog.py:328
+#: app/ui/subscriptions_dialog.py:419 app/ui/subscriptions_dialog.py:485
 msgid "Beaucoup de publications à télécharger"
 msgstr "A lot to download"
 
@@ -3936,7 +3938,7 @@ msgstr "A lot to download"
 msgid "Considérer les publications déjà en ligne comme des nouveautés"
 msgstr "Treat everything already online as new"
 
-#: app/ui/subscriptions_dialog.py:339
+#: app/ui/subscriptions_dialog.py:430
 msgid ""
 "Vous suivez maintenant « {title} ».\n"
 "\n"
@@ -3946,7 +3948,7 @@ msgstr ""
 "\n"
 "{n} items already online are waiting for you: open “See what's new” to choose."
 
-#: app/ui/subscriptions_dialog.py:321
+#: app/ui/subscriptions_dialog.py:412
 msgid ""
 "« {title} » compte déjà {n} publications en ligne, et vous avez demandé le téléchargement automatique : elles partiront toutes en téléchargement, ce qui peut occuper beaucoup de place.\n"
 "\n"
@@ -4095,7 +4097,7 @@ msgstr "Download the sound (MP3)"
 msgid "1 résultat. Choisissez dans la liste."
 msgstr "1 result. Choose from the list."
 
-#: app/ui/subscriptions_dialog.py:311
+#: app/ui/subscriptions_dialog.py:402
 msgid "Abonnement déjà suivi"
 msgstr "Already followed"
 
@@ -4241,7 +4243,7 @@ msgstr "Results"
 msgid "Service injoignable : {error}"
 msgstr "Service unreachable: {error}"
 
-#: app/ui/subscriptions_dialog.py:308
+#: app/ui/subscriptions_dialog.py:399
 msgid ""
 "Vous suivez déjà « {title} ».\n"
 "\n"
@@ -4286,3 +4288,41 @@ msgstr "Dutch"
 #: app/core/custom_sites.py:67
 msgid "Portugais"
 msgstr "Portuguese"
+
+#: app/ui/subscriptions_dialog.py:183
+msgid "Abonnement : {title} ({kind})"
+msgstr "Subscription: {title} ({kind})"
+
+#: app/ui/subscriptions_dialog.py:208 app/ui/subscriptions_dialog.py:209
+msgid "Me proposer aussi les publications déjà en ligne"
+msgstr "Also offer me the items already online"
+
+#: app/ui/subscriptions_dialog.py:284
+msgid "Modifier les réglages..."
+msgstr "Change settings..."
+
+#: app/ui/subscriptions_dialog.py:210
+msgid ""
+"Pour rattraper le passé d'une chaîne ou d'un podcast que vous suivez déjà. "
+"Tout ce qui est en ligne vous sera reproposé à la prochaine vérification."
+msgstr ""
+"To catch up on the past of a channel or podcast you already follow. "
+"Everything currently online will be offered to you again at the next check."
+
+#: app/ui/subscriptions_dialog.py:171
+msgid "Réglages de « {title} »"
+msgstr "Settings for “{title}”"
+
+#: app/ui/subscriptions_dialog.py:478
+msgid ""
+"Vous avez demandé le rattrapage des publications déjà en ligne, et « {title} » est en téléchargement automatique : tout son catalogue partira en téléchargement, ce qui peut occuper beaucoup de place.\n"
+"\n"
+"Tout télécharger maintenant ?\n"
+"\n"
+"Si vous répondez Non, le rattrapage a quand même lieu : les publications vous seront proposées et vous choisirez."
+msgstr ""
+"You asked to catch up on the items already online, and “{title}” is set to download automatically: its whole catalogue will start downloading, which can take up a lot of space.\n"
+"\n"
+"Download them all now?\n"
+"\n"
+"If you answer No, the catch-up still happens: the items will be offered to you and you choose."
