@@ -30,6 +30,14 @@ When a video really is unavailable — removed, made private, or restricted to c
 
 Thanks to Theo.
 
+### A video blocked in your country now says so
+
+Some videos are only shown in a list of countries chosen by their author. When you asked for one from a country left out, DownAccess showed "Video unavailable" — two words, no explanation at all, even though the site had given the exact reason and the list of countries concerned.
+
+The message now says what is going on: the video is restricted to certain countries, yours is not among them, and the list of allowed countries is shown. This is neither a fault nor a setting wrong on your side, and there is nothing to go looking for in the preferences.
+
+Thanks to Frederick.
+
 ### Note
 
 DRM-protected content (Netflix, Disney+, Prime Video) is not supported. That protection is put in place by the platforms: no application can work around it. On M6, only the soundtrack escapes the lock.

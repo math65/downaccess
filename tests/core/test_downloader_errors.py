@@ -10,6 +10,8 @@ import pytest
 from app.core.downloader import (
     _humanize_error,
     _is_login_required,
+    geo_blocked_message,
+    is_geo_blocked_error,
     should_retry_without_cookies,
     without_cookies,
     disk_full_message,
@@ -437,6 +439,88 @@ class TestVideoInaccessible:
         se regle en se connectant : ce message-la doit primer."""
         clair = _humanize_error("ERROR: Video unavailable. This video is private")
         assert "connect" in clair.lower()
+
+
+# Le short que Frederick, en Belgique, n'a pas pu telecharger : son auteur l'a
+# reserve a la France, ses territoires et l'Allemagne (rapport du 2026-08-30).
+GEO_RAW = (
+    "ERROR: [youtube] lcmKYvht8J4: The uploader has not made this video "
+    "available in your country\n"
+    "This video is available in Saint Barthelemy, Germany, France, French "
+    "Guiana, Guadeloupe, Saint Martin (French part), Martinique, New "
+    "Caledonia, French Polynesia, Saint Pierre and Miquelon, Reunion, French "
+    "Southern Territories, Wallis and Futuna, Mayotte.\n"
+    "You might want to use a VPN or a proxy server (with --proxy) to workaround."
+)
+
+
+class TestBlocageParPays:
+    """Regression : yt-dlp savait exactement pourquoi, l'utilisateur non.
+
+    Frederick a recu « Video unavailable » en anglais sur une video reservee a
+    la France, alors que le log de diagnostic portait le motif complet et la
+    liste des pays autorises.
+    """
+
+    def test_reconnait_le_blocage(self):
+        assert is_geo_blocked_error(GEO_RAW)
+
+    @pytest.mark.parametrize("message", [
+        "This video is not available from your location due to geo restriction",
+        "ERROR: The uploader has not made this video available in your country",
+    ])
+    def test_reconnait_les_autres_formulations(self, message):
+        assert is_geo_blocked_error(message)
+
+    @pytest.mark.parametrize("message", [
+        DISK_FULL_RAW, DRM_RAW, DNS_RAW, "Video unavailable", "",
+    ])
+    def test_ne_confond_pas_avec_autre_chose(self, message):
+        assert not is_geo_blocked_error(message)
+
+    def test_message_en_francais_sans_jargon(self):
+        clair = _humanize_error(GEO_RAW)
+        assert "pays" in clair.lower()
+        assert "uploader" not in clair.lower()
+        # « --proxy » est une option de ligne de commande : rien que
+        # l'utilisateur puisse taper quelque part dans DownAccess.
+        assert "--proxy" not in clair
+
+    def test_la_liste_des_pays_est_conservee(self):
+        """C'est l'information utile : savoir que c'est reserve a la France
+        evite de croire a une panne et de renvoyer un rapport."""
+        clair = _humanize_error(GEO_RAW)
+        assert "France" in clair
+        assert "Germany" in clair
+
+    def test_une_longue_liste_est_bornee(self):
+        """Quatorze pays dans un dialogue, c'est un pave illisible."""
+        clair = geo_blocked_message(GEO_RAW)
+        assert "autres" in clair
+        assert "Mayotte" not in clair, "la queue de liste doit etre coupee"
+
+    def test_une_liste_courte_passe_entiere(self):
+        clair = geo_blocked_message(
+            "The uploader has not made this video available in your country\n"
+            "This video is available in Germany, France.")
+        assert clair.rstrip().endswith("Germany, France.")
+        assert "autres" not in clair
+
+    def test_sans_liste_le_message_reste_utilisable(self):
+        """Certains sites annoncent le blocage sans dire pour qui."""
+        clair = geo_blocked_message(
+            "This video is not available from your location due to geo restriction")
+        assert "pays" in clair.lower()
+        assert "{countries}" not in clair
+
+    def test_pas_de_repli_sans_cookies(self):
+        """Retirer les cookies ne change pas l'adresse IP : la requete
+        supplementaire serait perdue d'avance."""
+        assert not should_retry_without_cookies(GEO_RAW)
+
+    def test_le_blocage_n_est_pas_transitoire(self):
+        """Reessayer trois fois ne deplacera pas l'utilisateur."""
+        assert not is_transient_error(GEO_RAW)
 
 
 class TestImageVerrouillee:

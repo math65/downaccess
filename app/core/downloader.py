@@ -396,6 +396,61 @@ def is_hopeless_error(msg: str) -> bool:
     return is_drm_error(msg) or is_disk_full_error(msg)
 
 
+# Blocage geographique. yt-dlp leve un `GeoRestrictedError` dont le message
+# porte le pourquoi ET la liste des pays autorises (assemblee dans
+# `YoutubeDL.py`, branche `except GeoRestrictedError`).
+_GEO_BLOCKED_PATTERNS = (
+    "not made this video available in your country",
+    "not available from your location",
+    "video is not available in your country",
+    "geo restriction", "geo-restricted",
+)
+
+# « This video is available in Saint Barthelemy, Germany, France, ... »
+_GEO_COUNTRIES_RE = re.compile(
+    r"this video is available in ([^\n]+)", re.IGNORECASE)
+
+# Au-dela, la liste devient un pave illisible dans un dialogue.
+_GEO_MAX_COUNTRIES = 12
+
+
+def is_geo_blocked_error(msg: str) -> bool:
+    """Vrai si le site refuse la video a cause du pays de connexion."""
+    low = (msg or "").lower()
+    return any(p in low for p in _GEO_BLOCKED_PATTERNS)
+
+
+def geo_blocked_message(msg: str) -> str:
+    """Message clair pour une video reservee a certains pays.
+
+    La liste des pays vient telle quelle de YouTube, en anglais : la traduire
+    demanderait une table des 249 codes ISO pour un gain douteux, et « Germany »
+    ou « France » se lisent tres bien. On le dit plutot que de laisser croire a
+    une inconsistance.
+    """
+    texte = _(
+        "Cette vidéo n'est pas disponible dans votre pays.\n\n"
+        "Son auteur en a réservé l'accès à une liste de pays qui n'inclut pas "
+        "le vôtre. C'est une restriction posée sur le site : aucun réglage de "
+        "DownAccess ne peut l'ouvrir."
+    )
+    trouve = _GEO_COUNTRIES_RE.search(msg or "")
+    if not trouve:
+        return texte
+    pays = [p.strip() for p in trouve.group(1).rstrip(". ").split(",") if p.strip()]
+    if not pays:
+        return texte
+    if len(pays) > _GEO_MAX_COUNTRIES:
+        reste = len(pays) - _GEO_MAX_COUNTRIES
+        liste = ", ".join(pays[:_GEO_MAX_COUNTRIES]) + _(
+            " et {n} autres").format(n=reste)
+    else:
+        liste = ", ".join(pays)
+    return texte + _(
+        "\n\nPays autorisés, tels que le site les annonce : {countries}."
+    ).format(countries=liste)
+
+
 # Cles d'options yt-dlp qui portent des cookies. Le jar de l'extraction guidee
 # passe par la meme cle `cookiefile` : c'est l'appelant qui sait de quels
 # cookies il s'agit et decide de les retirer ou non (les cookies UGE, eux, sont
@@ -436,6 +491,9 @@ def should_retry_without_cookies(msg: str) -> bool:
         return False
     # DRM : aucun jeu de clients n'ouvre ce verrou.
     if is_drm_error(low):
+        return False
+    # Blocage selon le pays : retirer les cookies ne change pas l'adresse IP.
+    if is_geo_blocked_error(low):
         return False
     # Transitoire : c'est la re-extraction qui aide, pas le retrait des
     # cookies, et ce repli-la a deja joue.
@@ -593,6 +651,11 @@ def _humanize_error(msg: str, dest: str = "") -> str:
             "Ce contenu nécessite que vous soyez connecté au site "
             "(vidéo réservée aux adultes, privée ou réservée aux membres)."
         )
+
+    # Bloquee selon le pays. Avant le test generique ci-dessous : les deux
+    # messages coexistent dans la meme erreur, et celui-ci en dit bien plus.
+    if is_geo_blocked_error(low):
+        return geo_blocked_message(msg)
 
     # Video inaccessible. En dernier recours seulement : le test doit rester
     # APRES celui de la connexion requise, car « Video unavailable. This video

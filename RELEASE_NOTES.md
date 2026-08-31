@@ -30,6 +30,14 @@ Quand une vidéo est réellement inaccessible — retirée, privée, ou réserv�
 
 Merci à Théo.
 
+### Une vidéo bloquée dans votre pays vous le dit enfin
+
+Certaines vidéos ne sont diffusées que dans une liste de pays choisie par leur auteur. Quand vous en demandiez une depuis un pays exclu, DownAccess affichait « Video unavailable » — deux mots en anglais, sans la moindre explication, alors que le site avait pourtant indiqué le motif exact et la liste des pays concernés.
+
+Le message dit maintenant ce qui se passe : la vidéo est réservée à certains pays, le vôtre n'en fait pas partie, et la liste des pays autorisés est affichée. Ce n'est ni une panne ni un mauvais réglage de votre côté, et il n'y a rien à chercher dans les préférences.
+
+Merci à Frédérick.
+
 ### Note
 
 Le contenu protégé par DRM (Netflix, Disney+, Prime Video) n'est pas pris en charge. Cette protection est posée par les plateformes : aucune application ne peut la contourner. Sur M6, seule la bande-son échappe au verrou.
