@@ -20,6 +20,16 @@ The window also offers something that only existed when subscribing: **Also offe
 
 Thanks to Veronique.
 
+### Being signed in no longer breaks downloads
+
+Signing in to YouTube from DownAccess is there to get at restricted videos. But in some cases it did exactly the opposite: it stopped a perfectly public video from downloading. You got "Video unavailable" on a video that opens without trouble in a browser — and nothing suggested that being signed in was the cause.
+
+DownAccess now tries again without your sign-in when a download fails, and the video comes through. There is nothing to do and nothing to untick, and your access stays in place for the videos that need it.
+
+When a video really is unavailable — removed, made private, or restricted to certain countries — the message now says so plainly, instead of leaving you with a sentence that is easily mistaken for a fault in the application.
+
+Thanks to Theo.
+
 ### Note
 
 DRM-protected content (Netflix, Disney+, Prime Video) is not supported. That protection is put in place by the platforms: no application can work around it. On M6, only the soundtrack escapes the lock.

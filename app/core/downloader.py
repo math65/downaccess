@@ -396,6 +396,57 @@ def is_hopeless_error(msg: str) -> bool:
     return is_drm_error(msg) or is_disk_full_error(msg)
 
 
+# Cles d'options yt-dlp qui portent des cookies. Le jar de l'extraction guidee
+# passe par la meme cle `cookiefile` : c'est l'appelant qui sait de quels
+# cookies il s'agit et decide de les retirer ou non (les cookies UGE, eux, sont
+# toute la raison d'etre du telechargement).
+_COOKIE_OPT_KEYS = ("cookiefile", "cookiesfrombrowser")
+
+
+def without_cookies(opts: dict) -> dict:
+    """Les memes options yt-dlp, sans le moindre cookie."""
+    return {k: v for k, v in opts.items() if k not in _COOKIE_OPT_KEYS}
+
+
+def should_retry_without_cookies(msg: str) -> bool:
+    """Un nouvel essai SANS les cookies du compte a-t-il une chance d'aboutir ?
+
+    Etre connecte peut faire echouer un telechargement qui passerait sans
+    compte. yt-dlp choisit ses clients YouTube selon qu'un cookie de compte est
+    present ou non : `('web_embedded', 'tv_downgraded', 'web')` si oui,
+    `('visionos', 'web')` si non. Une video dont le proprietaire a desactive
+    l'integration rend le premier jeu entierement muet — `web_embedded` et
+    `tv_downgraded` repondent UNPLAYABLE, `web` se fait forcer en SABR sans URL
+    de format — alors que `visionos` la sert normalement. L'utilisateur lisait
+    « Video unavailable. Playback on other websites has been disabled by the
+    video owner » sur une video parfaitement publique (rapport de Theo,
+    2026-08-30 ; reproduit en forcant le jeu de clients « connecte »).
+
+    On ne cherche pas a reconnaitre le message d'echec : ce decoupage des
+    clients est de la cuisine interne a yt-dlp, qui bouge a chaque version, et
+    un motif fige ne lui survivrait pas. On ecarte seulement les causes dont on
+    sait que les cookies ne sont pour rien — y compris celles ou les retirer ne
+    peut qu'aggraver — et on laisse le repli tenter sa chance pour le reste. Il
+    ne coute qu'une tentative de plus sur un chemin qui a deja echoue.
+    """
+    low = (msg or "").lower()
+    if "annul" in low or "cancel" in low:
+        return False
+    if is_disk_full_error(low) or is_network_down_error(low):
+        return False
+    # DRM : aucun jeu de clients n'ouvre ce verrou.
+    if is_drm_error(low):
+        return False
+    # Transitoire : c'est la re-extraction qui aide, pas le retrait des
+    # cookies, et ce repli-la a deja joue.
+    if is_transient_error(low):
+        return False
+    # Contenu reserve : sans cookies il devient inaccessible pour de bon.
+    if _is_login_required(msg):
+        return False
+    return True
+
+
 # ------------------------------------------------------------------
 # Espace disque
 # ------------------------------------------------------------------
@@ -543,6 +594,21 @@ def _humanize_error(msg: str, dest: str = "") -> str:
             "(vidéo réservée aux adultes, privée ou réservée aux membres)."
         )
 
+    # Video inaccessible. En dernier recours seulement : le test doit rester
+    # APRES celui de la connexion requise, car « Video unavailable. This video
+    # is private » commence de la meme facon et se regle, lui, en se
+    # connectant. A ce stade DownAccess a deja retente sans les cookies du
+    # compte (cf. `should_retry_without_cookies`) ; il n'y a plus rien a
+    # tenter, autant le dire dans une langue que l'utilisateur lit.
+    if "video unavailable" in low or "this video is not available" in low:
+        return _(
+            "Cette vidéo n'est pas accessible.\n\n"
+            "Elle a sans doute été retirée par son auteur, rendue privée, ou "
+            "réservée à certains pays. Vérifiez qu'elle s'ouvre normalement "
+            "dans votre navigateur : si elle ne s'y ouvre pas non plus, "
+            "DownAccess ne peut rien y faire."
+        )
+
     return msg
 
 
@@ -666,9 +732,11 @@ class Downloader:
         }
 
         # Cookies depuis le navigateur de l'utilisateur (si pas de cookies UGE)
+        account_cookies = False
         if not cookies and (use_cookies or _should_use_cookies(self._settings, url)):
             from app.core.cookies import apply_cookies
             apply_cookies(flat_opts, url)
+            account_cookies = any(k in flat_opts for k in _COOKIE_OPT_KEYS)
 
         # Nouvelle tentative sur erreur transitoire. Sans cela, une simple
         # coupure de connexion pendant l'analyse suffisait a faire echouer le
@@ -694,6 +762,12 @@ class Downloader:
                             time.sleep(0.2)
                             _wait -= 0.2
                         continue
+                    if account_cookies:
+                        secours = self._retry_info_without_cookies(
+                            download_id, url, flat_opts, str(exc),
+                            accept_audio_only=accept_audio_only)
+                        if secours is not None:
+                            return secours
                     _raise_download_error(
                         str(exc), exc, self._settings.get("download_folder", ""))
                 except DownloadError:
@@ -708,6 +782,33 @@ class Downloader:
                     os.unlink(cookie_jar_path)
                 except OSError:
                     pass
+
+    def _retry_info_without_cookies(self, download_id: str, url: str,
+                                    flat_opts: dict, err_msg: str, *,
+                                    accept_audio_only: bool = False
+                                    ) -> DownloadInfo | None:
+        """Rejoue l'analyse sans les cookies du compte. None si ca n'aide pas.
+
+        Le silence est voulu : quand le repli echoue a son tour, c'est
+        l'erreur d'origine qui remonte a l'utilisateur — elle decrit la vraie
+        cause, la notre ne dirait que « ca a echoue sans cookies non plus ».
+        """
+        if not should_retry_without_cookies(err_msg):
+            return None
+        _log.warning("Analyse : echec avec les cookies du compte id=%s, "
+                     "nouvel essai sans — %s", download_id, err_msg[:150])
+        try:
+            info = self._extract_info(
+                download_id, url, without_cookies(flat_opts),
+                accept_audio_only=accept_audio_only)
+        except Exception as exc:
+            _log.info("Analyse sans cookies : echec aussi id=%s — %s",
+                      download_id, str(exc)[:150])
+            return None
+        if info is not None:
+            _log.info("Analyse reussie sans les cookies du compte id=%s",
+                      download_id)
+        return info
 
     def _extract_info(self, download_id: str, url: str, flat_opts: dict, *,
                       accept_audio_only: bool = False) -> DownloadInfo | None:
@@ -971,9 +1072,11 @@ class Downloader:
         opts["extractor_args"] = {"generic": {"impersonate": [""]}}
 
         # Cookies depuis le navigateur de l'utilisateur (si pas de cookies UGE)
+        account_cookies = False
         if not cookies and (use_cookies or _should_use_cookies(self._settings, url)):
             from app.core.cookies import apply_cookies
             apply_cookies(opts, url)
+            account_cookies = any(k in opts for k in _COOKIE_OPT_KEYS)
 
         # Override des sous-titres pour ce téléchargement
         eff_settings = dict(self._settings)
@@ -1108,6 +1211,23 @@ class Downloader:
                         _raise_download_error(str(exc2), exc2, dest)
                     except Exception as exc2:
                         _raise_download_error(str(exc2), exc2, dest)
+                elif account_cookies and should_retry_without_cookies(err_msg):
+                    # Etre connecte peut faire echouer une video que le meme
+                    # telechargement recupere sans compte (cf.
+                    # `should_retry_without_cookies`). Si le repli echoue lui
+                    # aussi, c'est l'erreur d'origine qu'on remonte : elle
+                    # decrit la vraie cause.
+                    _log.warning("Echec avec les cookies du compte id=%s, "
+                                 "nouvel essai sans — %s",
+                                 download_id, err_msg[:150])
+                    try:
+                        _run_download(without_cookies(opts))
+                        _log.info("Telechargement reussi sans les cookies du "
+                                  "compte id=%s", download_id)
+                    except Exception as exc2:
+                        _log.info("Sans cookies : echec aussi id=%s — %s",
+                                  download_id, str(exc2)[:150])
+                        _raise_download_error(err_msg, exc, dest)
                 else:
                     _raise_download_error(err_msg, exc, dest)
             except Exception as exc:

@@ -10,6 +10,8 @@ import pytest
 from app.core.downloader import (
     _humanize_error,
     _is_login_required,
+    should_retry_without_cookies,
+    without_cookies,
     disk_full_message,
     drm_locked_video_message,
     is_disk_full_error,
@@ -272,6 +274,169 @@ class TestNouvelleTentativeALAnalyse:
             self.telechargeur(tmp_path).fetch_info("x", "https://a/1",
                                                    stop_event=arret)
         assert etat["appels"] == 1, "aucune nouvelle tentative apres annulation"
+
+
+# Ce que yt-dlp repond quand le proprietaire a desactive l'integration et que
+# l'utilisateur est connecte a son compte YouTube (rapport de Theo, 0.2.2).
+EMBED_DISABLED_RAW = (
+    "ERROR: [youtube] LhCSr3merW4: Video unavailable. Playback on other "
+    "websites has been disabled by the video owner"
+)
+
+
+class TestRepliSansCookies:
+    """Regression : etre connecte faisait echouer une video publique.
+
+    yt-dlp change de clients YouTube des qu'un cookie de compte est present :
+    ('web_embedded', 'tv_downgraded', 'web') au lieu de ('visionos', 'web').
+    Sur une video dont le proprietaire a desactive l'integration, les trois
+    premiers sont muets alors que 'visionos' la sert normalement. Theo, connecte
+    a son compte, lisait donc « Video unavailable » sur une video que
+    n'importe quel visiteur telecharge sans probleme.
+    """
+
+    def test_le_cas_de_theo_declenche_le_repli(self):
+        assert should_retry_without_cookies(EMBED_DISABLED_RAW)
+
+    @pytest.mark.parametrize("message", [
+        DISK_FULL_RAW,                       # le disque restera plein
+        DRM_RAW,                             # aucun client n'ouvre ce verrou
+        DNS_RAW,                             # la connexion est tombee
+        "ERROR: unable to download video data: HTTP Error 403: Forbidden",
+        "ERROR: Sign in to confirm your age",
+        "Telechargement annule par l'utilisateur",
+    ])
+    def test_les_causes_etrangeres_aux_cookies_sont_ecartees(self, message):
+        """Retenter sans cookies ne doit couter une requete que si ca peut
+        servir — et sur un contenu reserve, les retirer ne peut qu'aggraver."""
+        assert not should_retry_without_cookies(message)
+
+    def test_les_options_perdent_les_cookies_et_rien_d_autre(self):
+        opts = {"cookiefile": "C:/jar.txt", "cookiesfrombrowser": ("chrome",),
+                "format": "bestaudio/best", "quiet": True}
+        assert without_cookies(opts) == {"format": "bestaudio/best", "quiet": True}
+
+    def test_l_original_n_est_pas_modifie(self):
+        """Le repli rejoue une copie : l'appelant garde ses options intactes
+        pour pouvoir remonter l'erreur d'origine."""
+        opts = {"cookiefile": "C:/jar.txt", "quiet": True}
+        without_cookies(opts)
+        assert "cookiefile" in opts
+
+
+class TestRepliSansCookiesALAnalyse:
+    """Le repli vu depuis `fetch_info`, bout en bout."""
+
+    @pytest.fixture(autouse=True)
+    def sans_attente(self, monkeypatch):
+        from app.core import downloader
+        monkeypatch.setattr(downloader.time, "sleep", lambda _s: None)
+
+    @pytest.fixture
+    def avec_cookies(self, monkeypatch):
+        """Simule un utilisateur connecte a youtube.com."""
+        from app.core import downloader
+
+        def _apply(opts, url=None):
+            opts["cookiefile"] = "C:/jar.txt"
+
+        monkeypatch.setattr("app.core.cookies.apply_cookies", _apply)
+        return downloader
+
+    def telechargeur(self, tmp_path):
+        from app.core.downloader import Downloader
+        return Downloader({"download_folder": str(tmp_path),
+                           "cookie_sites": ["youtube.com"]})
+
+    def test_l_analyse_repasse_sans_les_cookies_et_aboutit(
+            self, tmp_path, monkeypatch, avec_cookies):
+        import yt_dlp
+        from app.core.downloader import DownloadInfo, Downloader
+        attendu = DownloadInfo(download_id="x", url="https://youtube.com/watch?v=a",
+                               title="Master recital")
+        vus = []
+
+        def _extract(self, download_id, url, flat_opts, **_kw):
+            vus.append("cookiefile" in flat_opts)
+            if "cookiefile" in flat_opts:
+                raise yt_dlp.utils.DownloadError(EMBED_DISABLED_RAW)
+            return attendu
+
+        monkeypatch.setattr(Downloader, "_extract_info", _extract)
+        info = self.telechargeur(tmp_path).fetch_info(
+            "x", "https://youtube.com/watch?v=a")
+        assert info is attendu
+        assert vus == [True, False], "un essai avec cookies, puis un sans"
+
+    def test_sans_cookies_poses_aucun_repli(self, tmp_path, monkeypatch):
+        """Un utilisateur non connecte n'a rien a retirer : pas de requete
+        supplementaire sur son dos."""
+        import yt_dlp
+        from app.core.downloader import DownloadError, Downloader
+        etat = {"appels": 0}
+
+        def _extract(self, download_id, url, flat_opts, **_kw):
+            etat["appels"] += 1
+            raise yt_dlp.utils.DownloadError(EMBED_DISABLED_RAW)
+
+        monkeypatch.setattr(Downloader, "_extract_info", _extract)
+        with pytest.raises(DownloadError):
+            Downloader({"download_folder": str(tmp_path), "cookie_sites": []}
+                       ).fetch_info("x", "https://youtube.com/watch?v=a")
+        assert etat["appels"] == 1
+
+    def test_si_le_repli_echoue_c_est_l_erreur_d_origine_qui_remonte(
+            self, tmp_path, monkeypatch, avec_cookies):
+        """« Ca a echoue sans cookies non plus » n'apprendrait rien : c'est le
+        message d'origine qui decrit la vraie cause."""
+        import yt_dlp
+        from app.core.downloader import DownloadError, Downloader
+
+        def _extract(self, download_id, url, flat_opts, **_kw):
+            if "cookiefile" in flat_opts:
+                raise yt_dlp.utils.DownloadError(EMBED_DISABLED_RAW)
+            raise yt_dlp.utils.DownloadError("ERROR: something else entirely")
+
+        monkeypatch.setattr(Downloader, "_extract_info", _extract)
+        with pytest.raises(DownloadError) as err:
+            self.telechargeur(tmp_path).fetch_info(
+                "x", "https://youtube.com/watch?v=a")
+        assert "something else" not in str(err.value)
+
+    def test_un_contenu_reserve_garde_son_message_de_connexion(
+            self, tmp_path, monkeypatch, avec_cookies):
+        """Retirer les cookies sur une video privee la rendrait inaccessible :
+        le repli ne doit pas se declencher, et l'utilisateur doit continuer a
+        s'entendre proposer de se connecter."""
+        import yt_dlp
+        from app.core.downloader import Downloader, LoginRequiredError
+        etat = {"appels": 0}
+
+        def _extract(self, download_id, url, flat_opts, **_kw):
+            etat["appels"] += 1
+            raise yt_dlp.utils.DownloadError(
+                "ERROR: Sign in to confirm you are not a bot")
+
+        monkeypatch.setattr(Downloader, "_extract_info", _extract)
+        with pytest.raises(LoginRequiredError):
+            self.telechargeur(tmp_path).fetch_info(
+                "x", "https://youtube.com/watch?v=a")
+        assert etat["appels"] == 1
+
+
+class TestVideoInaccessible:
+    """Le message brut anglais que Theo a recu tel quel."""
+
+    def test_message_en_francais(self):
+        clair = _humanize_error(EMBED_DISABLED_RAW)
+        assert "accessible" in clair.lower()
+        assert "unavailable" not in clair.lower()
+
+    def test_une_video_privee_reste_un_probleme_de_connexion(self):
+        """« Video unavailable. This video is private » commence pareil, mais
+        se regle en se connectant : ce message-la doit primer."""
+        clair = _humanize_error("ERROR: Video unavailable. This video is private")
+        assert "connect" in clair.lower()
 
 
 class TestImageVerrouillee:

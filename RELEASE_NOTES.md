@@ -20,6 +20,16 @@ La fenêtre offre en plus quelque chose qui n'existait qu'au moment de s'abonner
 
 Merci à Véronique.
 
+### Être connecté ne fait plus échouer de téléchargements
+
+Se connecter à YouTube dans DownAccess sert à récupérer les vidéos réservées. Mais dans certains cas, cette connexion faisait exactement l'inverse : elle empêchait le téléchargement d'une vidéo parfaitement publique. Vous receviez « Video unavailable », en anglais, sur une vidéo qui s'ouvre sans problème dans un navigateur — et rien n'indiquait que le fait d'être connecté en était la cause.
+
+DownAccess réessaie désormais sans votre connexion lorsqu'un téléchargement échoue, et la vidéo arrive. Vous n'avez rien à faire, rien à décocher, et vos accès restent en place pour les vidéos qui en ont besoin.
+
+Quand une vidéo est réellement inaccessible — retirée, privée, ou réservée à certains pays — le message vous le dit maintenant en français, au lieu de vous laisser devant une phrase en anglais qu'on prend facilement pour une panne de l'application.
+
+Merci à Théo.
+
 ### Note
 
 Le contenu protégé par DRM (Netflix, Disney+, Prime Video) n'est pas pris en charge. Cette protection est posée par les plateformes : aucune application ne peut la contourner. Sur M6, seule la bande-son échappe au verrou.
