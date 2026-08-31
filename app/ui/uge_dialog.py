@@ -215,6 +215,10 @@ class UGEDialog(wx.Frame):
         self._detected: list[str] = []
         self._poll_timer = wx.Timer(self)
         self._page = None  # DrissionPage ChromiumPage
+        # Processus hote du moteur WebView2, quand c'est lui qui sert. None
+        # quand l'extraction tourne sur un navigateur installe.
+        self._wv_proc = None
+        self._engine = ""
         self._polling = False
         self._intercept_enabled = False
         self._intercepted_headers: dict[str, tuple[str, str]] = {}  # url → (referer, cookies)
@@ -556,10 +560,68 @@ class UGEDialog(wx.Frame):
     # ------------------------------------------------------------------
 
     def _ensure_browser(self) -> bool:
-        """Lance le navigateur Chromium (Chrome, Edge ou Brave) si pas encore ouvert."""
+        """Ouvre le moteur de navigation, s'il ne l'est pas deja.
+
+        Deux moteurs possibles : **WebView2**, celui que Windows fournit (rien
+        a installer, aucune fenetre de navigateur tiers), ou un navigateur
+        Chromium present sur la machine. Ils se pilotent par le meme protocole
+        — c'est le meme moteur Chromium en dessous — donc tout le reste de
+        cette fenetre les ignore superbement.
+
+        Le repli est silencieux et sans perte : sans WebView2, l'extraction se
+        deroule exactement comme avant. Ce n'est pas une panne a signaler.
+        """
         if self._page is not None:
             return True
 
+        prefere = "auto"
+        try:
+            from app.core import settings as cfg
+            prefere = cfg.load().get("uge_engine", "auto")
+        except Exception:
+            pass
+
+        if prefere in ("auto", "webview2") and self._start_webview2():
+            return True
+        return self._start_installed_browser()
+
+    def _start_webview2(self) -> bool:
+        """Lance le moteur de Windows. False si indisponible (on replie)."""
+        proc = None
+        try:
+            from DrissionPage import ChromiumOptions, ChromiumPage
+
+            from app.core import webview_host
+
+            self._set_status(_("Ouverture du navigateur..."))
+            proc, addr = webview_host.start_host(
+                "about:blank", _("Extraction guidée — DownAccess"))
+            # `existing_only` : on s'attache a l'hote deja lance, on ne veut
+            # surtout pas que DrissionPage demarre un navigateur de son cote.
+            page = ChromiumPage(
+                ChromiumOptions().set_address(addr).existing_only())
+        except Exception as exc:
+            _log.warning("Moteur WebView2 indisponible, repli sur le "
+                         "navigateur installe : %s", exc)
+            try:
+                from app.core import webview_host
+                webview_host.stop_host(proc)
+            except Exception:
+                pass
+            return False
+
+        self._wv_proc = proc
+        self._page = page
+        self._engine = "webview2"
+        self._browser_name = "WebView2"
+        _log.info("Extraction guidee : moteur WebView2 de Windows")
+        self._page.listen.start('')
+        if self._intercept_enabled:
+            self._enable_fetch_intercept()
+        return True
+
+    def _start_installed_browser(self) -> bool:
+        """Lance un navigateur Chromium installe (Chrome, Edge ou Brave)."""
         browser_path = find_browser()
         if not browser_path:
             wx.MessageBox(
@@ -581,6 +643,9 @@ class UGEDialog(wx.Frame):
             # supprimé à la fermeture -> reconnexion obligatoire à chaque fois.
             self._page = ChromiumPage(build_options(browser_path))
             self._browser_name = browser_name(browser_path)
+            self._engine = "browser"
+            _log.info("Extraction guidee : navigateur installe (%s)",
+                      self._browser_name)
             # Écouter toutes les requêtes réseau (filtrage côté Python)
             self._page.listen.start('')
             if self._intercept_enabled:
@@ -790,9 +855,22 @@ class UGEDialog(wx.Frame):
                 self._page.listen.stop()
             except Exception:
                 pass
-            try:
-                self._page.quit()
-            except Exception:
-                pass
+            if self._engine == "webview2":
+                # `quit()` fermerait le moteur par en dessous alors que c'est
+                # notre processus hote qui le possede : on ferme l'hote, il
+                # emporte le moteur avec lui.
+                self._page = None
+                try:
+                    from app.core import webview_host
+                    webview_host.stop_host(self._wv_proc)
+                except Exception:
+                    pass
+                self._wv_proc = None
+            else:
+                try:
+                    self._page.quit()
+                except Exception:
+                    pass
             self._page = None
+            self._engine = ""
         event.Skip()

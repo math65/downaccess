@@ -21,6 +21,11 @@ LANGUAGE_CHOICES = ["auto", "fr", "en"]
 ANNOUNCE_CHOICES = ["always", "foreground", "never"]
 AD_MODE_CHOICES = ["ask", "ad_only", "original_and_ad", "original_only"]
 PAGING_CHOICES = ["pages", "continuous"]
+
+# Moteur de la fenetre d'extraction guidee. "auto" = WebView2 (fourni par
+# Windows) s'il est present, sinon un navigateur installe. Cf.
+# app/core/webview_host.py.
+UGE_ENGINE_CHOICES = ["auto", "webview2", "browser"]
 CHAPTERS_MODE_CHOICES = ["embed", "split", "ignore"]
 
 # Limiteur de vitesse : valeurs en octets/sec. 0 = illimité.
@@ -263,6 +268,24 @@ class SettingsDialog(wx.Dialog):
 
         # Extraction guidée
         lbl_uge = wx.StaticText(page, label=_("Extraction guidée :"))
+
+        # Moteur : WebView2 (fourni par Windows) ou un navigateur installe.
+        # Les deux se pilotent pareil ; ce qui change, c'est la fenetre que
+        # l'utilisateur voit s'ouvrir.
+        lbl_engine = wx.StaticText(page, label=_("Fenêtre à utiliser :"))
+        self.choice_uge_engine = wx.Choice(
+            page,
+            choices=[_("Automatique"),
+                     _("La fenêtre intégrée à DownAccess"),
+                     _("Mon navigateur habituel")],
+            name=_("Fenêtre à utiliser"))
+        lbl_engine_hint = wx.StaticText(page, label=_(
+            "La fenêtre intégrée s'appuie sur l'affichage web fourni avec "
+            "Windows : rien à installer, et aucune fenêtre de navigateur qui "
+            "s'ouvre à côté. Si elle n'est pas disponible sur votre "
+            "ordinateur, DownAccess utilise votre navigateur, sans rien vous "
+            "demander."))
+
         lbl_browser = wx.StaticText(page, label=_("Navigateur à utiliser :"))
         installed = available_browsers()
         self._browser_codes = ["auto"] + [code for code, _n in installed]
@@ -304,6 +327,9 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(self.radio_paging,          0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_uge,                    0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_browser,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(lbl_engine,          0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        sizer.Add(self.choice_uge_engine, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(lbl_engine_hint,     0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.choice_browser,        0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_browser_hint,           0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.chk_intercept_title,   0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
@@ -619,6 +645,10 @@ class SettingsDialog(wx.Dialog):
         self.radio_paging.SetSelection(
             PAGING_CHOICES.index(s.get("results_paging", "pages"))
             if s.get("results_paging", "pages") in PAGING_CHOICES else 0)
+        engine = s.get("uge_engine", "auto")
+        self.choice_uge_engine.SetSelection(
+            UGE_ENGINE_CHOICES.index(engine)
+            if engine in UGE_ENGINE_CHOICES else 0)
         browser = s.get("browser_choice", "auto")
         self.choice_browser.SetSelection(
             self._browser_codes.index(browser) if browser in self._browser_codes else 0)
@@ -692,6 +722,8 @@ class SettingsDialog(wx.Dialog):
         s["organize_by_site"]         = self.chk_organize.GetValue()
         s["organize_by_playlist"]     = self.chk_organize_playlist.GetValue()
         s["results_paging"] = PAGING_CHOICES[max(0, self.radio_paging.GetSelection())]
+        s["uge_engine"] = UGE_ENGINE_CHOICES[
+            max(0, self.choice_uge_engine.GetSelection())]
         s["browser_choice"] = self._browser_codes[max(0, self.choice_browser.GetSelection())]
         s["intercept_use_page_title"] = self.chk_intercept_title.GetValue()
         s["subscriptions_check_on_start"] = self.chk_subs_start.GetValue()

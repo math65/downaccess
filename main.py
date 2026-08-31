@@ -1,3 +1,14 @@
+import sys
+
+# Mode hote WebView2 : DownAccess se relance lui-meme avec ce drapeau pour
+# heberger le moteur de navigateur de Windows (extraction guidee). Le test doit
+# rester ICI, avant `import wx` : ce processus-la n'ouvre aucune interface
+# DownAccess, et `webview.start()` s'empare de la boucle de messages — les deux
+# ne peuvent pas cohabiter. Voir app/core/webview_host.py.
+if __name__ == "__main__" and "--da-webview-host" in sys.argv:
+    from app.core.webview_host import run_host
+    raise SystemExit(run_host())
+
 import wx
 from app.core import logger as _logger
 from app.core import settings as cfg

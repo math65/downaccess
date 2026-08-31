@@ -661,7 +661,7 @@ Se connecter ne lève pas toutes les barrières. Les contenus protégés par **D
 
 La plupart du temps, il suffit de coller une adresse dans DownAccess et le téléchargement démarre tout seul. Mais certains sites ne livrent pas leur contenu aussi facilement : la vidéo n'apparaît qu'après une connexion, derrière un lecteur particulier, ou seulement quand on lance soi-même la lecture.
 
-L'extraction guidée est faite pour ces cas-là. Au lieu de deviner ce que contient la page, **vous naviguez vous-même sur le site dans un vrai navigateur**, vous lancez la lecture, et DownAccess détecte au passage les fichiers audio et vidéo qui circulent. Vous n'avez plus qu'à choisir celui qui vous intéresse et à l'ajouter à votre file de téléchargement.
+L'extraction guidée est faite pour ces cas-là. Au lieu de deviner ce que contient la page, **vous naviguez vous-même sur le site**, vous lancez la lecture, et DownAccess détecte au passage les fichiers audio et vidéo qui circulent. Vous n'avez plus qu'à choisir celui qui vous intéresse et à l'ajouter à votre file de téléchargement.
 
 ### Comment l'ouvrir
 
@@ -673,13 +673,13 @@ Dans le menu **Fichier**, choisissez **Extraction guidée** (raccourci **Ctrl+G*
 
 1. La fenêtre **Extraction guidée** s'ouvre. Le curseur est placé directement dans le champ **Adresse** : vous pouvez taper ou coller l'adresse du site tout de suite.
 2. Saisissez l'adresse de la page (par exemple celle de la vidéo) et appuyez sur **Entrée**, ou activez le bouton **Aller**.
-3. Un **vrai navigateur s'ouvre à côté** de DownAccess. DownAccess utilise le navigateur déjà installé sur votre ordinateur : il prend **Google Chrome** en priorité, sinon **Microsoft Edge**, sinon **Brave**. Si aucun des trois n'est présent, un message vous invite à en installer un.
+3. Une **fenêtre de navigation s'ouvre à côté** de DownAccess. Elle s'appuie sur l'affichage web fourni avec Windows : vous n'avez aucun navigateur à installer, et votre navigateur habituel n'est pas dérangé. Si cet affichage n'est pas disponible sur votre ordinateur, DownAccess ouvre à la place le navigateur qui y est installé (Chrome, Edge ou Brave) — sans rien vous demander, et sans que la suite change en quoi que ce soit.
 4. Dans ce navigateur, naviguez normalement sur le site et **lancez la lecture de la vidéo ou de l'audio**. C'est le déclenchement de la lecture qui révèle le fichier média.
 5. Les médias repérés apparaissent au fur et à mesure dans la liste **Médias détectés** de la fenêtre DownAccess. Le compteur juste en dessous indique combien ont été trouvés, et chaque nouveau média est annoncé vocalement.
-6. Pour revenir à DownAccess depuis le navigateur, utilisez le raccourci Windows habituel **Alt+Tab** (DownAccess et le navigateur sont deux fenêtres distinctes).
+6. Pour revenir à DownAccess depuis cette fenêtre, utilisez le raccourci Windows habituel **Alt+Tab** (ce sont deux fenêtres distinctes).
 7. Dans la liste, sélectionnez le média voulu, puis activez **Ajouter à la file** (vous pouvez aussi simplement appuyer sur **Entrée** sur la ligne sélectionnée). Le téléchargement rejoint alors votre file comme un téléchargement classique.
 
-Le bouton **Effacer** vide la liste si vous voulez repartir de zéro, et **Fermer** referme la fenêtre ainsi que le navigateur associé.
+Le bouton **Effacer** vide la liste si vous voulez repartir de zéro, et **Fermer** referme la fenêtre ainsi que la fenêtre de navigation associée.
 
 > Note d'accessibilité : la liste des médias détectés est une liste standard de Windows, entièrement lisible par NVDA et JAWS. Pour chaque élément, la colonne **Type** indique la nature du fichier (par exemple Vidéo MP4, Audio MP3, HLS) et la colonne **URL** son adresse. Parcourez la liste avec les flèches haut et bas, puis ajoutez la ligne courante avec Entrée.
 
@@ -787,6 +787,16 @@ Trois cases à cocher, toutes **décochées** par défaut :
 - **Organiser dans des sous-dossiers par playlist** : range les vidéos d'une même playlist ensemble dans leur propre sous-dossier.
 
 #### Extraction guidée
+
+Le réglage **Fenêtre à utiliser** décide de ce qui s'ouvre quand vous lancez une extraction guidée :
+
+- **Automatique** (par défaut) : DownAccess utilise sa fenêtre intégrée, qui s'appuie sur l'affichage web fourni avec Windows. Rien à installer. Si cet affichage manque sur votre ordinateur, DownAccess bascule tout seul sur votre navigateur.
+- **La fenêtre intégrée à DownAccess** : la même chose, demandée explicitement.
+- **Mon navigateur habituel** : DownAccess ouvre Chrome, Edge ou Brave, comme avant.
+
+Le choix ne change rien à ce que l'extraction sait faire : les médias sont détectés de la même façon dans les deux cas. Il ne change que la fenêtre que vous voyez s'ouvrir.
+
+Le réglage **Navigateur à utiliser** juste en dessous ne concerne plus alors que le second cas, et la connexion aux sites (menu **Se connecter à un site**), qui continue de passer par votre vrai navigateur pour que vous gardiez votre gestionnaire de mots de passe.
 
 Une case à cocher, **cochée** par défaut : **Utiliser le titre de la page comme nom de fichier (interception)**. Lorsqu'elle est active, le fichier récupéré par l'extraction guidée prend le titre de la page web comme nom, ce qui donne des noms plus lisibles.
 

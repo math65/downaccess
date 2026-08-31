@@ -38,6 +38,18 @@ Le message dit maintenant ce qui se passe : la vidéo est réservée à certains
 
 Merci à Frédérick.
 
+### L'extraction guidée n'a plus besoin d'un navigateur installé
+
+Jusqu'ici, l'extraction guidée ouvrait Chrome, Edge ou Brave à côté de DownAccess. Il fallait donc en avoir un, et votre navigateur habituel se retrouvait mêlé à l'affaire.
+
+DownAccess ouvre désormais **sa propre fenêtre de navigation**, qui s'appuie sur l'affichage web fourni avec Windows. Vous n'avez plus rien à installer, et votre navigateur n'est plus dérangé.
+
+Tout le reste fonctionne exactement pareil : vous tapez l'adresse, vous lancez la lecture, les médias sont détectés au passage. Et si cet affichage n'est pas disponible sur votre ordinateur, DownAccess ouvre votre navigateur comme avant — sans rien vous demander, sans message d'erreur, sans que vous ayez à y penser.
+
+Vous pouvez choisir vous-même dans **Préférences > Général**, réglage **Fenêtre à utiliser**.
+
+La connexion aux sites, elle, continue de passer par votre vrai navigateur : c'est là que vit votre gestionnaire de mots de passe.
+
 ### Note
 
 Le contenu protégé par DRM (Netflix, Disney+, Prime Video) n'est pas pris en charge. Cette protection est posée par les plateformes : aucune application ne peut la contourner. Sur M6, seule la bande-son échappe au verrou.

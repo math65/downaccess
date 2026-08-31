@@ -46,6 +46,14 @@ DEFAULTS: dict = {
     "user_email": "",
     "cookie_sites": [],
     "intercept_use_page_title": True,
+    # Moteur de navigation de l'extraction guidée :
+    #   "auto"     -> WebView2 (fourni par Windows) s'il est present, sinon
+    #                 le navigateur installe ;
+    #   "webview2" -> WebView2, avec repli silencieux s'il manque ;
+    #   "browser"  -> toujours le navigateur installe (Chrome/Edge/Brave).
+    # Les deux moteurs se pilotent par le meme protocole (CDP) : le reste de
+    # l'extraction est rigoureusement identique. Voir app/core/webview_host.py.
+    "uge_engine": "auto",
     "browser_choice": "auto",      # navigateur pour l'extraction guidée et la
                                    # connexion : auto | chrome | edge | brave
     "results_paging": "pages",     # parcours des résultats de recherche :

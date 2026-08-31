@@ -16,6 +16,11 @@ dependencies = [
     "curl_cffi>=0.7.0",
     "yt-dlp-ejs>=0.8.0",
     "DrissionPage>=4.0.0",
+    # Heberge le moteur WebView2 de Windows pour l'extraction guidee. Ouvre un
+    # port CDP (REMOTE_DEBUGGING_PORT) auquel DrissionPage s'attache : tout le
+    # code d'extraction fonctionne alors sans changement. Tire pythonnet, qui
+    # s'appuie sur .NET Framework 4.8 (preinstalle sur Windows 10/11).
+    "pywebview>=5.0",
     "polib>=1.2.0",
 ]
 

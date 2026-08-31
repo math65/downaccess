@@ -659,7 +659,7 @@ Signing in does not lift every barrier. Content protected by **DRM** — in part
 
 Most of the time, you simply paste an address into DownAccess and the download starts on its own. But some sites don't hand over their content so easily: the video only appears after you log in, or it sits behind a particular player, or it only shows up once you start playback yourself.
 
-Guided extraction is made for exactly these cases. Instead of trying to guess what a page contains, **you browse the site yourself in a real browser**, you start playback, and DownAccess detects the audio and video files passing by along the way. All that's left for you to do is pick the one you want and add it to your download queue.
+Guided extraction is made for exactly these cases. Instead of trying to guess what a page contains, **you browse the site yourself**, you start playback, and DownAccess detects the audio and video files passing by along the way. All that's left for you to do is pick the one you want and add it to your download queue.
 
 ### How to open it
 
@@ -671,13 +671,13 @@ The very first time you use it, an explanation window reminds you how it works. 
 
 1. The **Guided extraction** window opens. The cursor is placed directly in the **Address** field: you can type or paste the site's address right away.
 2. Enter the address of the page (for example the page with the video) and press **Enter**, or activate the **Go** button.
-3. A **real browser opens alongside** DownAccess. DownAccess uses the browser already installed on your computer: it picks **Google Chrome** first, otherwise **Microsoft Edge**, otherwise **Brave**. If none of the three is present, a message invites you to install one.
+3. A **browsing window opens alongside** DownAccess. It uses the web display that comes with Windows: there is no browser for you to install, and your usual browser is left alone. If that display is not available on your computer, DownAccess opens the browser installed there instead (Chrome, Edge or Brave) — without asking you anything, and without changing anything that follows.
 4. In that browser, browse the site normally and **start playing the video or audio**. It's the act of starting playback that reveals the media file.
 5. The media that are spotted appear one by one in the **Detected media** list in the DownAccess window. The counter just below it shows how many have been found, and each new media item is announced by voice.
-6. To return to DownAccess from the browser, use the usual Windows shortcut **Alt+Tab** (DownAccess and the browser are two separate windows).
+6. To return to DownAccess from that window, use the usual Windows shortcut **Alt+Tab** (they are two separate windows).
 7. In the list, select the media you want, then activate **Add to queue** (you can also simply press **Enter** on the selected row). The download then joins your queue like a regular download.
 
-The **Clear** button empties the list if you want to start over, and **Close** closes the window along with its associated browser.
+The **Clear** button empties the list if you want to start over, and **Close** closes the window along with its associated browsing window.
 
 > Accessibility note: the detected media list is a standard Windows list, fully readable by NVDA and JAWS. For each item, the **Type** column indicates the kind of file (for example MP4 Video, MP3 Audio, HLS) and the **URL** column its address. Move through the list with the up and down arrow keys, then add the current row with Enter.
 
@@ -785,6 +785,17 @@ Three checkboxes, all **unchecked** by default:
 - **Organise into subfolders by playlist**: groups the videos from the same playlist together in their own subfolder.
 
 #### Guided extraction
+
+The **Window to use** setting decides what opens when you start a guided extraction:
+
+- **Automatic** (default): DownAccess uses its built-in window, which relies on the web display that comes with Windows. Nothing to install. If that display is missing on your computer, DownAccess switches to your browser on its own.
+- **The window built into DownAccess**: the same thing, asked for explicitly.
+- **My usual browser**: DownAccess opens Chrome, Edge or Brave, as before.
+
+The choice changes nothing about what the extraction can do: media are detected the same way either way. It only changes the window you see open.
+
+The **Browser to use** setting just below then only concerns the second case, and signing in to sites (**Sign in to a site** menu), which still goes through your real browser so that you keep your password manager.
+
 
 One checkbox, **checked** by default: **Use the page title as the file name (interception)**. When it is active, the file retrieved by guided extraction takes the title of the web page as its name, which gives more readable names.
 

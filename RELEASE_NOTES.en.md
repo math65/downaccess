@@ -38,6 +38,18 @@ The message now says what is going on: the video is restricted to certain countr
 
 Thanks to Frederick.
 
+### Guided extraction no longer needs an installed browser
+
+Until now, guided extraction opened Chrome, Edge or Brave alongside DownAccess. So you had to have one, and your usual browser got dragged into it.
+
+DownAccess now opens **its own browsing window**, built on the web display that comes with Windows. There is nothing left for you to install, and your browser is left alone.
+
+Everything else works exactly the same: you type the address, you start playback, media are detected along the way. And if that display is not available on your computer, DownAccess opens your browser as before — without asking you anything, without an error message, without you having to think about it.
+
+You can choose for yourself in **Preferences > General**, the **Window to use** setting.
+
+Signing in to sites still goes through your real browser: that is where your password manager lives.
+
 ### Note
 
 DRM-protected content (Netflix, Disney+, Prime Video) is not supported. That protection is put in place by the platforms: no application can work around it. On M6, only the soundtrack escapes the lock.
