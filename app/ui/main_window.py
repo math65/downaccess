@@ -326,6 +326,12 @@ class MainWindow(wx.Frame):
         # la selection des videos d'une playlist.
         self._search_snapshot: dict | None = None
         self._search_playlist_urls: set[str] = set()
+        # Conservation de la file sur le disque : un minuteur regroupe les
+        # rafales d'ajouts (une playlist de 200 videos = une seule ecriture),
+        # et le gel evite qu'une ecriture tardive n'efface le fichier apres
+        # l'annulation generale de la fermeture.
+        self._queue_save_timer: wx.CallLater | None = None
+        self._queue_save_frozen: bool = False
         self._queue = QueueManager(
             settings=self.settings,
             post_to_ui=wx.CallAfter,
@@ -335,6 +341,7 @@ class MainWindow(wx.Frame):
             on_error=self._on_dl_error,
             on_playlist=self._on_dl_playlist,
             on_warning=self._on_dl_warning,
+            on_change=self._on_queue_changed,
         )
 
     def _announce_download(self, text: str, interrupt: bool = False) -> None:
@@ -1409,8 +1416,12 @@ class MainWindow(wx.Frame):
         gdlg.Show()
 
     def _show_playlist_dialog(self, info: DownloadInfo) -> None:
-        """Affiche le dialogue de sélection des entrées et enfile la sélection."""
-        from app.ui.playlist_dialog import NUMBER_ORIGINAL, NUMBER_SEQUENTIAL
+        """Affiche le dialogue de sélection des entrées et enfile la sélection.
+
+        Sauf si l'utilisateur a demandé à ne plus être consulté : la playlist
+        part alors entière, directement en file.
+        """
+        from app.ui.playlist_dialog import NUMBER_ORIGINAL
         from app.core import settings as cfg
 
         # « Retour aux résultats » n'a de sens que si cette playlist vient d'une
@@ -1419,6 +1430,12 @@ class MainWindow(wx.Frame):
         can_go_back = bool(self._search_snapshot) and info.url in self._search_playlist_urls
 
         default_num = self.settings.get("playlist_numbering", NUMBER_ORIGINAL)
+
+        if self.settings.get("playlist_download_all", False):
+            toutes = list(enumerate(info.playlist_entries, start=1))
+            self._enqueue_playlist_entries(info, toutes, default_num)
+            return
+
         with PlaylistDialog(self, info.title, info.playlist_entries,
                             default_numbering=default_num,
                             allow_back=can_go_back) as dlg:
@@ -1435,14 +1452,36 @@ class MainWindow(wx.Frame):
                 return
             selected = dlg.get_selected_entries()
             numbering = dlg.get_numbering_mode()
+            plus_jamais = dlg.always_download_all()
 
         # Mémoriser le choix de numérotation
         if numbering != default_num:
             self.settings["playlist_numbering"] = numbering
             cfg.save(self.settings)
 
+        if plus_jamais:
+            self.settings["playlist_download_all"] = True
+            cfg.save(self.settings)
+            speech.speak(
+                _("Les prochaines playlists seront téléchargées entièrement, "
+                  "sans confirmation."), interrupt=False)
+
+        self._enqueue_playlist_entries(info, selected, numbering)
+
+    def _enqueue_playlist_entries(self, info: DownloadInfo,
+                                  entries: list[tuple[int, dict]],
+                                  numbering: int) -> None:
+        """Enfile des entrées de playlist déjà choisies.
+
+        Partagé par la sélection manuelle et par le mode « tout télécharger
+        sans demander » : les deux doivent numéroter et nommer les fichiers
+        exactement pareil.
+        """
+        from app.ui.playlist_dialog import NUMBER_ORIGINAL, NUMBER_SEQUENTIAL
+
         fmt_choice = self._dl_data.get("__last_fmt__", "auto")
-        for seq, (orig_idx, entry) in enumerate(selected, start=1):
+        enfiles = 0
+        for seq, (orig_idx, entry) in enumerate(entries, start=1):
             url = entry.get("url") or entry.get("webpage_url") or entry.get("id")
             if not url:
                 continue
@@ -1453,9 +1492,13 @@ class MainWindow(wx.Frame):
             else:
                 num = None
             self._enqueue_url(url, fmt_choice, playlist_title=info.title,
-                              playlist_number=num)
+                              playlist_number=num, announce=False)
+            enfiles += 1
 
-        speech.speak(_("{count} vidéos ajoutées à la file.").format(count=len(selected)))
+        self.set_status(
+            _("{count} vidéo(s) de « {title} » ajoutée(s) à la file.")
+            .format(count=enfiles, title=info.title))
+        speech.speak(_("{count} vidéos ajoutées à la file.").format(count=enfiles))
 
     def _update_gauge(self, dl_id: str, percent: float) -> None:
         self._gauge_dl_id = dl_id
@@ -2066,7 +2109,15 @@ class MainWindow(wx.Frame):
                      playlist_number: int | None = None,
                      skip_info: bool = False,
                      subtitles_override: bool | None = None,
-                     section: tuple[float, float] | None = None) -> None:
+                     section: tuple[float, float] | None = None,
+                     announce: bool = True) -> None:
+        """Ajoute une URL à la file et sa ligne dans la liste.
+
+        `announce=False` pour un ajout en lot : enfiler une playlist de deux
+        cents videos ferait sinon dire deux cents fois « Ajouté à la file »
+        avant que l'utilisateur puisse faire quoi que ce soit. L'appelant
+        annonce le total, une fois.
+        """
         # Détection URL mixte vidéo + playlist (ex: YouTube watch?v=...&list=...)
         if not playlist_title and "list=" in url and ("watch?" in url or "/watch/" in url):
             url = self._ask_video_or_playlist(url)
@@ -2110,7 +2161,8 @@ class MainWindow(wx.Frame):
         self._dl_data["__last_fmt__"] = format_spec
         self.set_count(self.download_list.count())
         self.set_status(_("URL ajoutée : {url}").format(url=url))
-        speech.speak(_("Ajouté à la file."), interrupt=False)
+        if announce:
+            speech.speak(_("Ajouté à la file."), interrupt=False)
 
     def _enqueue_with_format_selection(self, url: str,
                                        subtitles_override: bool | None = None) -> None:
@@ -2290,6 +2342,10 @@ class MainWindow(wx.Frame):
                 self.settings = dlg.get_settings()
                 cfg.save(self.settings)
                 self._queue._settings = self.settings
+                # Le reglage de conservation vient peut-etre de changer :
+                # decocher doit effacer le fichier tout de suite, pas au
+                # prochain evenement de file.
+                self._save_queue_now()
                 browser.set_preferred_browser(self.settings.get("browser_choice", "auto"))
                 speech.speak(_("Préférences enregistrées."))
                 if dlg.restart_requested():
@@ -2807,6 +2863,57 @@ class MainWindow(wx.Frame):
             wx.OK | wx.ICON_INFORMATION,
         )
 
+    # ------------------------------------------------------------------
+    # Conservation de la file (queue.json)
+    # ------------------------------------------------------------------
+
+    #: Delai de regroupement des ecritures. Assez court pour qu'une fermeture
+    #: brutale ne perde qu'une seconde de file, assez long pour qu'enfiler une
+    #: playlist entiere n'ecrive pas le fichier a chaque ligne.
+    _QUEUE_SAVE_DELAY_MS = 800
+
+    def _on_queue_changed(self) -> None:
+        """La file a changé : programmer son écriture.
+
+        Appelée depuis n'importe quel thread (les workers de téléchargement
+        signalent ici leur fin), d'où le passage par `wx.CallAfter`.
+        """
+        if self._queue_save_frozen:
+            return
+        wx.CallAfter(self._schedule_queue_save)
+
+    def _schedule_queue_save(self) -> None:
+        """Thread principal : arme le minuteur d'écriture s'il ne l'est pas."""
+        if self._queue_save_frozen:
+            return
+        if self._queue_save_timer is not None and self._queue_save_timer.IsRunning():
+            return          # une ecriture est deja prevue, elle prendra tout
+        self._queue_save_timer = wx.CallLater(self._QUEUE_SAVE_DELAY_MS,
+                                              self._save_queue_now)
+
+    def _save_queue_now(self, clean_exit: bool = False) -> None:
+        """Écrit la file conservée. Ne lève jamais : rien ici ne doit
+        interrompre un téléchargement ni empêcher la fermeture.
+
+        `clean_exit` : appel de fermeture normale. Il remet à zéro le décompte
+        des reprises, qui ne doit mesurer que les fins brutales.
+        """
+        if self._queue_save_frozen:
+            return
+        try:
+            if self.settings.get("resume_queue_on_start", True):
+                queue_store.save(self._queue.unfinished(),
+                                 reset_attempts=clean_exit)
+            else:
+                queue_store.clear()
+        except Exception as exc:
+            _log.warning("File non conservee : %s", exc)
+
+    def _stop_queue_save_timer(self) -> None:
+        if self._queue_save_timer is not None:
+            self._queue_save_timer.Stop()
+            self._queue_save_timer = None
+
     def restore_queue_at_startup(self) -> None:
         """Remet en file les téléchargements de la session précédente.
 
@@ -2824,10 +2931,11 @@ class MainWindow(wx.Frame):
             return
         if not entrees:
             return
-        # Efface AVANT de relancer : si l'un de ces telechargements fait
-        # planter l'application, il ne repartira pas en boucle a chaque
-        # demarrage.
-        queue_store.clear()
+        # Le fichier n'est plus efface ici : il l'etait pour qu'un
+        # telechargement qui fait planter l'application ne reparte pas en
+        # boucle, mais la file etant desormais reecrite a chaque changement,
+        # l'effacement n'aurait tenu qu'une seconde. C'est `queue_store.load()`
+        # qui tient ce role, en decomptant les reprises sur le disque.
         ids = self._queue.restore(entrees)
         if ids:
             self.set_status(
@@ -2851,11 +2959,12 @@ class MainWindow(wx.Frame):
 
         # Conserver la file AVANT l'annulation : `cancel_all()` pose le drapeau
         # d'arret sur les elements actifs, et `unfinished()` les ecarterait.
-        if self.settings.get("resume_queue_on_start", True):
-            try:
-                queue_store.save(self._queue.unfinished())
-            except Exception as exc:
-                _log.warning("File non conservee : %s", exc)
+        # Puis geler : sans cela, l'annulation generale ci-dessous declencherait
+        # une derniere ecriture, cette fois d'une file vide — elle effacerait
+        # ce qu'on vient tout juste de conserver.
+        self._stop_queue_save_timer()
+        self._save_queue_now(clean_exit=True)
+        self._queue_save_frozen = True
 
         if n_active > 0:
             self._queue.cancel_all()

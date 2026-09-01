@@ -275,6 +275,15 @@ class SettingsDialog(wx.Dialog):
             "prochain lancement, au lieu d'être perdu. Décochez pour repartir "
             "d'une liste vide à chaque fois."))
 
+        self.chk_playlist_all = wx.CheckBox(
+            page,
+            label=_("Télécharger les playlists entières sans demander"),
+            name=_("Télécharger les playlists entières sans demander"))
+        self.chk_playlist_all.SetToolTip(_(
+            "Une playlist part directement en file, sans la fenêtre de "
+            "sélection. Pratique pour enchaîner les listes ; décochez pour "
+            "choisir de nouveau les vidéos une par une."))
+
         self.chk_check_all = wx.CheckBox(
             page,
             label=_("Cocher tous les résultats d'office"),
@@ -340,6 +349,7 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(self.chk_organize,          0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_organize_playlist, 0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.chk_resume_queue,      0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
+        sizer.Add(self.chk_playlist_all,      0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.radio_announce,        0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_announce_hint,          0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(lbl_results,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
@@ -667,6 +677,7 @@ class SettingsDialog(wx.Dialog):
             if s.get("results_paging", "pages") in PAGING_CHOICES else 0)
         self.chk_resume_queue.SetValue(
             bool(s.get("resume_queue_on_start", True)))
+        self.chk_playlist_all.SetValue(bool(s.get("playlist_download_all", False)))
         self.chk_check_all.SetValue(bool(s.get("search_check_all", False)))
         engine = s.get("uge_engine", "auto")
         self.choice_uge_engine.SetSelection(
@@ -746,6 +757,7 @@ class SettingsDialog(wx.Dialog):
         s["organize_by_playlist"]     = self.chk_organize_playlist.GetValue()
         s["results_paging"] = PAGING_CHOICES[max(0, self.radio_paging.GetSelection())]
         s["resume_queue_on_start"] = self.chk_resume_queue.GetValue()
+        s["playlist_download_all"] = self.chk_playlist_all.GetValue()
         s["search_check_all"] = self.chk_check_all.GetValue()
         s["uge_engine"] = UGE_ENGINE_CHOICES[
             max(0, self.choice_uge_engine.GetSelection())]

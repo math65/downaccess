@@ -1,3 +1,25 @@
+## DownAccess 0.2.4
+
+### Your queue now survives a forced close
+
+The previous version kept your queue from one session to the next — but only if you closed DownAccess normally. That is exactly what you cannot do when the window stops responding: forcing it closed (Alt+F4, Task Manager) lost the whole queue, in precisely the case you were counting on it.
+
+The queue is now saved **as you go**: on every addition, every cancellation, every finished download. A power cut, an abrupt stop, a forced close — your list is there at the next launch.
+
+Thanks to Brad.
+
+### Downloading whole playlists without confirmation
+
+When you add a playlist, DownAccess opens a window to let you choose the videos. Useful the first time, tiresome when you mostly download complete lists, one after another.
+
+The selection window now offers a **Stop asking: download everything in the next playlists** checkbox. Tick it once: the playlists you add afterwards go straight to the queue, in full, with nothing opening. You add, and that is all.
+
+The setting can also be found in **Preferences > General**, as **Download whole playlists without asking**, to switch it on ahead of time or to go back.
+
+While we were at it, queueing a playlist no longer announces "Added to the queue" for every single video: your screen reader gives you the total, once.
+
+Thanks to Brad.
+
 ## DownAccess 0.2.3
 
 ### Your series in French, not in the original version

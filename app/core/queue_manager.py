@@ -29,6 +29,8 @@ class QueueItem:
     subtitles_override: bool | None = None  # None = utiliser les préférences
     section: tuple[float, float] | None = None  # (début, fin) en secondes
                                         # = ne télécharger que cet extrait
+    restore_attempts: int = 0           # reprises depuis une session precedente
+                                        # (garde-fou boucle, voir queue_store)
     stop_event:  threading.Event = field(default_factory=threading.Event)
     pause_event: threading.Event = field(default_factory=threading.Event)
 
@@ -40,6 +42,7 @@ OnComplete      = Callable[[str], None]           # download_id
 OnError         = Callable[[str, str, bool], None]  # download_id, message, login_required
 OnPlaylist      = Callable[[DownloadInfo], None]  # info avec is_playlist=True
 OnWarning       = Callable[[str, str], None]      # download_id, message
+OnChange        = Callable[[], None]              # la file a change (conservation)
 PostToUI        = Callable[..., None]             # ex: wx.CallAfter
 
 
@@ -60,6 +63,7 @@ class QueueManager:
         on_error:    OnError,
         on_playlist: OnPlaylist | None = None,
         on_warning:  OnWarning  | None = None,
+        on_change:   OnChange   | None = None,
     ):
         self._settings    = settings
         self._post        = post_to_ui
@@ -69,10 +73,27 @@ class QueueManager:
         self._on_error    = on_error
         self._on_playlist = on_playlist
         self._on_warning  = on_warning
+        # Appele des que le contenu de la file change, pour l'ecrire sur le
+        # disque. Sans cela, seule une fermeture propre conservait la file :
+        # une fenetre tuee a l'Alt+F4 la perdait entierement (rapport de Brad).
+        self._on_change   = on_change
 
         self._queue:   list[QueueItem]        = []
         self._active:  dict[str, QueueItem]   = {}   # download_id → item
         self._lock     = threading.Lock()
+
+    def _notify_change(self) -> None:
+        """Signale que la file a change. Ne leve jamais, et jamais sous verrou.
+
+        Le callback relit la file (`unfinished()`), qui reprend `self._lock` :
+        l'appeler verrou tenu bloquerait tout.
+        """
+        if self._on_change is None:
+            return
+        try:
+            self._on_change()
+        except Exception:
+            _log.exception("Notification de changement de file en echec")
 
     # ------------------------------------------------------------------
     # API publique
@@ -97,7 +118,8 @@ class QueueManager:
             use_cookies: bool = False,
             skip_info: bool = False,
             subtitles_override: bool | None = None,
-            section: tuple[float, float] | None = None) -> str:
+            section: tuple[float, float] | None = None,
+            restore_attempts: int = 0) -> str:
         """Ajoute une URL à la file. Retourne le download_id."""
         dl_id = str(uuid.uuid4())
         item = QueueItem(
@@ -115,10 +137,12 @@ class QueueManager:
             skip_info=skip_info,
             subtitles_override=subtitles_override,
             section=section,
+            restore_attempts=restore_attempts,
         )
         with self._lock:
             self._queue.append(item)
         _log.info("Ajout file id=%s url=%s format=%s", dl_id, url, format_spec)
+        self._notify_change()
         self._try_start_next()
         return dl_id
 
@@ -158,9 +182,14 @@ class QueueManager:
             # En cours → signal d'arrêt
             if download_id in self._active:
                 self._active[download_id].stop_event.set()
-                return
-            # En attente → retirer de la file
-            self._queue = [i for i in self._queue if i.download_id != download_id]
+            else:
+                # En attente → retirer de la file
+                self._queue = [i for i in self._queue
+                               if i.download_id != download_id]
+        # Annuler doit s'inscrire tout de suite sur le disque : sinon le
+        # telechargement dont on ne voulait plus reviendrait au prochain
+        # lancement.
+        self._notify_change()
 
     def pause(self, download_id: str) -> None:
         with self._lock:
@@ -193,7 +222,8 @@ class QueueManager:
             if idx == 0:
                 return False
             self._queue[idx], self._queue[idx - 1] = self._queue[idx - 1], self._queue[idx]
-            return True
+        self._notify_change()
+        return True
 
     def move_down(self, download_id: str) -> bool:
         """Descend un item en attente dans la file. Retourne True si déplacé."""
@@ -205,13 +235,15 @@ class QueueManager:
             if idx >= len(self._queue) - 1:
                 return False
             self._queue[idx], self._queue[idx + 1] = self._queue[idx + 1], self._queue[idx]
-            return True
+        self._notify_change()
+        return True
 
     def cancel_all(self) -> None:
         with self._lock:
             for item in self._active.values():
                 item.stop_event.set()
             self._queue.clear()
+        self._notify_change()
 
     def get_state(self) -> dict:
         """Retourne l'état courant de la file (thread-safe)."""
@@ -362,6 +394,12 @@ class QueueManager:
                 _log.info("Annulé pendant téléchargement id=%s", dl_id)
 
     def _finish(self, download_id: str) -> None:
+        """Libère le créneau d'un téléchargement terminé, abouti ou non.
+
+        C'est ici que la file conservée maigrit : un téléchargement terminé
+        n'a plus à être repris au prochain lancement.
+        """
         with self._lock:
             self._active.pop(download_id, None)
+        self._notify_change()
         self._try_start_next()

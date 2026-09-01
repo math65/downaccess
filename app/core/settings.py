@@ -69,6 +69,12 @@ DEFAULTS: dict = {
     # precedente. Sans cela, fermer l'application perdait tout ce qui n'avait
     # pas abouti — l'historique ne garde que les reussites.
     "resume_queue_on_start": True,
+    # Enfiler d'office toutes les videos d'une playlist, sans passer par la
+    # fenetre de selection. Qui remplit un disque externe de playlists devait
+    # confirmer chaque liste une par une (demande de Brad, 2026-09-01). Faux
+    # par defaut : sauter une fenetre de confirmation ne doit pas arriver par
+    # surprise, ca se demande — la case vit dans cette meme fenetre.
+    "playlist_download_all": False,
     "suppressed_warnings": [],     # clés des avertissements masqués
     # Dialogues d'explication montres UNE SEULE fois. Ils doivent figurer ici :
     # `load()` ne conserve que les cles presentes dans DEFAULTS, donc une cle

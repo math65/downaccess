@@ -1,3 +1,25 @@
+## DownAccess 0.2.4
+
+### Votre file d'attente survit maintenant à une fermeture forcée
+
+La version précédente conservait votre file d'attente d'une session à l'autre — mais seulement si vous fermiez DownAccess normalement. Or c'est justement ce qu'on ne peut pas faire quand la fenêtre ne répond plus : fermer de force (Alt+F4, gestionnaire des tâches) faisait perdre toute la file, exactement dans le cas où l'on comptait sur elle.
+
+La file est désormais enregistrée **au fil de l'eau** : à chaque ajout, à chaque annulation, à chaque téléchargement terminé. Coupure de courant, arrêt brutal, fermeture forcée — vous retrouvez votre liste au lancement suivant.
+
+Merci à Brad.
+
+### Télécharger les playlists entières sans confirmation
+
+Quand vous ajoutez une playlist, DownAccess ouvre une fenêtre pour vous laisser choisir les vidéos. Utile la première fois, lassant quand on télécharge surtout des listes complètes, l'une après l'autre.
+
+La fenêtre de sélection offre maintenant une case **Ne plus demander : tout télécharger dans les playlists suivantes**. Cochez-la une fois : les playlists que vous ajouterez ensuite partiront directement en file, entières, sans rien ouvrir. Vous ajoutez, et c'est tout.
+
+Le réglage se retrouve dans **Préférences > Général**, sous le nom **Télécharger les playlists entières sans demander**, pour l'activer à l'avance ou revenir en arrière.
+
+Au passage, enfiler une playlist n'annonce plus « Ajouté à la file » à chaque vidéo : votre lecteur d'écran vous donne le total, une fois.
+
+Merci à Brad.
+
 ## DownAccess 0.2.3
 
 ### Vos séries en français, pas en version originale

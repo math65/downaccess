@@ -124,6 +124,19 @@ class PlaylistDialog(wx.Dialog):
         )
         self.radio_number.SetSelection(self._default_numbering)
 
+        # « Ne plus demander » : qui remplit un disque entier de playlists
+        # rouvrait cette fenetre et appuyait sur Entree a chaque fois (demande
+        # de Brad, 2026-09-01). La case ne touche pas a la selection en cours :
+        # elle ne concerne que les playlists suivantes, sinon cocher la case
+        # contredirait les lignes que l'utilisateur vient de decocher.
+        self.chk_always_all = wx.CheckBox(
+            panel,
+            label=_("Ne plus demander : tout télécharger dans les playlists suivantes"),
+            name=_("Ne plus demander : tout télécharger dans les playlists suivantes"))
+        self.chk_always_all.SetToolTip(_(
+            "Les prochaines playlists partiront directement en file, sans "
+            "passer par cette fenêtre. Réactivable dans Préférences → Général."))
+
         # Compteur (StaticText mis à jour → NVDA peut le lire en naviguant)
         self.lbl_count = wx.StaticText(panel,
             label=self._count_label(len(entries)))
@@ -147,6 +160,7 @@ class PlaylistDialog(wx.Dialog):
         main_sizer.Add(self.lst,       1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         main_sizer.Add(row_sel,            0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
         main_sizer.Add(self.radio_number, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 8)
+        main_sizer.Add(self.chk_always_all, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
         main_sizer.Add(self.lbl_count,    0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         main_sizer.Add(btn_sizer,         0, wx.EXPAND | wx.ALL, 12)
 
@@ -157,11 +171,12 @@ class PlaylistDialog(wx.Dialog):
         self.btn_none.MoveAfterInTabOrder(self.btn_all)
         self.btn_invert.MoveAfterInTabOrder(self.btn_none)
         self.radio_number.MoveAfterInTabOrder(self.btn_invert)
+        self.chk_always_all.MoveAfterInTabOrder(self.radio_number)
         if self.btn_back is not None:
-            self.btn_back.MoveAfterInTabOrder(self.radio_number)
+            self.btn_back.MoveAfterInTabOrder(self.chk_always_all)
             self.btn_ok.MoveAfterInTabOrder(self.btn_back)
         else:
-            self.btn_ok.MoveAfterInTabOrder(self.radio_number)
+            self.btn_ok.MoveAfterInTabOrder(self.chk_always_all)
         self.btn_cancel.MoveAfterInTabOrder(self.btn_ok)
 
         self.lst.SetFocus()
@@ -238,3 +253,7 @@ class PlaylistDialog(wx.Dialog):
     def get_numbering_mode(self) -> int:
         """Retourne NUMBER_ORIGINAL, NUMBER_SEQUENTIAL ou NUMBER_NONE."""
         return self.radio_number.GetSelection()
+
+    def always_download_all(self) -> bool:
+        """L'utilisateur demande-t-il à ne plus voir cette fenêtre ?"""
+        return self.chk_always_all.GetValue()

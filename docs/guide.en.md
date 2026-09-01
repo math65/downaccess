@@ -495,9 +495,16 @@ When the address you add points to a playlist, DownAccess detects it automatical
    - **Number in the playlist (original position)**: keeps each video's original number within the playlist.
    - **Sequential number (1, 2, 3...)**: numbers the files in order, according to your selection.
    - **Do not number**: no number is added to the file names.
-4. Confirm with the **Download selection** button, or give up with **Cancel**.
+4. A **Stop asking: download everything in the next playlists** checkbox spares you this window from now on. See the next section.
+5. Confirm with the **Download selection** button, or give up with **Cancel**.
 
 Your numbering choice is remembered and offered by default next time. The selected videos are then added to the queue one by one and download like any other item.
+
+#### Downloading whole playlists without confirmation
+
+If you mostly download complete playlists, confirming every list eventually gets in the way. Tick **Stop asking: download everything in the next playlists**, in that same window: the playlists you add afterwards go straight to the queue, in full, with nothing opening. The checkbox does not touch your current selection — it only applies to the next times.
+
+To go back, untick **Download whole playlists without asking** in **Preferences → General**. The setting is there too if you would rather switch it on without waiting for the next playlist.
 
 > **Playlist opened from a search**: if you reached this window from search results, a **Back to results** button takes you back to them exactly as you left them — same page, same ticked boxes. Handy when you discover the playlist's contents are not what you wanted: you do not have to run your search again.
 
@@ -788,7 +795,13 @@ Three checkboxes, all **unchecked** by default:
 
 **Resume unfinished downloads at startup** — ticked by default. Anything that did not have time to finish when you close DownAccess is put back in the queue at the next launch, and starts again on its own. Untick it if you would rather start from an empty list every time.
 
+The queue is saved **as you go**, on every addition, cancellation or completed download — not only when you quit properly. If the application freezes and you have to force it closed (Alt+F4, Task Manager, a power cut), your queue is still there at the next launch.
+
 Two points worth knowing. Downloads that came from **guided extraction** are not resumed: their address carries a token that is only valid for a few minutes, and replaying it the next day would lead nowhere. And resuming starts the download again from the beginning — DownAccess does not pick a file up at the exact byte where it stopped.
+
+One last safeguard: if the application stops abruptly three times in a row without ever being closed normally, the waiting downloads are given up. That is what stops an address that crashes DownAccess from crashing it again at every startup. A normal close resets that count.
+
+**Download whole playlists without asking** — unticked by default. See "[Downloading whole playlists without confirmation](#downloading-whole-playlists-without-confirmation)".
 
 #### Guided extraction
 

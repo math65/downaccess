@@ -495,9 +495,16 @@ Quand l'adresse que vous ajoutez pointe vers une playlist, DownAccess la détect
    - **Numéro dans la playlist (position originale)** : conserve le numéro d'origine de chaque vidéo dans la playlist.
    - **Numéro séquentiel (1, 2, 3...)** : numérote les fichiers à la suite, selon votre sélection.
    - **Ne pas numéroter** : aucun numéro ajouté aux noms de fichiers.
-4. Validez avec le bouton **Télécharger la sélection**, ou abandonnez avec **Annuler**.
+4. Une case **Ne plus demander : tout télécharger dans les playlists suivantes** vous dispense de cette fenêtre à l'avenir. Voyez la section suivante.
+5. Validez avec le bouton **Télécharger la sélection**, ou abandonnez avec **Annuler**.
 
 Votre choix de numérotation est mémorisé et proposé par défaut la prochaine fois. Les vidéos sélectionnées sont ensuite ajoutées une à une à la file et se téléchargent comme n'importe quel autre élément.
+
+#### Télécharger les playlists entières sans confirmation
+
+Si vous téléchargez surtout des playlists complètes, confirmer chaque liste finit par peser. Cochez **Ne plus demander : tout télécharger dans les playlists suivantes**, dans cette même fenêtre : les playlists que vous ajouterez ensuite partiront directement en file, entières, sans que rien ne s'ouvre. La case ne touche pas à la sélection en cours — elle ne concerne que les fois suivantes.
+
+Pour revenir en arrière, décochez **Télécharger les playlists entières sans demander** dans **Préférences → Général**. Le réglage s'y trouve aussi si vous préférez l'activer sans attendre la prochaine playlist.
 
 > **Playlist ouverte depuis une recherche** : si vous êtes arrivé sur cette fenêtre depuis les résultats d'une recherche, un bouton **Retour aux résultats** vous y ramène tel que vous les aviez laissés — même page, mêmes cases cochées. Pratique quand vous découvrez que le contenu de la playlist ne vous convient pas : vous n'avez pas à refaire votre recherche.
 
@@ -790,7 +797,13 @@ Trois cases à cocher, toutes **décochées** par défaut :
 
 **Reprendre les téléchargements non terminés au démarrage** — coché par défaut. Ce qui n'a pas eu le temps de se terminer quand vous fermez DownAccess est remis en file au lancement suivant, et repart tout seul. Décochez si vous préférez repartir d'une liste vide à chaque fois.
 
+La file est enregistrée **au fil de l'eau**, à chaque ajout, annulation ou téléchargement terminé — pas seulement quand vous quittez proprement. Si l'application se fige et que vous devez la fermer de force (Alt+F4, gestionnaire des tâches, coupure de courant), vous retrouvez votre file au lancement suivant.
+
 Deux précisions. Les téléchargements issus de l'**extraction guidée** ne sont pas repris : leur adresse contient un jeton qui n'est valable que quelques minutes, et la relancer le lendemain ne donnerait rien. Et la reprise recommence le téléchargement depuis le début — DownAccess ne reprend pas un fichier à l'octet où il s'était arrêté.
+
+Enfin, un garde-fou : si l'application s'arrête brutalement trois fois de suite sans jamais être fermée normalement, les téléchargements en attente sont abandonnés. C'est ce qui évite qu'une adresse qui fait planter DownAccess ne le fasse replanter à chaque démarrage. Une fermeture normale remet ce décompte à zéro.
+
+**Télécharger les playlists entières sans demander** — décoché par défaut. Voir « [Télécharger les playlists entières sans confirmation](#télécharger-les-playlists-entières-sans-confirmation) ».
 
 #### Extraction guidée
 
