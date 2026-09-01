@@ -36,6 +36,7 @@ def _classify_search_entry(entry: dict, site_prefix: str) -> str:
         return "channel"
     return "video"
 
+from app.core import queue_store
 from app.core import settings as cfg
 from app.core import speech
 from app.core import i18n
@@ -2806,11 +2807,40 @@ class MainWindow(wx.Frame):
             wx.OK | wx.ICON_INFORMATION,
         )
 
+    def restore_queue_at_startup(self) -> None:
+        """Remet en file les téléchargements de la session précédente.
+
+        Silencieux : les lignes réapparaissent dans la liste et repartent
+        d'elles-mêmes. Un dialogue au lancement serait un obstacle de plus pour
+        l'utilisateur qui voulait justement retrouver sa file.
+        """
+        if not self.settings.get("resume_queue_on_start", True):
+            queue_store.clear()
+            return
+        try:
+            entrees = queue_store.load()
+        except Exception as exc:
+            _log.warning("File conservee illisible : %s", exc)
+            return
+        if not entrees:
+            return
+        # Efface AVANT de relancer : si l'un de ces telechargements fait
+        # planter l'application, il ne repartira pas en boucle a chaque
+        # demarrage.
+        queue_store.clear()
+        ids = self._queue.restore(entrees)
+        if ids:
+            self.set_status(
+                _("{count} téléchargement(s) repris de la session précédente.")
+                .format(count=len(ids)))
+
     def _on_close(self, event) -> None:
         n_active = self._queue.active_count
         if n_active > 0 and event.CanVeto():
             result = wx.MessageBox(
-                _("{count} téléchargement(s) en cours.\n\nQuitter maintenant les annulera.\n\nVoulez-vous vraiment quitter ?").format(count=n_active),
+                _("{count} téléchargement(s) en cours.\n\nIls seront "
+                  "interrompus, puis repris au prochain démarrage de "
+                  "DownAccess.\n\nVoulez-vous vraiment quitter ?").format(count=n_active),
                 _("Téléchargements en cours — DownAccess"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
                 self,
@@ -2818,6 +2848,14 @@ class MainWindow(wx.Frame):
             if result != wx.YES:
                 event.Veto()
                 return
+
+        # Conserver la file AVANT l'annulation : `cancel_all()` pose le drapeau
+        # d'arret sur les elements actifs, et `unfinished()` les ecarterait.
+        if self.settings.get("resume_queue_on_start", True):
+            try:
+                queue_store.save(self._queue.unfinished())
+            except Exception as exc:
+                _log.warning("File non conservee : %s", exc)
 
         if n_active > 0:
             self._queue.cancel_all()

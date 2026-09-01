@@ -52,6 +52,9 @@ def main():
     # Releve des abonnements : silencieux, sans fenetre, il alimente juste
     # le compteur du menu Abonnements (Ctrl+B).
     frame.check_subscriptions_at_startup()
+    # Reprise de la file de la session precedente : silencieuse, elle remplit
+    # simplement la liste et les telechargements repartent.
+    frame.restore_queue_at_startup()
 
     app.MainLoop()
 

@@ -259,9 +259,14 @@ class TestNouvelleTentativeALAnalyse:
         assert etat["appels"] == 1
 
     def test_annulation_interrompt_l_attente(self, tmp_path, monkeypatch):
-        """Annuler pendant l'attente entre deux essais doit rendre la main."""
+        """Annuler rend la main tout de suite, et SANS message d'erreur.
+
+        Une annulation n'est pas une panne : l'utilisateur vient de la
+        demander, lui afficher une erreur par-dessus n'aurait aucun sens.
+        `fetch_info` retourne donc None, et la file se tait.
+        """
         import threading
-        from app.core.downloader import DownloadError, Downloader
+        from app.core.downloader import Downloader
         arret = threading.Event()
         etat = {"appels": 0}
 
@@ -272,9 +277,9 @@ class TestNouvelleTentativeALAnalyse:
             raise yt_dlp.utils.DownloadError(DNS_RAW)
 
         monkeypatch.setattr(Downloader, "_extract_info", _extract)
-        with pytest.raises(DownloadError):
-            self.telechargeur(tmp_path).fetch_info("x", "https://a/1",
-                                                   stop_event=arret)
+        resultat = self.telechargeur(tmp_path).fetch_info(
+            "x", "https://a/1", stop_event=arret)
+        assert resultat is None
         assert etat["appels"] == 1, "aucune nouvelle tentative apres annulation"
 
 

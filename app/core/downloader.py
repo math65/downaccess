@@ -595,6 +595,56 @@ def disk_full_message(dest: str) -> str:
     return "\n\n".join(parts)
 
 
+class ExtractionCancelled(Exception):
+    """L'utilisateur a annule pendant l'analyse.
+
+    Interne au module : `fetch_info` la traduit en retour vide, l'appelant n'a
+    pas a la connaitre.
+    """
+
+
+def _is_cancelled(exc: BaseException, stop_event: threading.Event | None) -> bool:
+    """L'exception vient-elle de notre annulation ?
+
+    yt-dlp encapsule ce que leve `match_filter` dans son propre
+    `DownloadError` : comparer les types ne suffit pas, on remonte la chaine
+    des causes, et a defaut on se fie au drapeau d'annulation.
+    """
+    courante: BaseException | None = exc
+    for _profondeur in range(6):   # borne : une chaine de causes peut boucler
+        if courante is None:
+            break
+        if isinstance(courante, ExtractionCancelled):
+            return True
+        courante = courante.__cause__ or courante.__context__
+    return bool(stop_event and stop_event.is_set())
+
+
+def _cancel_filter(stop_event: threading.Event | None):
+    """Filtre yt-dlp qui interrompt l'extraction des que l'utilisateur annule.
+
+    yt-dlp appelle `match_filter` pour chaque entree qu'il rencontre, y compris
+    en mode `extract_flat` : lever depuis ce filtre est le seul moyen d'arreter
+    une extraction en cours. Sans lui, annuler l'analyse d'une grosse playlist
+    ne faisait RIEN — le bouton repondait, mais l'extraction continuait pendant
+    des minutes, et l'utilisateur finissait par fermer l'application en perdant
+    sa file (rapport de Brad, 2026-09-01).
+
+    Retourne None quand il n'y a rien a annuler : yt-dlp comprend « garde cette
+    entree », ce qui est le comportement par defaut.
+    """
+    if stop_event is None:
+        return None
+
+    def filtre(info_dict, *, incomplete=False):
+        if stop_event.is_set():
+            raise ExtractionCancelled()
+        # Ne rien retourner = yt-dlp garde l'entree (comportement par defaut).
+        return
+
+    return filtre
+
+
 def _humanize_error(msg: str, dest: str = "") -> str:
     """Traduit certaines erreurs yt-dlp cryptiques en messages clairs et
     actionnables pour le grand public.
@@ -767,6 +817,12 @@ class Downloader:
         if self._settings.get("proxy_http"):
             flat_opts["proxy"] = self._settings["proxy_http"]
 
+        # Interruption : sans ce filtre, annuler pendant l'analyse d'une
+        # playlist n'avait aucun effet visible avant la fin de l'extraction.
+        filtre = _cancel_filter(stop_event)
+        if filtre is not None:
+            flat_opts["match_filter"] = filtre
+
         # Headers UGE (referer du navigateur)
         headers = {}
         if self._settings.get("user_agent"):
@@ -813,6 +869,10 @@ class Downloader:
                         download_id, url, flat_opts,
                         accept_audio_only=accept_audio_only)
                 except yt_dlp.utils.DownloadError as exc:
+                    if _is_cancelled(exc, stop_event):
+                        _log.info("Analyse annulee par l'utilisateur id=%s",
+                                  download_id)
+                        return None
                     if (_attempt_no < _MAX_ATTEMPTS
                             and is_transient_error(str(exc))
                             and not (stop_event and stop_event.is_set())):
@@ -835,7 +895,16 @@ class Downloader:
                         str(exc), exc, self._settings.get("download_folder", ""))
                 except DownloadError:
                     raise          # message deja ecrit pour l'utilisateur
+                except ExtractionCancelled:
+                    _log.info("Analyse annulee par l'utilisateur id=%s", download_id)
+                    return None
                 except Exception as exc:
+                    # yt-dlp enveloppe parfois l'exception du filtre : on
+                    # rattrape l'annulation avant de crier a l'erreur.
+                    if _is_cancelled(exc, stop_event):
+                        _log.info("Analyse annulee par l'utilisateur id=%s",
+                                  download_id)
+                        return None
                     _raise_download_error(
                         str(exc), exc, self._settings.get("download_folder", ""))
             return None

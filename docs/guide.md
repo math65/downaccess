@@ -786,6 +786,12 @@ Trois cases à cocher, toutes **décochées** par défaut :
 - **Organiser dans des sous-dossiers par site** : range chaque fichier dans un sous-dossier nommé d'après le site d'origine (par exemple un dossier par plateforme).
 - **Organiser dans des sous-dossiers par playlist** : range les vidéos d'une même playlist ensemble dans leur propre sous-dossier.
 
+#### File d'attente
+
+**Reprendre les téléchargements non terminés au démarrage** — coché par défaut. Ce qui n'a pas eu le temps de se terminer quand vous fermez DownAccess est remis en file au lancement suivant, et repart tout seul. Décochez si vous préférez repartir d'une liste vide à chaque fois.
+
+Deux précisions. Les téléchargements issus de l'**extraction guidée** ne sont pas repris : leur adresse contient un jeton qui n'est valable que quelques minutes, et la relancer le lendemain ne donnerait rien. Et la reprise recommence le téléchargement depuis le début — DownAccess ne reprend pas un fichier à l'octet où il s'était arrêté.
+
 #### Extraction guidée
 
 Le réglage **Fenêtre à utiliser** décide de ce qui s'ouvre quand vous lancez une extraction guidée :

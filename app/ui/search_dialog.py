@@ -252,6 +252,11 @@ class SearchResultsDialog(wx.Dialog):
         # a la file). Indispensable en pagination : les entrees d'une autre page
         # ne sont plus dans la liste affichee.
         self._checked: dict[str, dict] = {}
+        # Reglage « cocher d'office ». On ne l'applique qu'aux entrees jamais
+        # vues (`_deja_vues`) : sans cela, revenir sur une page recocherait ce
+        # que l'utilisateur venait justement de decocher.
+        self._auto_check = bool(self._settings.get("search_check_all"))
+        self._deja_vues: set[str] = set()
 
         self._build_ui(site_label)
         self._populate()
@@ -389,7 +394,11 @@ class SearchResultsDialog(wx.Dialog):
                 # Signale aux utilisateurs deficients visuels que l'audiodescription
                 # existe (lu par NVDA dans le titre).
                 title = _("{title} — Audiodescription").format(title=title)
-            checked = _entry_key(entry) in self._checked
+            cle = _entry_key(entry)
+            if self._auto_check and cle not in self._deja_vues:
+                self._checked[cle] = entry
+            self._deja_vues.add(cle)
+            checked = cle in self._checked
             idx = self.lst.GetItemCount()
             self.lst.InsertItem(idx, _checked_label() if checked else _unchecked_label())
             self.lst.SetItem(idx, 1, title)

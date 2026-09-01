@@ -58,6 +58,26 @@ Les fenêtres d'explication de l'extraction guidée et de la connexion à un sit
 
 C'est corrigé : elles ne reviendront plus.
 
+### Votre file d'attente n'est plus perdue en fermant
+
+Jusqu'ici, fermer DownAccess effaçait tout ce qui n'avait pas fini de se télécharger. L'historique ne garde que ce qui a abouti : une file de vingt vidéos interrompue était bel et bien perdue.
+
+Ce qui n'a pas eu le temps de se terminer est désormais **remis en file au lancement suivant**, et repart tout seul. Vous n'avez rien à faire.
+
+Si vous préférez repartir d'une liste vide à chaque fois, décochez **Reprendre les téléchargements non terminés au démarrage** dans **Préférences > Général**.
+
+### Annuler pendant l'analyse d'une longue liste répond enfin
+
+Sur une chaîne ou une playlist qui compte des centaines de vidéos, l'analyse prend du temps. Le bouton Annuler semblait ne rien faire : le travail continuait en arrière-plan pendant des minutes, et il ne restait qu'à fermer l'application.
+
+L'annulation est maintenant prise en compte tout de suite. Sur une chaîne de 2 400 vidéos, l'analyse s'arrête en 2 secondes au lieu de 30.
+
+### Cocher tous les résultats d'un coup
+
+Si vous téléchargez souvent des listes entières, cocher chaque ligne devenait lassant. Une nouvelle option dans **Préférences > Général** — **Cocher tous les résultats d'office** — les présente tous cochés. Vous gardez la main : décochez ce que vous ne voulez pas avant de valider.
+
+Merci à Brad.
+
 ### Note
 
 Le contenu protégé par DRM (Netflix, Disney+, Prime Video) n'est pas pris en charge. Cette protection est posée par les plateformes : aucune application ne peut la contourner. Sur M6, seule la bande-son échappe au verrou.

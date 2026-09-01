@@ -784,6 +784,12 @@ Three checkboxes, all **unchecked** by default:
 - **Organise into subfolders by site**: places each file in a subfolder named after the source site (for example, a folder per platform).
 - **Organise into subfolders by playlist**: groups the videos from the same playlist together in their own subfolder.
 
+#### Download queue
+
+**Resume unfinished downloads at startup** — ticked by default. Anything that did not have time to finish when you close DownAccess is put back in the queue at the next launch, and starts again on its own. Untick it if you would rather start from an empty list every time.
+
+Two points worth knowing. Downloads that came from **guided extraction** are not resumed: their address carries a token that is only valid for a few minutes, and replaying it the next day would lead nowhere. And resuming starts the download again from the beginning — DownAccess does not pick a file up at the exact byte where it stopped.
+
 #### Guided extraction
 
 The **Window to use** setting decides what opens when you start a guided extraction:

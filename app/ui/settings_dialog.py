@@ -266,6 +266,24 @@ class SettingsDialog(wx.Dialog):
             name=_("Parcours des résultats"),
         )
 
+        self.chk_resume_queue = wx.CheckBox(
+            page,
+            label=_("Reprendre les téléchargements non terminés au démarrage"),
+            name=_("Reprendre les téléchargements non terminés au démarrage"))
+        self.chk_resume_queue.SetToolTip(_(
+            "Ce qui n'a pas eu le temps de se terminer est remis en file au "
+            "prochain lancement, au lieu d'être perdu. Décochez pour repartir "
+            "d'une liste vide à chaque fois."))
+
+        self.chk_check_all = wx.CheckBox(
+            page,
+            label=_("Cocher tous les résultats d'office"),
+            name=_("Cocher tous les résultats d'office"))
+        self.chk_check_all.SetToolTip(_(
+            "Évite de cocher chaque ligne quand vous téléchargez souvent des "
+            "listes entières. Vous gardez la main : décochez ce que vous ne "
+            "voulez pas avant de valider."))
+
         # Extraction guidée
         lbl_uge = wx.StaticText(page, label=_("Extraction guidée :"))
 
@@ -321,10 +339,12 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(self.chk_open_folder,       0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_organize,          0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_organize_playlist, 0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
+        sizer.Add(self.chk_resume_queue,      0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.radio_announce,        0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_announce_hint,          0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(lbl_results,                0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.radio_paging,          0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(self.chk_check_all,         0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_uge,                    0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(lbl_engine,                 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.choice_uge_engine,     0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
@@ -645,6 +665,9 @@ class SettingsDialog(wx.Dialog):
         self.radio_paging.SetSelection(
             PAGING_CHOICES.index(s.get("results_paging", "pages"))
             if s.get("results_paging", "pages") in PAGING_CHOICES else 0)
+        self.chk_resume_queue.SetValue(
+            bool(s.get("resume_queue_on_start", True)))
+        self.chk_check_all.SetValue(bool(s.get("search_check_all", False)))
         engine = s.get("uge_engine", "auto")
         self.choice_uge_engine.SetSelection(
             UGE_ENGINE_CHOICES.index(engine)
@@ -722,6 +745,8 @@ class SettingsDialog(wx.Dialog):
         s["organize_by_site"]         = self.chk_organize.GetValue()
         s["organize_by_playlist"]     = self.chk_organize_playlist.GetValue()
         s["results_paging"] = PAGING_CHOICES[max(0, self.radio_paging.GetSelection())]
+        s["resume_queue_on_start"] = self.chk_resume_queue.GetValue()
+        s["search_check_all"] = self.chk_check_all.GetValue()
         s["uge_engine"] = UGE_ENGINE_CHOICES[
             max(0, self.choice_uge_engine.GetSelection())]
         s["browser_choice"] = self._browser_codes[max(0, self.choice_browser.GetSelection())]

@@ -58,6 +58,26 @@ The explanation windows for guided extraction and for signing in to a site were 
 
 This is fixed: they will not come back.
 
+### Your queue is no longer lost when you close the app
+
+Until now, closing DownAccess wiped everything that had not finished downloading. History only keeps what succeeded: an interrupted queue of twenty videos was gone for good.
+
+Anything that did not have time to finish is now **put back in the queue at the next launch**, and starts again on its own. There is nothing for you to do.
+
+If you would rather start from an empty list every time, untick **Resume unfinished downloads at startup** in **Preferences > General**.
+
+### Cancelling during the analysis of a long list finally responds
+
+On a channel or playlist with hundreds of videos, the analysis takes a while. The Cancel button appeared to do nothing: the work carried on in the background for minutes, and closing the application was the only way out.
+
+Cancelling is now taken into account straight away. On a channel of 2,400 videos, the analysis stops in 2 seconds instead of 30.
+
+### Tick every result at once
+
+If you often download whole lists, ticking each row became tedious. A new option in **Preferences > General** — **Tick all results by default** — presents them all ticked. You stay in control: untick what you do not want before confirming.
+
+Thanks to Brad.
+
 ### Note
 
 DRM-protected content (Netflix, Disney+, Prime Video) is not supported. That protection is put in place by the platforms: no application can work around it. On M6, only the soundtrack escapes the lock.

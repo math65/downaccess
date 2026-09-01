@@ -59,6 +59,16 @@ DEFAULTS: dict = {
     "results_paging": "pages",     # parcours des résultats de recherche :
                                    # pages = boutons Page précédente/suivante
                                    # continuous = la suite se charge en bas de liste
+    # Cocher d'office les resultats d'une recherche. Qui enchaine les
+    # playlists cochait ses vingt lignes une par une a chaque fois (demande de
+    # Brad, 2026-09-01). Faux par defaut : cocher tout d'office sur une
+    # recherche large enverrait beaucoup de choses en file sans qu'on l'ait
+    # voulu — c'est un choix a poser, pas a subir.
+    "search_check_all": False,
+    # Reprendre au demarrage les telechargements non termines de la session
+    # precedente. Sans cela, fermer l'application perdait tout ce qui n'avait
+    # pas abouti — l'historique ne garde que les reussites.
+    "resume_queue_on_start": True,
     "suppressed_warnings": [],     # clés des avertissements masqués
     # Dialogues d'explication montres UNE SEULE fois. Ils doivent figurer ici :
     # `load()` ne conserve que les cles presentes dans DEFAULTS, donc une cle

@@ -122,6 +122,36 @@ class QueueManager:
         self._try_start_next()
         return dl_id
 
+    def unfinished(self) -> list[QueueItem]:
+        """Téléchargements ni terminés ni annulés, en cours d'abord.
+
+        Sert a conserver la file d'une session a l'autre : ce sont exactement
+        ceux que l'utilisateur perdait en fermant l'application.
+        """
+        with self._lock:
+            actifs = [i for i in self._active.values()
+                      if not i.stop_event.is_set()]
+            return actifs + list(self._queue)
+
+    def restore(self, entrees: list[dict]) -> list[str]:
+        """Remet en file des téléchargements conservés. Retourne leurs ids.
+
+        Chaque entree passe par `add()` : elle repart donc exactement comme un
+        ajout normal, analyse comprise — une adresse devenue invalide echoue
+        proprement au lieu de ressusciter un etat incoherent.
+        """
+        ids = []
+        for entree in entrees:
+            try:
+                ids.append(self.add(**entree))
+            except TypeError as exc:
+                # Fichier ecrit par une version differente : on ignore l'entree
+                # plutot que d'empecher le demarrage.
+                _log.warning("Entree de file ignoree (%s) : %s", exc, entree)
+        if ids:
+            _log.info("File restauree : %d telechargement(s)", len(ids))
+        return ids
+
     def cancel(self, download_id: str) -> None:
         """Annule/supprime un téléchargement (en cours ou en attente)."""
         with self._lock:
@@ -269,6 +299,11 @@ class QueueManager:
                     return
                 self._post(self._on_info, info)
             except DownloadError as exc:
+                if item.stop_event.is_set():
+                    # Annulation : ce n'est pas une panne, on ne montre pas de
+                    # message d'erreur a l'utilisateur qui vient de la demander.
+                    _log.info("Analyse annulee id=%s", dl_id)
+                    return
                 _log.error("Erreur fetch_info id=%s — %s", dl_id, exc)
                 self._post(self._on_error, dl_id, str(exc),
                            isinstance(exc, LoginRequiredError))
