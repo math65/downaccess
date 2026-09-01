@@ -46,6 +46,8 @@ DownAccess ouvre désormais **sa propre fenêtre de navigation**, qui s'appuie s
 
 Tout le reste fonctionne exactement pareil : vous tapez l'adresse, vous lancez la lecture, les médias sont détectés au passage. Et si cet affichage n'est pas disponible sur votre ordinateur, DownAccess ouvre votre navigateur comme avant — sans rien vous demander, sans message d'erreur, sans que vous ayez à y penser.
 
+Vous y trouvez aussi des boutons **Précédent**, **Suivant** et **Actualiser** (ou **Alt+Flèche gauche**, **Alt+Flèche droite** et **F5**) : ils pilotent la page depuis la fenêtre DownAccess, sans avoir à chercher dans la fenêtre de navigation.
+
 Vous pouvez choisir vous-même dans **Préférences > Général**, réglage **Fenêtre à utiliser**.
 
 La connexion aux sites, elle, continue de passer par votre vrai navigateur : c'est là que vit votre gestionnaire de mots de passe.

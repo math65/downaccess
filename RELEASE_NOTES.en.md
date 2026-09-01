@@ -46,6 +46,8 @@ DownAccess now opens **its own browsing window**, built on the web display that 
 
 Everything else works exactly the same: you type the address, you start playback, media are detected along the way. And if that display is not available on your computer, DownAccess opens your browser as before — without asking you anything, without an error message, without you having to think about it.
 
+You also get **Back**, **Forward** and **Reload** buttons (or **Alt+Left**, **Alt+Right** and **F5**): they drive the page from the DownAccess window, with nothing to look for in the browsing window.
+
 You can choose for yourself in **Preferences > General**, the **Window to use** setting.
 
 Signing in to sites still goes through your real browser: that is where your password manager lives.

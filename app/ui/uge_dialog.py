@@ -258,9 +258,25 @@ class UGEDialog(wx.Frame):
         self.txt_url.SetHint("https://www.example.com/video")
         self.btn_go = wx.Button(panel, label=_("Aller"), name=_("Aller à l'adresse"))
 
+        # WebView2 n'a aucune barre de navigation : ces boutons-ci la
+        # remplacent. Ils pilotent la page par le meme canal que le reste, donc
+        # ils fonctionnent aussi avec le navigateur installe.
+        self.btn_back = wx.Button(panel, label=_("Précédent"),
+                                  name=_("Revenir à la page précédente"))
+        self.btn_forward = wx.Button(panel, label=_("Suivant"),
+                                     name=_("Aller à la page suivante"))
+        self.btn_reload = wx.Button(panel, label=_("Actualiser"),
+                                    name=_("Recharger la page"))
+        # Rien a piloter tant qu'aucune page n'est ouverte.
+        for bouton in (self.btn_back, self.btn_forward, self.btn_reload):
+            bouton.Disable()
+
         addr_sizer.Add(lbl_addr,     0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
         addr_sizer.Add(self.txt_url, 1, wx.EXPAND | wx.RIGHT, 6)
-        addr_sizer.Add(self.btn_go,  0)
+        addr_sizer.Add(self.btn_go,  0, wx.RIGHT, 6)
+        addr_sizer.Add(self.btn_back, 0, wx.RIGHT, 6)
+        addr_sizer.Add(self.btn_forward, 0, wx.RIGHT, 6)
+        addr_sizer.Add(self.btn_reload, 0)
         sizer.Add(addr_sizer, 0, wx.EXPAND | wx.ALL, 8)
 
         # Statut
@@ -323,6 +339,21 @@ class UGEDialog(wx.Frame):
     def _bind_events(self) -> None:
         self.btn_go.Bind(wx.EVT_BUTTON, self._on_go)
         self.txt_url.Bind(wx.EVT_TEXT_ENTER, self._on_go)
+        self.btn_back.Bind(wx.EVT_BUTTON, self._on_back)
+        self.btn_forward.Bind(wx.EVT_BUTTON, self._on_forward)
+        self.btn_reload.Bind(wx.EVT_BUTTON, self._on_reload)
+
+        # Raccourcis habituels d'un navigateur : ils evitent d'aller chercher
+        # le bouton depuis la liste des medias.
+        id_back, id_forward, id_reload = wx.NewIdRef(), wx.NewIdRef(), wx.NewIdRef()
+        self.Bind(wx.EVT_MENU, self._on_back, id=id_back)
+        self.Bind(wx.EVT_MENU, self._on_forward, id=id_forward)
+        self.Bind(wx.EVT_MENU, self._on_reload, id=id_reload)
+        self.SetAcceleratorTable(wx.AcceleratorTable([
+            (wx.ACCEL_ALT, wx.WXK_LEFT, id_back),
+            (wx.ACCEL_ALT, wx.WXK_RIGHT, id_forward),
+            (wx.ACCEL_NORMAL, wx.WXK_F5, id_reload),
+        ]))
         self.chk_intercept.Bind(wx.EVT_CHECKBOX, self._on_toggle_intercept)
         self.btn_clear.Bind(wx.EVT_BUTTON, self._on_clear)
         self.btn_add.Bind(wx.EVT_BUTTON, self._on_add)
@@ -691,8 +722,50 @@ class UGEDialog(wx.Frame):
 
         threading.Thread(target=navigate, daemon=True).start()
 
+    def _navigate(self, action, echec: str) -> None:
+        """Joue une action de navigation dans un thread, puis rafraichit l'UI.
+
+        Toujours hors du thread interface : `back()` attend le chargement de la
+        page, ce qui figerait la fenetre pendant plusieurs secondes.
+        """
+        if self._page is None:
+            return
+
+        def travail():
+            try:
+                action(self._page)
+            except Exception as exc:
+                _log.info("Navigation : %s (%s)", echec, exc)
+                wx.CallAfter(self._set_status_direct, echec)
+                return
+            try:
+                url, titre = self._page.url, self._page.title
+            except Exception:
+                return
+            wx.CallAfter(self._on_page_loaded, url, titre)
+
+        threading.Thread(target=travail, daemon=True).start()
+
+    def _set_status_direct(self, texte: str) -> None:
+        self.lbl_status.SetLabel(texte)
+        speech.speak(texte, interrupt=False)
+
+    def _on_back(self, _event) -> None:
+        self._navigate(lambda page: page.back(),
+                       _("Aucune page précédente."))
+
+    def _on_forward(self, _event) -> None:
+        self._navigate(lambda page: page.forward(),
+                       _("Aucune page suivante."))
+
+    def _on_reload(self, _event) -> None:
+        self._navigate(lambda page: page.refresh(),
+                       _("Impossible de recharger la page."))
+
     def _on_page_loaded(self, url: str, title: str) -> None:
         self.txt_url.SetValue(url)
+        for bouton in (self.btn_back, self.btn_forward, self.btn_reload):
+            bouton.Enable()
         self.lbl_status.SetLabel(
             _("Page chargée : {title}\nLancez la vidéo dans le navigateur — les médias seront détectés automatiquement.").format(
                 title=title

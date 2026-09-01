@@ -105,7 +105,7 @@ msgstr ""
 msgid "(pas de résumé disponible)"
 msgstr ""
 
-#: app/ui/uge_dialog.py:292 app/ui/uge_dialog.py:787
+#: app/ui/uge_dialog.py:308 app/ui/uge_dialog.py:860
 msgid "0 média(s) détecté(s)"
 msgstr ""
 
@@ -206,8 +206,12 @@ msgstr ""
 msgid "Action indisponible."
 msgstr ""
 
-#: app/ui/uge_dialog.py:277
+#: app/ui/uge_dialog.py:293
 msgid "Activer l'interception des requêtes média"
+msgstr ""
+
+#: app/ui/uge_dialog.py:268
+msgid "Actualiser"
 msgstr ""
 
 #: app/core/site_search.py:79
@@ -270,7 +274,7 @@ msgstr ""
 msgid "Afficher la liste des raccourcis clavier"
 msgstr ""
 
-#: app/ui/uge_dialog.py:812
+#: app/ui/uge_dialog.py:885
 msgid "Ajout direct du média intercepté…"
 msgstr ""
 
@@ -286,7 +290,7 @@ msgstr ""
 msgid "Ajouter des URLs"
 msgstr ""
 
-#: app/ui/uge_dialog.py:306
+#: app/ui/uge_dialog.py:322
 msgid "Ajouter le média sélectionné à la file de téléchargement"
 msgstr ""
 
@@ -294,11 +298,11 @@ msgstr ""
 msgid "Ajouter un ou plusieurs URLs à télécharger"
 msgstr ""
 
-#: app/ui/add_url_dialog.py:139 app/ui/uge_dialog.py:305
+#: app/ui/add_url_dialog.py:139 app/ui/uge_dialog.py:321
 msgid "Ajouter à la file"
 msgstr ""
 
-#: app/ui/uge_dialog.py:828
+#: app/ui/uge_dialog.py:901
 msgid "Ajouté à la file de téléchargement."
 msgstr ""
 
@@ -316,6 +320,10 @@ msgstr ""
 
 #: app/ui/uge_dialog.py:259
 msgid "Aller à l'adresse"
+msgstr ""
+
+#: app/ui/uge_dialog.py:267
+msgid "Aller à la page suivante"
 msgstr ""
 
 #: app/core/custom_sites.py:64
@@ -424,7 +432,7 @@ msgstr ""
 msgid "Aucun flux n'a été trouvé à cette adresse."
 msgstr ""
 
-#: app/ui/uge_dialog.py:628
+#: app/ui/uge_dialog.py:659
 msgid ""
 "Aucun navigateur compatible trouvé.\n"
 "\n"
@@ -508,6 +516,14 @@ msgid ""
 "\n"
 "Certains abonnements n'ont pas pu être vérifiés :\n"
 "{errors}"
+msgstr ""
+
+#: app/ui/uge_dialog.py:755
+msgid "Aucune page précédente."
+msgstr ""
+
+#: app/ui/uge_dialog.py:759
+msgid "Aucune page suivante."
 msgstr ""
 
 #: app/ui/audio_track_dialog.py:138
@@ -760,7 +776,7 @@ msgid "Chargement de {category} sur {site}…"
 msgstr ""
 
 #: app/ui/player_dialog.py:70 app/ui/search_dialog.py:430
-#: app/ui/uge_dialog.py:675
+#: app/ui/uge_dialog.py:706
 msgid "Chargement…"
 msgstr ""
 
@@ -1136,11 +1152,11 @@ msgstr ""
 msgid "Détecter automatiquement les URLs copiées"
 msgstr ""
 
-#: app/ui/uge_dialog.py:301
+#: app/ui/uge_dialog.py:317
 msgid "Effacer"
 msgstr ""
 
-#: app/ui/uge_dialog.py:302
+#: app/ui/uge_dialog.py:318
 msgid "Effacer la liste des médias détectés"
 msgstr ""
 
@@ -1206,7 +1222,7 @@ msgid ""
 "Note : les contenus protégés par DRM ne sont pas pris en charge."
 msgstr ""
 
-#: app/ui/uge_dialog.py:269
+#: app/ui/uge_dialog.py:285
 msgid "Entrez une URL pour ouvrir le navigateur."
 msgstr ""
 
@@ -1256,7 +1272,7 @@ msgstr ""
 msgid "Erreur"
 msgstr ""
 
-#: app/ui/login_dialog.py:167 app/ui/uge_dialog.py:689
+#: app/ui/login_dialog.py:167 app/ui/uge_dialog.py:720
 msgid "Erreur : {error}"
 msgstr ""
 
@@ -1305,7 +1321,7 @@ msgstr ""
 msgid "Erreur lors de la recherche."
 msgstr ""
 
-#: app/ui/uge_dialog.py:525
+#: app/ui/uge_dialog.py:556
 msgid ""
 "Erreur lors de la sauvegarde :\n"
 "{error}"
@@ -1329,11 +1345,11 @@ msgstr ""
 msgid "Erreur yt-dlp"
 msgstr ""
 
-#: app/ui/uge_dialog.py:526
+#: app/ui/uge_dialog.py:557
 msgid "Erreur — DownAccess"
 msgstr ""
 
-#: app/ui/uge_dialog.py:632 app/ui/uge_dialog.py:658
+#: app/ui/uge_dialog.py:663 app/ui/uge_dialog.py:689
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
@@ -1373,7 +1389,7 @@ msgstr ""
 msgid "Extraction guidée — Comment ça marche"
 msgstr ""
 
-#: app/ui/uge_dialog.py:211 app/ui/uge_dialog.py:598
+#: app/ui/uge_dialog.py:211 app/ui/uge_dialog.py:629
 msgid "Extraction guidée — DownAccess"
 msgstr ""
 
@@ -1431,7 +1447,7 @@ msgstr ""
 #: app/ui/login_dialog.py:110 app/ui/main_window.py:2593
 #: app/ui/player_dialog.py:119 app/ui/report_dialog.py:123
 #: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:291
-#: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:309
+#: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:325
 #: app/ui/warning_dialog.py:41 app/ui/warning_dialog.py:42
 msgid "Fermer"
 msgstr ""
@@ -1440,7 +1456,7 @@ msgstr ""
 msgid "Fichier introuvable"
 msgstr ""
 
-#: app/ui/uge_dialog.py:546
+#: app/ui/uge_dialog.py:577
 msgid ""
 "Fichier sauvegardé :\n"
 "{filepath}\n"
@@ -1618,7 +1634,7 @@ msgid "Impossible d'extraire l'URL de streaming."
 msgstr ""
 
 #: app/ui/guided_login_dialog.py:134 app/ui/login_dialog.py:169
-#: app/ui/uge_dialog.py:657
+#: app/ui/uge_dialog.py:688
 msgid ""
 "Impossible d'ouvrir le navigateur.\n"
 "\n"
@@ -1669,6 +1685,10 @@ msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
 "Fermez complètement votre navigateur, ou connectez-vous via le menu « Se connecter à un site », puis réessayez."
+msgstr ""
+
+#: app/ui/uge_dialog.py:763
+msgid "Impossible de recharger la page."
 msgstr ""
 
 #: app/ui/main_window.py:758
@@ -1764,15 +1784,15 @@ msgstr ""
 msgid "Installation en cours…"
 msgstr ""
 
-#: app/ui/uge_dialog.py:276
+#: app/ui/uge_dialog.py:292
 msgid "Intercepter les requêtes (sites avec tokens expirants)"
 msgstr ""
 
-#: app/ui/uge_dialog.py:365
+#: app/ui/uge_dialog.py:396
 msgid "Interception des requêtes média activée."
 msgstr ""
 
-#: app/ui/uge_dialog.py:375
+#: app/ui/uge_dialog.py:406
 msgid "Interception des requêtes média désactivée."
 msgstr ""
 
@@ -1848,7 +1868,7 @@ msgstr ""
 msgid "L'installeur s'est terminé immédiatement — fichier corrompu ?"
 msgstr ""
 
-#: app/ui/uge_dialog.py:346
+#: app/ui/uge_dialog.py:377
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
@@ -2106,7 +2126,7 @@ msgstr ""
 msgid "Liste des formats disponibles"
 msgstr ""
 
-#: app/ui/uge_dialog.py:287
+#: app/ui/uge_dialog.py:303
 msgid "Liste des médias détectés"
 msgstr ""
 
@@ -2114,7 +2134,7 @@ msgstr ""
 msgid "Liste des résultats"
 msgstr ""
 
-#: app/ui/uge_dialog.py:789
+#: app/ui/uge_dialog.py:862
 msgid "Liste effacée."
 msgstr ""
 
@@ -2210,19 +2230,19 @@ msgstr ""
 msgid "Média"
 msgstr ""
 
-#: app/ui/uge_dialog.py:549
+#: app/ui/uge_dialog.py:580
 msgid "Média intercepté — DownAccess"
 msgstr ""
 
-#: app/ui/uge_dialog.py:474
+#: app/ui/uge_dialog.py:505
 msgid "Média intercepté."
 msgstr ""
 
-#: app/ui/uge_dialog.py:540
+#: app/ui/uge_dialog.py:571
 msgid "Média sauvegardé : {filename} ({size_mb:.1f} Mo)"
 msgstr ""
 
-#: app/ui/uge_dialog.py:283
+#: app/ui/uge_dialog.py:299
 msgid "Médias détectés :"
 msgstr ""
 
@@ -2342,7 +2362,7 @@ msgstr ""
 msgid "Ouverture dans Access Media Converter…"
 msgstr ""
 
-#: app/ui/uge_dialog.py:596
+#: app/ui/uge_dialog.py:627
 msgid "Ouverture du navigateur..."
 msgstr ""
 
@@ -2433,7 +2453,7 @@ msgstr ""
 msgid "Page Git&Hub du projet"
 msgstr ""
 
-#: app/ui/uge_dialog.py:697
+#: app/ui/uge_dialog.py:770
 msgid ""
 "Page chargée : {title}\n"
 "Lancez la vidéo dans le navigateur — les médias seront détectés automatiquement."
@@ -2628,6 +2648,10 @@ msgstr ""
 msgid "Proxy SOCKS4/5 :"
 msgstr ""
 
+#: app/ui/uge_dialog.py:264
+msgid "Précédent"
+msgstr ""
+
 #: app/ui/main_window.py:2293
 msgid "Préférences enregistrées."
 msgstr ""
@@ -2690,6 +2714,10 @@ msgstr ""
 
 #: app/core/error_reporter.py:168
 msgid "Rapport envoyé avec succès."
+msgstr ""
+
+#: app/ui/uge_dialog.py:269
+msgid "Recharger la page"
 msgstr ""
 
 #: app/ui/search_dialog.py:77
@@ -2810,6 +2838,10 @@ msgstr ""
 msgid "Retour aux résultats de recherche."
 msgstr ""
 
+#: app/ui/uge_dialog.py:265
+msgid "Revenir à la page précédente"
+msgstr ""
+
 #: app/ui/playlist_harvest_dialog.py:19
 msgid "Récupération de la playlist"
 msgstr ""
@@ -2876,7 +2908,7 @@ msgstr ""
 msgid "Résolution"
 msgstr ""
 
-#: app/ui/uge_dialog.py:816
+#: app/ui/uge_dialog.py:889
 msgid "Résolution de l'URL en cours…"
 msgstr ""
 
@@ -3017,6 +3049,10 @@ msgstr ""
 
 #: app/ui/contact_dialog.py:16
 msgid "Suggestion de fonctionnalité"
+msgstr ""
+
+#: app/ui/uge_dialog.py:266
+msgid "Suivant"
 msgstr ""
 
 #: app/ui/subscriptions_dialog.py:91
@@ -3239,7 +3275,7 @@ msgid "Transcription — {title}"
 msgstr ""
 
 #: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:277
-#: app/ui/uge_dialog.py:289
+#: app/ui/uge_dialog.py:305
 msgid "Type"
 msgstr ""
 
@@ -3279,7 +3315,7 @@ msgstr ""
 msgid "Téléchargement démarré : {title}."
 msgstr ""
 
-#: app/ui/uge_dialog.py:449 app/ui/uge_dialog.py:450
+#: app/ui/uge_dialog.py:480 app/ui/uge_dialog.py:481
 msgid "Téléchargement en cours…"
 msgstr ""
 
@@ -3303,7 +3339,7 @@ msgstr ""
 msgid "Téléchargement supprimé de la liste."
 msgstr ""
 
-#: app/ui/uge_dialog.py:535
+#: app/ui/uge_dialog.py:566
 msgid "Téléchargement terminé : {filename} ({size_mb:.1f} Mo)"
 msgstr ""
 
@@ -3385,7 +3421,7 @@ msgstr ""
 msgid "Télécharger un extrait"
 msgstr ""
 
-#: app/ui/uge_dialog.py:290
+#: app/ui/uge_dialog.py:306
 msgid "URL"
 msgstr ""
 
@@ -3855,15 +3891,15 @@ msgstr ""
 msgid "{count} entrée(s)"
 msgstr ""
 
-#: app/ui/uge_dialog.py:760
+#: app/ui/uge_dialog.py:833
 msgid "{count} média détecté."
 msgstr ""
 
-#: app/ui/uge_dialog.py:473 app/ui/uge_dialog.py:756
+#: app/ui/uge_dialog.py:504 app/ui/uge_dialog.py:829
 msgid "{count} média(s) détecté(s)"
 msgstr ""
 
-#: app/ui/uge_dialog.py:758
+#: app/ui/uge_dialog.py:831
 msgid "{count} médias détectés."
 msgstr ""
 
