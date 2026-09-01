@@ -52,6 +52,12 @@ Vous pouvez choisir vous-même dans **Préférences > Général**, réglage **Fe
 
 La connexion aux sites, elle, continue de passer par votre vrai navigateur : c'est là que vit votre gestionnaire de mots de passe.
 
+### Le rappel « Comment ça marche » ne revient plus
+
+Les fenêtres d'explication de l'extraction guidée et de la connexion à un site devaient s'afficher une seule fois, à la première utilisation. Elles revenaient en réalité à **chaque démarrage** de DownAccess : votre « j'ai lu » était bien enregistré, mais oublié au lancement suivant.
+
+C'est corrigé : elles ne reviendront plus.
+
 ### Note
 
 Le contenu protégé par DRM (Netflix, Disney+, Prime Video) n'est pas pris en charge. Cette protection est posée par les plateformes : aucune application ne peut la contourner. Sur M6, seule la bande-son échappe au verrou.

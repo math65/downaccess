@@ -719,7 +719,7 @@ msgstr "Guided extraction — How it works"
 #: app/ui/login_dialog.py:110 app/ui/main_window.py:2593
 #: app/ui/player_dialog.py:119 app/ui/report_dialog.py:123
 #: app/ui/search_dialog.py:362 app/ui/subscriptions_dialog.py:291
-#: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:325
+#: app/ui/transcript_dialog.py:48 app/ui/uge_dialog.py:350
 #: app/ui/warning_dialog.py:41 app/ui/warning_dialog.py:42
 msgid "Fermer"
 msgstr "Close"
@@ -811,26 +811,6 @@ msgstr "About DownAccess"
 #: app/ui/main_window.py:204
 msgid "Installation en cours…"
 msgstr "Installing…"
-
-#: app/ui/main_window.py:1923
-msgid ""
-"L'extraction guidée ouvre votre navigateur (Chrome, Edge ou Brave) à côté de DownAccess.\n"
-"\n"
-"Naviguez sur le site et lancez la vidéo dans le navigateur.\n"
-"Les médias détectés apparaîtront dans la fenêtre DownAccess.\n"
-"\n"
-"Vous pourrez ensuite les ajouter à la file de téléchargement.\n"
-"\n"
-"Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video…) ne sont pas pris en charge."
-msgstr ""
-"Guided extraction opens your browser (Chrome, Edge, or Brave) next to DownAccess.\n"
-"\n"
-"Navigate to the site and play the video in the browser.\n"
-"Detected media will appear in the DownAccess window.\n"
-"\n"
-"You can then add them to the download queue.\n"
-"\n"
-"Note: DRM-protected content (Netflix, Disney+, Prime Video…) is not supported."
 
 #: app/ui/main_window.py:2361
 msgid "La liste est déjà vide."
@@ -1237,47 +1217,47 @@ msgstr "Failed to send the report."
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr "yt-dlp update failed."
 
-#: app/ui/uge_dialog.py:308 app/ui/uge_dialog.py:860
+#: app/ui/uge_dialog.py:333 app/ui/uge_dialog.py:900
 msgid "0 média(s) détecté(s)"
 msgstr "0 media detected"
 
-#: app/ui/uge_dialog.py:293
+#: app/ui/uge_dialog.py:318
 msgid "Activer l'interception des requêtes média"
 msgstr "Enable media request interception"
 
-#: app/ui/uge_dialog.py:252
+#: app/ui/uge_dialog.py:277
 msgid "Adresse :"
 msgstr "Address:"
 
-#: app/ui/uge_dialog.py:255
+#: app/ui/uge_dialog.py:280
 msgid "Adresse URL"
 msgstr "URL address"
 
-#: app/ui/uge_dialog.py:885
+#: app/ui/uge_dialog.py:925
 msgid "Ajout direct du média intercepté…"
 msgstr "Adding intercepted media directly…"
 
-#: app/ui/uge_dialog.py:322
+#: app/ui/uge_dialog.py:347
 msgid "Ajouter le média sélectionné à la file de téléchargement"
 msgstr "Add the selected media to the download queue"
 
-#: app/ui/add_url_dialog.py:139 app/ui/uge_dialog.py:321
+#: app/ui/add_url_dialog.py:139 app/ui/uge_dialog.py:346
 msgid "Ajouter à la file"
 msgstr "Add to queue"
 
-#: app/ui/uge_dialog.py:901
+#: app/ui/uge_dialog.py:941
 msgid "Ajouté à la file de téléchargement."
 msgstr "Added to the download queue."
 
-#: app/ui/uge_dialog.py:259
+#: app/ui/uge_dialog.py:284
 msgid "Aller"
 msgstr "Go"
 
-#: app/ui/uge_dialog.py:259
+#: app/ui/uge_dialog.py:284
 msgid "Aller à l'adresse"
 msgstr "Go to address"
 
-#: app/ui/uge_dialog.py:659
+#: app/ui/uge_dialog.py:699
 msgid ""
 "Aucun navigateur compatible trouvé.\n"
 "\n"
@@ -1287,32 +1267,32 @@ msgstr ""
 "\n"
 "Install Google Chrome, Microsoft Edge, or Brave."
 
-#: app/ui/uge_dialog.py:196
+#: app/ui/uge_dialog.py:221
 msgid "Audio {ext}"
 msgstr "Audio {ext}"
 
 #: app/ui/player_dialog.py:70 app/ui/search_dialog.py:430
-#: app/ui/uge_dialog.py:706
+#: app/ui/uge_dialog.py:746
 msgid "Chargement…"
 msgstr "Loading…"
 
-#: app/ui/uge_dialog.py:317
+#: app/ui/uge_dialog.py:342
 msgid "Effacer"
 msgstr "Clear"
 
-#: app/ui/uge_dialog.py:318
+#: app/ui/uge_dialog.py:343
 msgid "Effacer la liste des médias détectés"
 msgstr "Clear the list of detected media"
 
-#: app/ui/uge_dialog.py:285
+#: app/ui/uge_dialog.py:310
 msgid "Entrez une URL pour ouvrir le navigateur."
 msgstr "Enter a URL to open the browser."
 
-#: app/ui/login_dialog.py:167 app/ui/uge_dialog.py:720
+#: app/ui/login_dialog.py:167 app/ui/uge_dialog.py:760
 msgid "Erreur : {error}"
 msgstr "Error: {error}"
 
-#: app/ui/uge_dialog.py:556
+#: app/ui/uge_dialog.py:581
 msgid ""
 "Erreur lors de la sauvegarde :\n"
 "{error}"
@@ -1320,19 +1300,19 @@ msgstr ""
 "Error during save:\n"
 "{error}"
 
-#: app/ui/uge_dialog.py:557
+#: app/ui/uge_dialog.py:582
 msgid "Erreur — DownAccess"
 msgstr "Error — DownAccess"
 
-#: app/ui/uge_dialog.py:663 app/ui/uge_dialog.py:689
+#: app/ui/uge_dialog.py:703 app/ui/uge_dialog.py:729
 msgid "Erreur — Extraction guidée"
 msgstr "Error — Guided extraction"
 
-#: app/ui/uge_dialog.py:211 app/ui/uge_dialog.py:629
+#: app/ui/uge_dialog.py:236 app/ui/uge_dialog.py:654
 msgid "Extraction guidée — DownAccess"
 msgstr "Guided extraction — DownAccess"
 
-#: app/ui/uge_dialog.py:577
+#: app/ui/uge_dialog.py:602
 msgid ""
 "Fichier sauvegardé :\n"
 "{filepath}\n"
@@ -1345,7 +1325,7 @@ msgstr ""
 "Size: {size_mb:.1f} MB"
 
 #: app/ui/guided_login_dialog.py:134 app/ui/login_dialog.py:169
-#: app/ui/uge_dialog.py:688
+#: app/ui/uge_dialog.py:728
 msgid ""
 "Impossible d'ouvrir le navigateur.\n"
 "\n"
@@ -1355,84 +1335,84 @@ msgstr ""
 "\n"
 "{error}"
 
-#: app/ui/uge_dialog.py:292
+#: app/ui/uge_dialog.py:317
 msgid "Intercepter les requêtes (sites avec tokens expirants)"
 msgstr "Intercept requests (sites with expiring tokens)"
 
-#: app/ui/uge_dialog.py:396
+#: app/ui/uge_dialog.py:421
 msgid "Interception des requêtes média activée."
 msgstr "Media request interception enabled."
 
-#: app/ui/uge_dialog.py:406
+#: app/ui/uge_dialog.py:431
 msgid "Interception des requêtes média désactivée."
 msgstr "Media request interception disabled."
 
-#: app/ui/uge_dialog.py:377
+#: app/ui/uge_dialog.py:402
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr "Interception will be enabled when the browser starts."
 
-#: app/ui/uge_dialog.py:303
+#: app/ui/uge_dialog.py:328
 msgid "Liste des médias détectés"
 msgstr "List of detected media"
 
-#: app/ui/uge_dialog.py:862
+#: app/ui/uge_dialog.py:902
 msgid "Liste effacée."
 msgstr "List cleared."
 
-#: app/ui/uge_dialog.py:197
+#: app/ui/uge_dialog.py:222
 msgid "Média"
 msgstr "Media"
 
-#: app/ui/uge_dialog.py:580
+#: app/ui/uge_dialog.py:605
 msgid "Média intercepté — DownAccess"
 msgstr "Intercepted media — DownAccess"
 
-#: app/ui/uge_dialog.py:505
+#: app/ui/uge_dialog.py:530
 msgid "Média intercepté."
 msgstr "Media intercepted."
 
-#: app/ui/uge_dialog.py:571
+#: app/ui/uge_dialog.py:596
 msgid "Média sauvegardé : {filename} ({size_mb:.1f} Mo)"
 msgstr "Media saved: {filename} ({size_mb:.1f} MB)"
 
-#: app/ui/uge_dialog.py:299
+#: app/ui/uge_dialog.py:324
 msgid "Médias détectés :"
 msgstr "Detected media:"
 
-#: app/ui/uge_dialog.py:889
+#: app/ui/uge_dialog.py:929
 msgid "Résolution de l'URL en cours…"
 msgstr "Resolving URL…"
 
 #: app/ui/search_dialog.py:300 app/ui/subscriptions_dialog.py:277
-#: app/ui/uge_dialog.py:305
+#: app/ui/uge_dialog.py:330
 msgid "Type"
 msgstr "Type"
 
-#: app/ui/uge_dialog.py:480 app/ui/uge_dialog.py:481
+#: app/ui/uge_dialog.py:505 app/ui/uge_dialog.py:506
 msgid "Téléchargement en cours…"
 msgstr "Downloading…"
 
-#: app/ui/uge_dialog.py:566
+#: app/ui/uge_dialog.py:591
 msgid "Téléchargement terminé : {filename} ({size_mb:.1f} Mo)"
 msgstr "Download finished: {filename} ({size_mb:.1f} MB)"
 
-#: app/ui/uge_dialog.py:306
+#: app/ui/uge_dialog.py:331
 msgid "URL"
 msgstr "URL"
 
-#: app/ui/uge_dialog.py:193
+#: app/ui/uge_dialog.py:218
 msgid "Vidéo {ext}"
 msgstr "Video {ext}"
 
-#: app/ui/uge_dialog.py:833
+#: app/ui/uge_dialog.py:873
 msgid "{count} média détecté."
 msgstr "{count} media detected."
 
-#: app/ui/uge_dialog.py:504 app/ui/uge_dialog.py:829
+#: app/ui/uge_dialog.py:529 app/ui/uge_dialog.py:869
 msgid "{count} média(s) détecté(s)"
 msgstr "{count} media detected"
 
-#: app/ui/uge_dialog.py:831
+#: app/ui/uge_dialog.py:871
 msgid "{count} médias détectés."
 msgstr "{count} media detected."
 
@@ -2384,7 +2364,7 @@ msgstr ""
 "\n"
 "Powered by yt-dlp and ffmpeg."
 
-#: app/ui/uge_dialog.py:770
+#: app/ui/uge_dialog.py:810
 msgid ""
 "Page chargée : {title}\n"
 "Lancez la vidéo dans le navigateur — les médias seront détectés automatiquement."
@@ -2392,7 +2372,7 @@ msgstr ""
 "Page loaded: {title}\n"
 "Play the video in the browser — media will be detected automatically."
 
-#: app/ui/uge_dialog.py:233
+#: app/ui/uge_dialog.py:258
 msgid ""
 "Extraction guidée ouverte. Saisissez une URL et appuyez sur Entrée pour "
 "naviguer. Lancez la vidéo dans le navigateur qui s'est ouvert. Les médias "
@@ -4389,42 +4369,62 @@ msgstr "The window built into DownAccess"
 msgid "Mon navigateur habituel"
 msgstr "My usual browser"
 
-#: app/ui/uge_dialog.py:627
+#: app/ui/uge_dialog.py:652
 msgid "Ouverture du navigateur..."
 msgstr "Opening the browser..."
 
-#: app/ui/uge_dialog.py:268
+#: app/ui/uge_dialog.py:293
 msgid "Actualiser"
 msgstr "Reload"
 
-#: app/ui/uge_dialog.py:267
+#: app/ui/uge_dialog.py:292
 msgid "Aller à la page suivante"
 msgstr "Go forward to the next page"
 
-#: app/ui/uge_dialog.py:755
+#: app/ui/uge_dialog.py:795
 msgid "Aucune page précédente."
 msgstr "No previous page."
 
-#: app/ui/uge_dialog.py:759
+#: app/ui/uge_dialog.py:799
 msgid "Aucune page suivante."
 msgstr "No next page."
 
-#: app/ui/uge_dialog.py:763
+#: app/ui/uge_dialog.py:803
 msgid "Impossible de recharger la page."
 msgstr "Cannot reload the page."
 
-#: app/ui/uge_dialog.py:264
+#: app/ui/uge_dialog.py:289
 msgid "Précédent"
 msgstr "Back"
 
-#: app/ui/uge_dialog.py:269
+#: app/ui/uge_dialog.py:294
 msgid "Recharger la page"
 msgstr "Reload the page"
 
-#: app/ui/uge_dialog.py:265
+#: app/ui/uge_dialog.py:290
 msgid "Revenir à la page précédente"
 msgstr "Go back to the previous page"
 
-#: app/ui/uge_dialog.py:266
+#: app/ui/uge_dialog.py:291
 msgid "Suivant"
 msgstr "Forward"
+
+#: app/ui/main_window.py:1923
+msgid ""
+"L'extraction guidée ouvre une fenêtre de navigation à côté de DownAccess.\n"
+"\n"
+"Naviguez sur le site et lancez la vidéo dans cette fenêtre.\n"
+"Les médias détectés apparaîtront dans la fenêtre DownAccess.\n"
+"\n"
+"Vous pourrez ensuite les ajouter à la file de téléchargement.\n"
+"\n"
+"Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video…) ne sont pas pris en charge."
+msgstr ""
+"Guided extraction opens a browsing window alongside DownAccess.\n"
+"\n"
+"Browse the site and start the video in that window.\n"
+"The media found will appear in the DownAccess window.\n"
+"\n"
+"You can then add them to the download queue.\n"
+"\n"
+"Note: DRM-protected content (Netflix, Disney+, Prime Video…) is not supported."

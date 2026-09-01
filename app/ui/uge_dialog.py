@@ -103,6 +103,31 @@ _UA_DESKTOP = (
 )
 
 
+# Raccourcis de navigation DANS la page, pour le moteur WebView2 seulement.
+# WebView2 est un moteur nu : pywebview ne lui active les touches du navigateur
+# (Alt+Fleche, F5) qu'en mode debug, qui ouvrirait aussi les outils de
+# developpement et le menu contextuel — pas ce qu'on veut montrer a
+# l'utilisateur. On ecoute donc les touches dans la page elle-meme.
+#
+# ⚠️ A n'injecter QUE pour WebView2 : un vrai navigateur traite deja ces
+# touches, et les deux ensemble feraient reculer de deux pages d'un coup.
+_NAV_KEYS_SCRIPT = """
+(function () {
+    if (window.__da_nav_keys) return;
+    window.__da_nav_keys = true;
+    document.addEventListener('keydown', function (e) {
+        if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === 'ArrowLeft') {
+            e.preventDefault(); history.back();
+        } else if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === 'ArrowRight') {
+            e.preventDefault(); history.forward();
+        } else if (e.key === 'F5' && !e.ctrlKey && !e.altKey) {
+            e.preventDefault(); location.reload();
+        }
+    }, true);   // phase de capture : avant les gestionnaires de la page
+})();
+"""
+
+
 def _resolve_redirect(url: str, referer: str | None = None) -> str:
     """
     Suit les redirections HTTP et tente d'extraire l'URL du média depuis
@@ -647,9 +672,24 @@ class UGEDialog(wx.Frame):
         self._browser_name = "WebView2"
         _log.info("Extraction guidee : moteur WebView2 de Windows")
         self._page.listen.start('')
+        self._install_nav_keys()
         if self._intercept_enabled:
             self._enable_fetch_intercept()
         return True
+
+    def _install_nav_keys(self) -> None:
+        """Rend Alt+Fleche et F5 actifs dans la fenetre de navigation.
+
+        `addScriptToEvaluateOnNewDocument` rejoue le script a chaque page :
+        rien a refaire apres une navigation. Sans effet sur le deroulement de
+        l'extraction si le moteur le refuse.
+        """
+        try:
+            self._page.run_cdp("Page.addScriptToEvaluateOnNewDocument",
+                               source=_NAV_KEYS_SCRIPT)
+            self._page.run_js(_NAV_KEYS_SCRIPT)   # la page deja ouverte
+        except Exception as exc:
+            _log.info("Raccourcis de navigation non installes : %s", exc)
 
     def _start_installed_browser(self) -> bool:
         """Lance un navigateur Chromium installe (Chrome, Edge ou Brave)."""

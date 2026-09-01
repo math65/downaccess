@@ -60,6 +60,12 @@ DEFAULTS: dict = {
                                    # pages = boutons Page précédente/suivante
                                    # continuous = la suite se charge en bas de liste
     "suppressed_warnings": [],     # clés des avertissements masqués
+    # Dialogues d'explication montres UNE SEULE fois. Ils doivent figurer ici :
+    # `load()` ne conserve que les cles presentes dans DEFAULTS, donc une cle
+    # absente est ecrite sur le disque puis jetee au demarrage suivant — et le
+    # dialogue revenait a chaque lancement.
+    "_uge_intro_shown": False,
+    "_login_intro_shown": False,
     "language": "auto",            # auto | fr | en
     "install_id": "",              # identifiant anonyme d'installation (généré au 1er lancement)
     "seen_announcements": [],      # ids des annonces "once" déjà affichées

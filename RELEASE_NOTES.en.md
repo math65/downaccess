@@ -52,6 +52,12 @@ You can choose for yourself in **Preferences > General**, the **Window to use** 
 
 Signing in to sites still goes through your real browser: that is where your password manager lives.
 
+### The "How it works" reminder no longer comes back
+
+The explanation windows for guided extraction and for signing in to a site were meant to show once, on first use. In practice they came back at **every start** of DownAccess: your "I have read this" was recorded, then forgotten at the next launch.
+
+This is fixed: they will not come back.
+
 ### Note
 
 DRM-protected content (Netflix, Disney+, Prime Video) is not supported. That protection is put in place by the platforms: no application can work around it. On M6, only the soundtrack escapes the lock.

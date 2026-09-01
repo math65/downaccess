@@ -1921,9 +1921,9 @@ class MainWindow(wx.Frame):
         if not self.settings.get("_uge_intro_shown"):
             wx.MessageBox(
                 _(
-                    "L'extraction guidée ouvre votre navigateur (Chrome, Edge ou Brave) "
+                    "L'extraction guidée ouvre une fenêtre de navigation "
                     "à côté de DownAccess.\n\n"
-                    "Naviguez sur le site et lancez la vidéo dans le navigateur.\n"
+                    "Naviguez sur le site et lancez la vidéo dans cette fenêtre.\n"
                     "Les médias détectés apparaîtront dans la fenêtre DownAccess.\n\n"
                     "Vous pourrez ensuite les ajouter à la file de téléchargement.\n\n"
                     "Note : les contenus protégés par DRM (Netflix, Disney+, Prime Video…) "
