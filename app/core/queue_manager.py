@@ -109,6 +109,18 @@ class QueueManager:
         with self._lock:
             return len(self._active)
 
+    @property
+    def pending_count(self) -> int:
+        """Nombre de téléchargements en attente de créneau (thread-safe)."""
+        with self._lock:
+            return len(self._queue)
+
+    @property
+    def is_idle(self) -> bool:
+        """Vrai si plus rien ne tourne ni n'attend : la rafale est finie."""
+        with self._lock:
+            return not self._active and not self._queue
+
     def add(self, url: str, format_spec: str = "auto", format_id: str | None = None,
             audio_groups: list[list[str]] | None = None,
             prefetched_info: DownloadInfo | None = None,

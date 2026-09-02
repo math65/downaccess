@@ -230,6 +230,47 @@ OnProgressCallback  = Callable[[DownloadProgress], None]
 OnErrorCallback     = Callable[[str, str], None]   # (download_id, message)
 
 
+# Controle anti-robot. YouTube repond « Sign in to confirm you're not a bot »
+# quand trop de telechargements partent coup sur coup de la meme adresse IP,
+# et yt-dlp y ajoute son conseil habituel sur les cookies. Le message a beau
+# commencer par « Sign in », ce n'est PAS une demande de connexion : c'est une
+# limite de debit posee sur l'adresse Internet. Se connecter n'y change rien —
+# etre connecte peut meme aggraver le cas (cf. le repli sans cookies de 0.2.3).
+#
+# Il faut donc le reconnaitre AVANT tout le reste : trois motifs de
+# `_LOGIN_REQUIRED_PATTERNS` y repondent d'un coup (« sign in to confirm »,
+# « cookies-from-browser », « for the authentication »), et l'application
+# envoyait l'utilisateur se connecter en boucle, une fenetre par video en
+# echec (rapport de Brad, 0.2.3).
+_BOT_CHECK_PATTERNS = (
+    "not a bot", "not a robot",
+)
+
+
+def is_bot_check_error(msg: str) -> bool:
+    """Vrai si le site a oppose un controle anti-robot (limite de debit)."""
+    low = (msg or "").lower()
+    return any(p in low for p in _BOT_CHECK_PATTERNS)
+
+
+def bot_check_message() -> str:
+    """Message clair pour un controle anti-robot.
+
+    Dire explicitement que la connexion n'y peut rien : c'est la premiere
+    chose que l'utilisateur essaie, et il peut y passer la soiree.
+    """
+    return _(
+        "Le site a interrompu le téléchargement pour vérifier que vous "
+        "n'êtes pas un robot.\n\n"
+        "Ce n'est pas un problème de compte : vous connecter n'y changera "
+        "rien. C'est une limite déclenchée par le nombre de téléchargements "
+        "lancés coup sur coup depuis votre connexion Internet.\n\n"
+        "Attendez quelques minutes avant de relancer. Si cela se reproduit "
+        "souvent, réduisez le nombre de téléchargements simultanés dans "
+        "Préférences > Général."
+    )
+
+
 # Marqueurs (dans les messages yt-dlp) indiquant qu'une connexion au site
 # règlerait le problème : contenu réservé aux adultes/membres/privé, ou
 # suggestion explicite de yt-dlp d'utiliser des cookies/identifiants.
@@ -244,7 +285,13 @@ _LOGIN_REQUIRED_PATTERNS = (
 
 def _is_login_required(msg: str) -> bool:
     """Vrai si l'erreur yt-dlp indique qu'une connexion au site aiderait."""
-    low = msg.lower()
+    low = (msg or "").lower()
+    # Le controle anti-robot dit « Sign in ... » et reclame des cookies sans
+    # qu'aucune connexion n'y puisse quoi que ce soit : il doit sortir ici,
+    # avant que trois motifs de la liste ne le prennent pour une demande de
+    # connexion.
+    if is_bot_check_error(low):
+        return False
     return any(p in low for p in _LOGIN_REQUIRED_PATTERNS)
 
 
@@ -378,6 +425,11 @@ def is_transient_error(msg: str) -> bool:
     # explicite, pour que l'ajout d'un motif transitoire ne l'attrape jamais.
     if is_disk_full_error(low):
         return False
+    # Controle anti-robot : c'est le nombre de requetes qui l'a declenche.
+    # Reessayer tout de suite, c'est en ajouter — exactement ce qu'il ne faut
+    # pas faire. Seul le temps le leve.
+    if is_bot_check_error(low):
+        return False
     return any(p in low for p in _TRANSIENT_ERROR_PATTERNS)
 
 
@@ -501,6 +553,10 @@ def should_retry_without_cookies(msg: str) -> bool:
         return False
     # Contenu reserve : sans cookies il devient inaccessible pour de bon.
     if _is_login_required(msg):
+        return False
+    # Controle anti-robot : la limite porte sur l'adresse IP, pas sur le
+    # compte. Retenter sans les cookies ne ferait qu'une requete de plus.
+    if is_bot_check_error(msg):
         return False
     return True
 
@@ -693,6 +749,11 @@ def _humanize_error(msg: str, dest: str = "") -> str:
             "Fermez complètement votre navigateur, ou connectez-vous via le "
             "menu « Se connecter à un site », puis réessayez."
         )
+
+    # Controle anti-robot. Avant la connexion requise : le message du site
+    # commence par « Sign in », et c'est precisement le contresens a eviter.
+    if is_bot_check_error(low):
+        return bot_check_message()
 
     # Connexion requise : message court (le parcours de connexion guidée
     # affiche son propre dialogue détaillé ; ce texte sert de repli).

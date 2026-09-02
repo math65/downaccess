@@ -7,6 +7,7 @@ qu'il soit déjà ouvert ou non. La connexion ne se fait qu'une fois.
 """
 import logging
 import threading
+from pathlib import Path
 from urllib.parse import urlparse
 
 import wx
@@ -37,6 +38,52 @@ def friendly_browser_error(exc: Exception) -> str:
             "puis réessayez."
         )
     return msg
+
+
+def _cookie_du_domaine(domaine_cookie: str, domaine: str) -> bool:
+    """Vrai si ce cookie appartient au site, sous-domaines compris.
+
+    Un cookie de session porte « .youtube.com », celui d'une page de connexion
+    « accounts.youtube.com » : les deux doivent partir quand on se deconnecte
+    de youtube.com.
+    """
+    cd = (domaine_cookie or "").lstrip(".").lower()
+    d = (domaine or "").lstrip(".").lower()
+    if not cd or not d:
+        return False
+    return cd == d or cd.endswith("." + d)
+
+
+def _oublier_cookies_enregistres(dialogue, url: str, domaine: str) -> bool:
+    r"""Efface le jar que DownAccess passe a yt-dlp, et oublie le site.
+
+    Vider le navigateur ne suffit pas : les cookies recoltes vivent aussi dans
+    `%APPDATA%\DownAccess\cookies\<site>.txt`, et yt-dlp continuait de les
+    envoyer. L'utilisateur se croyait deconnecte et ne l'etait pas.
+    """
+    efface = False
+    try:
+        jar = Path(jar_path_for(url))
+        if jar.exists():
+            jar.unlink()
+            efface = True
+            _log.info("Jar de cookies supprime : %s", jar)
+    except OSError as exc:
+        _log.warning("Jar de cookies non supprime : %s", exc)
+
+    try:
+        parent = dialogue.GetParent()
+        settings = getattr(parent, "settings", None)
+        if settings is not None:
+            sites = settings.get("cookie_sites", [])
+            if domaine in sites:
+                sites.remove(domaine)
+                from app.core import settings as cfg
+                cfg.save(settings)
+                efface = True
+    except Exception as exc:
+        _log.warning("Site non retire de la liste des cookies : %s", exc)
+    return efface
 
 
 class LoginDialog(wx.Dialog):
@@ -180,7 +227,12 @@ class LoginDialog(wx.Dialog):
             current_url = self._page.url
             # Extraire le domaine
             from urllib.parse import urlparse
-            domain = urlparse(current_url).hostname or ""
+            domain = (urlparse(current_url).hostname or "").lower()
+            # Les cookies de session sont poses sur le domaine racine
+            # (« .youtube.com »), pas sur « www.youtube.com » : sans ce
+            # retrait, la comparaison ne trouvait rien a supprimer.
+            if domain.startswith("www."):
+                domain = domain[4:]
             if not domain:
                 wx.MessageBox(
                     _("Impossible de déterminer le domaine du site."),
@@ -197,29 +249,53 @@ class LoginDialog(wx.Dialog):
             if confirm != wx.YES:
                 return
 
-            # Supprimer les cookies via CDP
-            self._page.run_cdp(
-                "Network.deleteCookies",
-                domain=domain,
-                name="",
-            )
-            # Supprimer aussi avec le point devant (sous-domaines)
-            self._page.run_cdp(
-                "Network.deleteCookies",
-                domain=f".{domain}",
-                name="",
-            )
+            # Supprimer les cookies : il faut les ENUMERER d'abord.
+            # `Network.deleteCookies` exige un nom et ne supprime que les
+            # cookies qui le portent — l'appel precedent passait `name=""`,
+            # qui ne correspond a aucun cookie reel : le bouton n'effacait
+            # rien, et l'utilisateur restait connecte sans le savoir
+            # (rapport de Brad, 0.2.3).
+            tous = self._page.run_cdp("Network.getAllCookies") or {}
+            cibles = [c for c in tous.get("cookies", [])
+                      if _cookie_du_domaine(c.get("domain", ""), domain)]
+            for cookie in cibles:
+                self._page.run_cdp(
+                    "Network.deleteCookies",
+                    name=cookie.get("name", ""),
+                    domain=cookie.get("domain", ""),
+                    path=cookie.get("path", "/"),
+                )
+
+            # Et les cookies que DownAccess garde de son cote : sans cela,
+            # yt-dlp continuait d'envoyer l'ancienne session a chaque
+            # telechargement. Se deconnecter dans le navigateur ne servait
+            # alors a rien.
+            oublies = _oublier_cookies_enregistres(self, current_url, domain)
+
             # Recharger la page pour refléter la déconnexion
             self._page.refresh()
+            if not cibles and not oublies:
+                self.lbl_status.SetLabel(
+                    _("Aucun cookie de {domain} à supprimer : vous n'étiez "
+                      "pas connecté à ce site.").format(domain=domain))
+                speech.speak(_("Aucun cookie à supprimer."))
+                return
             self.lbl_status.SetLabel(
-                _("Cookies de {domain} supprimés.\nVous êtes déconnecté de ce site.").format(domain=domain)
+                _("Cookies de {domain} supprimés.\nVous êtes déconnecté "
+                  "de ce site.").format(domain=domain)
             )
             speech.speak(_("Cookies de {domain} supprimés.").format(domain=domain))
         except Exception as exc:
-            _log.error("Erreur suppression cookies : %s", exc)
+            # Le detail technique part dans le journal, pas dans le dialogue :
+            # il arrivait tel quel sous les yeux de l'utilisateur, parfois
+            # dans la langue de la bibliotheque et jamais dans la sienne.
+            _log.exception("Erreur suppression cookies : %s", exc)
             wx.MessageBox(
-                _("Erreur lors de la suppression des cookies :\n{error}").format(error=exc),
-                _("Erreur"), wx.OK | wx.ICON_ERROR, self,
+                _("La suppression des cookies n'a pas abouti.\n\n"
+                  "Vous pouvez vous déconnecter depuis le site lui-même, "
+                  "puis fermer cette fenêtre. Le détail de l'erreur est "
+                  "enregistré dans le journal de DownAccess."),
+                _("Suppression impossible"), wx.OK | wx.ICON_ERROR, self,
             )
 
     def _on_close(self, event) -> None:

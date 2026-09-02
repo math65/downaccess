@@ -1,5 +1,23 @@
 ## DownAccess 0.2.4
 
+### No more cascade of "Sign-in required" windows
+
+When you start a lot of downloads one after another, the site may stop to check that you are not a robot. Its message begins with "Sign in", and DownAccess read that as a request to log in: it offered to sign you in, one window per failed video. On a long list that meant dozens of windows to close one by one — and signing in changed nothing, because that was never the problem.
+
+DownAccess now recognises this check for what it is. It explains it in a single window, tells you plainly that your account is not at fault, and suggests waiting a few minutes or lowering the number of simultaneous downloads in Preferences > General.
+
+More generally, **one failure affecting your whole list now opens only one window**. The remaining downloads are still marked as failed in the list, and the status bar keeps count. You can see what is happening without closing a hundred windows.
+
+Thanks to Brad.
+
+### The "Delete cookies for this site" button finally works
+
+In the site sign-in window, this button was not actually deleting any cookies. You thought you were signed out, while DownAccess kept using your old session. When something went wrong, it showed a technical message on top, sometimes in the wrong language.
+
+Cookies are now genuinely deleted, including the ones DownAccess kept on its side for downloads. The site is also removed from the list of signed-in sites. And if something prevents the deletion, the message tells you what to do instead of showing a technical error.
+
+Thanks to Brad.
+
 ### Your queue now survives a forced close
 
 The previous version kept your queue from one session to the next — but only if you closed DownAccess normally. That is exactly what you cannot do when the window stops responding: forcing it closed (Alt+F4, Task Manager) lost the whole queue, in precisely the case you were counting on it.

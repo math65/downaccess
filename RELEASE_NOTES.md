@@ -1,5 +1,23 @@
 ## DownAccess 0.2.4
 
+### Plus de cascade de fenêtres « Connexion nécessaire »
+
+Quand vous lancez beaucoup de téléchargements à la suite, le site peut s'interrompre pour vérifier que vous n'êtes pas un robot. Son message commence par « Sign in », et DownAccess y lisait une demande de connexion : il vous proposait de vous connecter, une fenêtre par vidéo en échec. Sur une longue liste, cela faisait des dizaines de fenêtres à fermer une par une — et se connecter n'y changeait rien, puisque ce n'était pas le problème.
+
+DownAccess reconnaît désormais cette vérification pour ce qu'elle est. Il vous l'explique en une fenêtre, vous dit franchement que votre compte n'y est pour rien, et vous conseille d'attendre quelques minutes ou de réduire le nombre de téléchargements simultanés dans Préférences > Général.
+
+Plus largement, **une même panne qui frappe toute votre liste n'ouvre plus qu'une seule fenêtre**. Les téléchargements suivants restent marqués en erreur dans la liste, et la barre d'état vous donne le compte. Vous voyez ce qui se passe sans avoir à fermer cent fenêtres.
+
+Merci à Brad.
+
+### Le bouton « Supprimer les cookies du site » fonctionne enfin
+
+Dans la fenêtre de connexion à un site, ce bouton ne supprimait en réalité aucun cookie. Vous vous croyiez déconnecté, et DownAccess continuait d'utiliser votre ancienne session. En cas de problème, il affichait par-dessus un message technique parfois dans la mauvaise langue.
+
+Les cookies sont maintenant réellement supprimés, y compris ceux que DownAccess conservait de son côté pour les téléchargements. Le site est aussi retiré de la liste des sites connectés. Et si quelque chose empêche la suppression, le message vous dit quoi faire au lieu de vous montrer une erreur technique.
+
+Merci à Brad.
+
 ### Votre file d'attente survit maintenant à une fermeture forcée
 
 La version précédente conservait votre file d'attente d'une session à l'autre — mais seulement si vous fermiez DownAccess normalement. Or c'est justement ce qu'on ne peut pas faire quand la fenêtre ne répond plus : fermer de force (Alt+F4, gestionnaire des tâches) faisait perdre toute la file, exactement dans le cas où l'on comptait sur elle.

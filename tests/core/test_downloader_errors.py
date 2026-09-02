@@ -414,7 +414,13 @@ class TestRepliSansCookiesALAnalyse:
             self, tmp_path, monkeypatch, avec_cookies):
         """Retirer les cookies sur une video privee la rendrait inaccessible :
         le repli ne doit pas se declencher, et l'utilisateur doit continuer a
-        s'entendre proposer de se connecter."""
+        s'entendre proposer de se connecter.
+
+        L'exemple etait « Sign in to confirm you are not a bot » : c'est le
+        controle anti-robot, pas un contenu reserve, et le confondre coutait
+        une fenetre de connexion par video en echec (rapport de Brad).
+        Il est traite a part, ci-dessous.
+        """
         import yt_dlp
         from app.core.downloader import Downloader, LoginRequiredError
         etat = {"appels": 0}
@@ -422,7 +428,7 @@ class TestRepliSansCookiesALAnalyse:
         def _extract(self, download_id, url, flat_opts, **_kw):
             etat["appels"] += 1
             raise yt_dlp.utils.DownloadError(
-                "ERROR: Sign in to confirm you are not a bot")
+                "ERROR: Private video. Sign in if you've been granted access")
 
         monkeypatch.setattr(Downloader, "_extract_info", _extract)
         with pytest.raises(LoginRequiredError):

@@ -326,6 +326,10 @@ class MainWindow(wx.Frame):
         # la selection des videos d'une playlist.
         self._search_snapshot: dict | None = None
         self._search_playlist_urls: set[str] = set()
+        # Erreurs en rafale : une meme panne qui frappe 200 videos enfilees
+        # ne doit ouvrir qu'UNE fenetre. Cle = site + nature de l'erreur,
+        # valeur = nombre d'echecs identiques passes sous silence depuis.
+        self._error_bursts: dict[str, int] = {}
         # Conservation de la file sur le disque : un minuteur regroupe les
         # rafales d'ajouts (une playlist de 200 videos = une seule ecriture),
         # et le gel evite qu'une ecriture tardive n'efface le fichier apres
@@ -399,6 +403,9 @@ class MainWindow(wx.Frame):
 
     def _on_dl_complete(self, download_id: str) -> None:
         dl_data = self._dl_data.get(download_id, {})
+        # Ce site remarche : la prochaine panne, s'il y en a une, aura droit
+        # a sa fenetre.
+        self._clear_error_burst_for_site(dl_data.get("url", ""))
         self._progress.pop(download_id, None)
         if self._gauge_dl_id == download_id:
             self._reset_gauge()
@@ -718,6 +725,74 @@ class MainWindow(wx.Frame):
         self._announce_download(_("Le téléchargement a finalement réussi. Le fichier est "
                                   "dans votre dossier de téléchargements."))
 
+    # ------------------------------------------------------------------
+    # Erreurs en rafale
+    # ------------------------------------------------------------------
+
+    def _error_burst_key(self, dl_data: dict, message: str,
+                         login_required: bool) -> str:
+        """Identifie la *nature* d'un echec, pour reconnaitre les repetitions.
+
+        Site + nature, et non l'URL : c'est la meme panne qui frappe toute la
+        file. La nature distingue les parcours qui ouvrent des fenetres
+        differentes, pour qu'une panne vraiment nouvelle ait toujours la
+        sienne.
+        """
+        site = self._site_label(dl_data.get("url", ""))
+        if login_required:
+            nature = "login_failed" if dl_data.get("use_cookies") else "login"
+        else:
+            nature = message
+        return f"{site}|{nature}"
+
+    def _claim_error_dialog(self, dl_data: dict, message: str,
+                            login_required: bool) -> bool:
+        """Vrai si cet echec a le droit d'ouvrir une fenetre.
+
+        Le premier de son espece l'obtient ; les suivants sont comptes et
+        annonces dans la barre d'etat. Sans ce garde-fou, une file de deux
+        cents fictions audio bloquees par le meme controle anti-robot ouvrait
+        deux cents fenetres modales a la suite, impossibles a fermer assez
+        vite (rapport de Brad, 0.2.3).
+        """
+        cle = self._error_burst_key(dl_data, message, login_required)
+        if cle not in self._error_bursts:
+            self._error_bursts[cle] = 0
+            return True
+
+        self._error_bursts[cle] += 1
+        etouffes = self._error_bursts[cle]
+        site = self._site_label(dl_data.get("url", ""))
+        self.set_status(
+            _("{count} téléchargements ont échoué pour la même raison "
+              "({site}). Ils sont marqués dans la liste.")
+            .format(count=etouffes + 1, site=site))
+        if etouffes == 1:
+            # Une seule fois : annoncer les deux cents suivants serait la
+            # meme rafale, en vocal.
+            speech.speak(
+                _("D'autres téléchargements échouent pour la même raison. "
+                  "Ils sont marqués en erreur dans la liste, sans nouvelle "
+                  "fenêtre."), interrupt=False)
+        self._reset_error_bursts_if_idle()
+        return False
+
+    def _reset_error_bursts_if_idle(self) -> None:
+        """Rearme les fenetres d'erreur quand la file est retombee a vide.
+
+        La rafale est finie : la prochaine panne, plus tard, merite a nouveau
+        d'etre montree franchement.
+        """
+        if self._queue.is_idle:
+            self._error_bursts.clear()
+
+    def _clear_error_burst_for_site(self, url: str) -> None:
+        """Un telechargement a abouti sur ce site : la panne est passee."""
+        site = self._site_label(url)
+        prefixe = f"{site}|"
+        for cle in [c for c in self._error_bursts if c.startswith(prefixe)]:
+            del self._error_bursts[cle]
+
     def _on_dl_error(self, download_id: str, message: str,
                      login_required: bool = False) -> None:
         self.download_list.error_item(download_id)
@@ -727,6 +802,12 @@ class MainWindow(wx.Frame):
         self.set_status(_("Erreur lors du téléchargement."))
         dl_data = self._dl_data.get(download_id, {})
         self._log_history(dl_data, status="failed", error=message)
+
+        # Une meme panne sur une file entiere n'ouvre qu'une fenetre. L'item
+        # est deja marque en erreur dans la liste : le retour visuel existe,
+        # c'est la fenetre modale repetee qui n'a pas lieu d'etre.
+        if not self._claim_error_dialog(dl_data, message, login_required):
+            return
 
         # Échec faute de connexion → parcours de connexion guidée.
         if login_required:

@@ -60,6 +60,11 @@ class FausseListe:
         pass
 
 
+class FausseFile:
+    """File deja vide : un seul echec, pas de rafale."""
+    is_idle = True
+
+
 class FausseFenetre:
     def __init__(self):
         self.settings = dict(DEFAULTS)
@@ -71,6 +76,8 @@ class FausseFenetre:
         self.enfilees = []
         self.rapports = []
         self.statuts = []
+        self._error_bursts = {}
+        self._queue = FausseFile()
 
     def set_status(self, message):
         self.statuts.append(message)
@@ -89,6 +96,14 @@ class FausseFenetre:
 
     # La relance elle-meme est celle de l'application : c'est elle qu'on teste.
     _redownload_as_audio = MainWindow._redownload_as_audio
+
+    # Le garde-fou des erreurs en rafale est traverse a chaque echec : c'est
+    # celui de l'application, pas une imitation.
+    _claim_error_dialog      = MainWindow._claim_error_dialog
+    _error_burst_key         = MainWindow._error_burst_key
+    _reset_error_bursts_if_idle = MainWindow._reset_error_bursts_if_idle
+    # `staticmethod` : sans le rehabiller, `self` partirait comme URL.
+    _site_label              = staticmethod(MainWindow._site_label)
 
 
 def afficher(monkeypatch, message, clic="close"):
