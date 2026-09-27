@@ -36,6 +36,14 @@ YouTube and YouTube Music use the same account, but DownAccess kept their sign-i
 
 Thanks to Arnaud.
 
+### A video that is not online yet is reported as such
+
+Arte often publishes a video's page a few days before broadcasting it. If you tried to download it too early, you got a technical message in English that even asked you to report a bug. DownAccess now tells you that the video is not online yet, and from what date it will be.
+
+More generally, when a site offers no video on a page, the message explains it in plain language instead of showing the raw error.
+
+Thanks to Véronique.
+
 ### Searching Arte and france.tv now retries on its own
 
 Sometimes the site sends back an incomplete answer. The search then stopped with an unreadable technical message. DownAccess now asks a second time, which almost always works. If the site still does not answer, a clear message invites you to try again a little later.

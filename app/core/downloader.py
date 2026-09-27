@@ -602,6 +602,11 @@ def free_space_bytes(path: str) -> int:
             current = parent
 
 
+def is_no_formats_error(msg: str) -> bool:
+    """yt-dlp n'a trouve aucun flux sur la page."""
+    return "no video formats found" in (msg or "").lower()
+
+
 def destination_unreachable(folder: str) -> bool:
     """Vrai si le volume du dossier de telechargement n'existe plus : disque
     externe debranche ou mis en veille, lecteur reseau deconnecte.
@@ -813,6 +818,18 @@ def _humanize_error(msg: str, dest: str = "") -> str:
     # connectant. A ce stade DownAccess a deja retente sans les cookies du
     # compte (cf. `should_retry_without_cookies`) ; il n'y a plus rien a
     # tenter, autant le dire dans une langue que l'utilisateur lit.
+    # Aucun flux propose. yt-dlp y ajoute « please report this issue on
+    # GitHub », qui fait croire a une panne du logiciel ; le plus souvent la
+    # video n'est simplement pas (ou plus) diffusee. Arte, ou le site donne sa
+    # date de mise en ligne, est traite plus tot (`_raise_download_error`).
+    if is_no_formats_error(low):
+        return _(
+            "Le site ne propose aucune vidéo à télécharger sur cette page.\n\n"
+            "La vidéo n'est peut-être pas encore en ligne, ou n'est plus "
+            "disponible. Vérifiez qu'elle se lit dans votre navigateur. Si "
+            "c'est le cas, envoyez un rapport depuis cette fenêtre."
+        )
+
     if "video unavailable" in low or "this video is not available" in low:
         return _(
             "Cette vidéo n'est pas accessible.\n\n"
@@ -825,10 +842,39 @@ def _humanize_error(msg: str, dest: str = "") -> str:
     return msg
 
 
-def _raise_download_error(raw_msg: str, cause: Exception, dest: str = "") -> None:
+def not_yet_online_message(start) -> str:
+    """La video est annoncee par le site, mais pas encore diffusee."""
+    local = start.astimezone()
+    return _(
+        "Cette vidéo n'est pas encore en ligne.\n\n"
+        "Le site l'annonce déjà, mais ne la diffusera qu'à partir du {date} "
+        "à {time}. Réessayez à ce moment-là."
+    ).format(date=local.strftime("%d/%m/%Y"), time=local.strftime("%H:%M"))
+
+
+def _upcoming_start(url: str):
+    """Date de mise en ligne a venir, si le site la donne (Arte). Jamais
+    d'exception : on est deja sur le chemin d'une erreur."""
+    if "arte.tv" not in (url or "").lower():
+        return None
+    try:
+        from app.core.site_search import arte_upcoming_start
+        return arte_upcoming_start(url)
+    except Exception as exc:
+        _log.info("Date de mise en ligne Arte illisible : %s", exc)
+        return None
+
+
+def _raise_download_error(raw_msg: str, cause: Exception, dest: str = "",
+                          url: str = "") -> None:
     """Lève l'erreur du bon type : LoginRequiredError si une connexion
     aiderait, sinon DownloadError. Le message est reformulé pour l'utilisateur.
-    `dest` = dossier de destination, pour chiffrer l'espace disque restant."""
+    `dest` = dossier de destination, pour chiffrer l'espace disque restant.
+    `url` = page demandee, pour reconnaitre une video pas encore en ligne."""
+    if url and is_no_formats_error(raw_msg) and not is_drm_error(raw_msg.lower()):
+        debut = _upcoming_start(url)
+        if debut is not None:
+            raise DownloadError(not_yet_online_message(debut)) from cause
     friendly = _humanize_error(raw_msg, dest)
     if _is_login_required(raw_msg):
         raise LoginRequiredError(friendly) from cause
@@ -992,7 +1038,8 @@ class Downloader:
                         if secours is not None:
                             return secours
                     _raise_download_error(
-                        str(exc), exc, self._settings.get("download_folder", ""))
+                        str(exc), exc, self._settings.get("download_folder", ""),
+                        url=url)
                 except DownloadError:
                     raise          # message deja ecrit pour l'utilisateur
                 except ExtractionCancelled:
@@ -1006,7 +1053,8 @@ class Downloader:
                                   download_id)
                         return None
                     _raise_download_error(
-                        str(exc), exc, self._settings.get("download_folder", ""))
+                        str(exc), exc, self._settings.get("download_folder", ""),
+                        url=url)
             return None
         finally:
             if cookie_jar_path:
@@ -1440,9 +1488,9 @@ class Downloader:
                             ydl.download([url])
                         subtitle_warning = err_msg
                     except yt_dlp.utils.DownloadError as exc2:
-                        _raise_download_error(str(exc2), exc2, dest)
+                        _raise_download_error(str(exc2), exc2, dest, url=url)
                     except Exception as exc2:
-                        _raise_download_error(str(exc2), exc2, dest)
+                        _raise_download_error(str(exc2), exc2, dest, url=url)
                 elif account_cookies and should_retry_without_cookies(err_msg):
                     # Etre connecte peut faire echouer une video que le meme
                     # telechargement recupere sans compte (cf.
@@ -1459,14 +1507,14 @@ class Downloader:
                     except Exception as exc2:
                         _log.info("Sans cookies : echec aussi id=%s — %s",
                                   download_id, str(exc2)[:150])
-                        _raise_download_error(err_msg, exc, dest)
+                        _raise_download_error(err_msg, exc, dest, url=url)
                 else:
-                    _raise_download_error(err_msg, exc, dest)
+                    _raise_download_error(err_msg, exc, dest, url=url)
             except Exception as exc:
                 if log_buf is not None and on_verbose_log is not None:
                     on_verbose_log(log_buf.getvalue())
                 _log.error("Erreur inattendue id=%s url=%s — %s", download_id, url, exc)
-                _raise_download_error(str(exc), exc, dest)
+                _raise_download_error(str(exc), exc, dest, url=url)
         finally:
             monitor_stop.set()
             if cookie_jar_path:

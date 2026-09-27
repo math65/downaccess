@@ -36,6 +36,14 @@ YouTube et YouTube Music utilisent le même compte, mais DownAccess gardait leur
 
 Merci à Arnaud.
 
+### Une vidéo pas encore en ligne est annoncée comme telle
+
+Arte publie souvent la page d'une vidéo quelques jours avant de la diffuser. En essayant de la télécharger trop tôt, vous obteniez un message technique en anglais, qui vous invitait même à signaler un bug. DownAccess vous dit maintenant que la vidéo n'est pas encore en ligne, et à partir de quelle date elle le sera.
+
+Plus généralement, quand un site ne propose aucune vidéo sur une page, le message l'explique en français au lieu de renvoyer l'erreur brute.
+
+Merci à Véronique.
+
 ### La recherche sur Arte et france.tv réessaie d'elle-même
 
 Il arrive que le site renvoie une réponse incomplète. La recherche s'arrêtait alors sur un message technique incompréhensible. DownAccess refait maintenant la demande une seconde fois, ce qui suffit presque toujours. Si le site ne répond toujours pas, un message clair vous invite à réessayer un peu plus tard.

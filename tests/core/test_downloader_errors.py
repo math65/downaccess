@@ -655,3 +655,62 @@ def test_youtube_music_partage_le_jar_de_youtube():
     yt = jar_path_for("https://www.youtube.com/watch?v=x")
     assert jar_path_for("https://music.youtube.com/watch?v=x") == yt
     assert jar_path_for("https://m.youtube.com/watch?v=x") == yt
+
+
+# --- Video annoncee mais pas encore en ligne (Veronique, 0.2.3) --------------
+
+_SANS_FLUX = ("ERROR: [ArteTV] 133770-001-A: No video formats found!; please "
+              "report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= ")
+
+
+class _FausseReponse:
+    def __init__(self, attrs):
+        self._attrs = attrs
+
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        return {"data": {"attributes": self._attrs}}
+
+
+def test_arte_date_de_mise_en_ligne_a_venir(monkeypatch):
+    from datetime import datetime, UTC
+    from app.core import site_search
+    monkeypatch.setattr(site_search.cffi_requests, "get", lambda *a, **kw: _FausseReponse(
+        {"streams": [], "rights": {"begin": "2026-09-30T10:00:00+00:00"}}))
+    url = "https://www.arte.tv/fr/videos/133770-001-A/vril/"
+    avant = datetime(2026, 9, 11, tzinfo=UTC)
+    apres = datetime(2026, 10, 1, tzinfo=UTC)
+    assert site_search.arte_upcoming_start(url, now=avant) == datetime(2026, 9, 30, 10, tzinfo=UTC)
+    assert site_search.arte_upcoming_start(url, now=apres) is None
+
+
+def test_arte_avec_flux_rien_a_attendre(monkeypatch):
+    from app.core import site_search
+    monkeypatch.setattr(site_search.cffi_requests, "get", lambda *a, **kw: _FausseReponse(
+        {"streams": [{"url": "x"}], "rights": {"begin": "2099-01-01T00:00:00+00:00"}}))
+    assert site_search.arte_upcoming_start(
+        "https://www.arte.tv/fr/videos/133770-001-A/vril/") is None
+
+
+def test_pas_encore_en_ligne_donne_la_date(monkeypatch):
+    from datetime import datetime, UTC
+    from app.core import downloader
+    monkeypatch.setattr(downloader, "_upcoming_start",
+                        lambda url: datetime(2026, 9, 30, 10, tzinfo=UTC))
+    with pytest.raises(downloader.DownloadError) as err:
+        downloader._raise_download_error(
+            _SANS_FLUX, Exception(), "", url="https://www.arte.tv/fr/videos/133770-001-A/vril/")
+    assert "pas encore en ligne" in str(err.value)
+    assert "30/09/2026" in str(err.value)
+
+
+def test_aucun_flux_sans_date_message_clair(monkeypatch):
+    """Sans date connue, plus d'invitation a signaler un bug sur GitHub."""
+    from app.core import downloader
+    monkeypatch.setattr(downloader, "_upcoming_start", lambda url: None)
+    with pytest.raises(downloader.DownloadError) as err:
+        downloader._raise_download_error(_SANS_FLUX, Exception(), "", url="https://x/y")
+    assert "github" not in str(err.value).lower()
+    assert "aucune vidéo" in str(err.value)

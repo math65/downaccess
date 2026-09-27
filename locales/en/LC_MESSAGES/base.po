@@ -2213,15 +2213,15 @@ msgstr "unknown"
 msgid "{count} entrée(s)"
 msgstr "{count} entries"
 
-#: app/core/downloader.py:644 app/ui/format_dialog.py:175
+#: app/core/downloader.py:649 app/ui/format_dialog.py:175
 msgid "{n:.0f} Ko"
 msgstr "{n:.0f} KB"
 
-#: app/core/downloader.py:643 app/ui/format_dialog.py:173
+#: app/core/downloader.py:648 app/ui/format_dialog.py:173
 msgid "{n:.0f} Mo"
 msgstr "{n:.0f} MB"
 
-#: app/core/downloader.py:641 app/ui/format_dialog.py:171
+#: app/core/downloader.py:646 app/ui/format_dialog.py:171
 msgid "{n:.1f} Go"
 msgstr "{n:.1f} GB"
 
@@ -2241,7 +2241,7 @@ msgstr "Failed"
 msgid "⚠ Mode manuel disponible pour une seule URL à la fois."
 msgstr "⚠ Manual mode is available for only one URL at a time."
 
-#: app/core/downloader.py:1567 app/core/downloader.py:1570
+#: app/core/downloader.py:1615 app/core/downloader.py:1618
 msgid "Annulé par l'utilisateur"
 msgstr "Cancelled by user"
 
@@ -2259,7 +2259,7 @@ msgstr "HTTP error {code}."
 msgid "Erreur inconnue."
 msgstr "Unknown error."
 
-#: app/core/downloader.py:2201
+#: app/core/downloader.py:2249
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
@@ -2291,7 +2291,7 @@ msgstr ""
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr "Unable to check the version (connection unavailable)."
 
-#: app/core/downloader.py:2189
+#: app/core/downloader.py:2237
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
@@ -2417,7 +2417,7 @@ msgid ""
 "fenêtre."
 msgstr "The DownAccess browser is open. Sign in, then close this window."
 
-#: app/core/downloader.py:800
+#: app/core/downloader.py:805
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -2475,7 +2475,7 @@ msgid ""
 "vidéos."
 msgstr "DownAccess will remember your sign-in to {site} for future videos."
 
-#: app/core/downloader.py:785
+#: app/core/downloader.py:790
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -3147,11 +3147,11 @@ msgstr "Browser to use:"
 msgid "(pas de résumé disponible)"
 msgstr "(no summary available)"
 
-#: app/core/site_search.py:82
+#: app/core/site_search.py:83
 msgid "Actualités et société"
 msgstr "News & society"
 
-#: app/core/site_search.py:100
+#: app/core/site_search.py:101
 msgid "Arts et spectacles"
 msgstr "Arts & performance"
 
@@ -3183,15 +3183,15 @@ msgstr "Loading the {category} category…"
 msgid "Chargement de {category} sur {site}…"
 msgstr "Loading {category} on {site}…"
 
-#: app/core/site_search.py:98
+#: app/core/site_search.py:99
 msgid "Cinéma"
 msgstr "Film"
 
-#: app/core/site_search.py:90
+#: app/core/site_search.py:91
 msgid "Culture pop"
 msgstr "Pop culture"
 
-#: app/core/site_search.py:79 app/core/site_search.py:97
+#: app/core/site_search.py:80 app/core/site_search.py:98
 msgid "Documentaires"
 msgstr "Documentaries"
 
@@ -3199,11 +3199,11 @@ msgstr "Documentaries"
 msgid "En continu (la suite se charge en arrivant en bas de la liste)"
 msgstr "Continuous (more results load as you reach the bottom of the list)"
 
-#: app/core/site_search.py:80
+#: app/core/site_search.py:81
 msgid "Films"
 msgstr "Films"
 
-#: app/core/site_search.py:84
+#: app/core/site_search.py:85
 msgid "Histoire"
 msgstr "History"
 
@@ -3217,7 +3217,7 @@ msgstr ""
 "\n"
 "{error}"
 
-#: app/core/site_search.py:91
+#: app/core/site_search.py:92
 msgid "Jeunesse"
 msgstr "Children"
 
@@ -3292,15 +3292,15 @@ msgstr "Result summary"
 msgid "Saisissez une requête, ou choisissez une catégorie à parcourir."
 msgstr "Enter a search term, or pick a category to browse."
 
-#: app/core/site_search.py:83
+#: app/core/site_search.py:84
 msgid "Sciences"
 msgstr "Science"
 
-#: app/core/site_search.py:101
+#: app/core/site_search.py:102
 msgid "Sport"
 msgstr "Sport"
 
-#: app/core/site_search.py:81 app/core/site_search.py:99
+#: app/core/site_search.py:100 app/core/site_search.py:82
 msgid "Séries et fictions"
 msgstr "Series & fiction"
 
@@ -3324,24 +3324,24 @@ msgstr "{shown} of {total} results"
 msgid "{site} — {category}"
 msgstr "{site} — {category}"
 
-#: app/core/site_search.py:85
+#: app/core/site_search.py:86
 msgid "Émissions"
 msgstr "Programmes"
 
-#: app/core/downloader.py:651
+#: app/core/downloader.py:656
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr "Free space in \"{folder}\": {size}."
 
-#: app/core/downloader.py:654
+#: app/core/downloader.py:659
 msgid "Espace nécessaire : environ {size}."
 msgstr "Space required: about {size}."
 
-#: app/core/downloader.py:668
+#: app/core/downloader.py:673
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr "There is not enough free space on the disk to download this file."
 
-#: app/core/downloader.py:660
+#: app/core/downloader.py:665
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3349,7 +3349,7 @@ msgstr ""
 "Free up some space on this disk, or choose a different download folder in "
 "Preferences (Ctrl+P)."
 
-#: app/core/downloader.py:679
+#: app/core/downloader.py:684
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr "Your disk is full: the download could not be saved."
 
@@ -3424,7 +3424,7 @@ msgstr "Download an &extract...\tCtrl+E"
 msgid "Télécharger un extrait"
 msgstr "Download an extract"
 
-#: app/core/downloader.py:2052
+#: app/core/downloader.py:2100
 msgid "fin"
 msgstr "end"
 
@@ -3880,7 +3880,7 @@ msgstr ""
 "\n"
 "If you answer No, the subscription is still created: the {n} items will be offered to you and you choose."
 
-#: app/core/downloader.py:762
+#: app/core/downloader.py:767
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -3890,7 +3890,7 @@ msgstr ""
 "\n"
 "DownAccess cannot download it, and no setting will change that: the protection is put in place by the site. Subscription platforms (Netflix, Disney+, Prime Video) and some france.tv videos work this way."
 
-#: app/core/downloader.py:775
+#: app/core/downloader.py:780
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -3900,7 +3900,7 @@ msgstr ""
 "\n"
 "DownAccess tried again without success. Check your connection, then restart the download with the F2 key."
 
-#: app/core/site_search.py:89
+#: app/core/site_search.py:90
 msgid "Concerts et spectacles"
 msgstr "Concerts and live performances"
 
@@ -4245,7 +4245,7 @@ msgstr ""
 "\n"
 "If you answer No, the catch-up still happens: the items will be offered to you and you choose."
 
-#: app/core/downloader.py:817
+#: app/core/downloader.py:834
 msgid ""
 "Cette vidéo n'est pas accessible.\n"
 "\n"
@@ -4510,7 +4510,7 @@ msgid ""
 " reprennent."
 msgstr "The download folder is available again: downloads are resuming."
 
-#: app/core/downloader.py:627
+#: app/core/downloader.py:632
 msgid ""
 "Le dossier de téléchargement « {folder} » est introuvable.\n"
 "\n"
@@ -4520,7 +4520,7 @@ msgstr ""
 "\n"
 "The drive it is on may be unplugged, asleep, or disconnected from the network. Plug it back in, or choose another folder in Preferences (Ctrl+P). Waiting downloads will resume on their own as soon as the folder is available again."
 
-#: app/core/site_search.py:188
+#: app/core/site_search.py:189
 msgid ""
 "Le site n'a pas répondu correctement, même après un second essai.\n"
 "\n"
@@ -4638,3 +4638,23 @@ msgstr "{count} finished downloads removed from the list."
 #: app/ui/main_window.py:2613
 msgid "{count} éléments retirés de la liste."
 msgstr "{count} items removed from the list."
+
+#: app/core/downloader.py:848
+msgid ""
+"Cette vidéo n'est pas encore en ligne.\n"
+"\n"
+"Le site l'annonce déjà, mais ne la diffusera qu'à partir du {date} à {time}. Réessayez à ce moment-là."
+msgstr ""
+"This video is not online yet.\n"
+"\n"
+"The site already lists it, but will only make it available from {date} at {time}. Please try again then."
+
+#: app/core/downloader.py:826
+msgid ""
+"Le site ne propose aucune vidéo à télécharger sur cette page.\n"
+"\n"
+"La vidéo n'est peut-être pas encore en ligne, ou n'est plus disponible. Vérifiez qu'elle se lit dans votre navigateur. Si c'est le cas, envoyez un rapport depuis cette fenêtre."
+msgstr ""
+"The site offers no video to download on this page.\n"
+"\n"
+"The video may not be online yet, or may no longer be available. Check that it plays in your browser. If it does, send a report from this window."

@@ -218,7 +218,7 @@ msgstr ""
 msgid "Actualiser"
 msgstr ""
 
-#: app/core/site_search.py:82
+#: app/core/site_search.py:83
 msgid "Actualités et société"
 msgstr ""
 
@@ -388,7 +388,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:1567 app/core/downloader.py:1570
+#: app/core/downloader.py:1615 app/core/downloader.py:1618
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -408,7 +408,7 @@ msgstr ""
 msgid "Aperçu — {title}"
 msgstr ""
 
-#: app/core/site_search.py:100
+#: app/core/site_search.py:101
 msgid "Arts et spectacles"
 msgstr ""
 
@@ -664,7 +664,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:800
+#: app/core/downloader.py:805
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -741,7 +741,7 @@ msgstr ""
 msgid "Cette source ne peut pas être suivie."
 msgstr ""
 
-#: app/core/downloader.py:762
+#: app/core/downloader.py:767
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -759,7 +759,7 @@ msgid ""
 "Pour l'image, aucun réglage n'y changera rien : c'est une protection posée par le site. M6, les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
-#: app/core/downloader.py:817
+#: app/core/downloader.py:834
 msgid ""
 "Cette vidéo n'est pas accessible.\n"
 "\n"
@@ -771,6 +771,13 @@ msgid ""
 "Cette vidéo n'est pas disponible dans votre pays.\n"
 "\n"
 "Son auteur en a réservé l'accès à une liste de pays qui n'inclut pas le vôtre. C'est une restriction posée sur le site : aucun réglage de DownAccess ne peut l'ouvrir."
+msgstr ""
+
+#: app/core/downloader.py:848
+msgid ""
+"Cette vidéo n'est pas encore en ligne.\n"
+"\n"
+"Le site l'annonce déjà, mais ne la diffusera qu'à partir du {date} à {time}. Réessayez à ce moment-là."
 msgstr ""
 
 #: app/ui/audio_track_dialog.py:64
@@ -888,7 +895,7 @@ msgid ""
 "celles à télécharger."
 msgstr ""
 
-#: app/core/site_search.py:98
+#: app/core/site_search.py:99
 msgid "Cinéma"
 msgstr ""
 
@@ -924,7 +931,7 @@ msgstr ""
 msgid "Commentaire (optionnel) :"
 msgstr ""
 
-#: app/core/site_search.py:89
+#: app/core/site_search.py:90
 msgid "Concerts et spectacles"
 msgstr ""
 
@@ -1027,7 +1034,7 @@ msgstr ""
 msgid "Créer un fichier par chapitre"
 msgstr ""
 
-#: app/core/site_search.py:90
+#: app/core/site_search.py:91
 msgid "Culture pop"
 msgstr ""
 
@@ -1061,7 +1068,7 @@ msgstr ""
 msgid "Diagnostic en cours…"
 msgstr ""
 
-#: app/core/site_search.py:79 app/core/site_search.py:97
+#: app/core/site_search.py:80 app/core/site_search.py:98
 msgid "Documentaires"
 msgstr ""
 
@@ -1360,7 +1367,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:2201
+#: app/core/downloader.py:2249
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1394,11 +1401,11 @@ msgstr ""
 msgid "Erreur — Extraction guidée"
 msgstr ""
 
-#: app/core/downloader.py:651
+#: app/core/downloader.py:656
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:654
+#: app/core/downloader.py:659
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1527,7 +1534,7 @@ msgstr ""
 msgid "File de téléchargement"
 msgstr ""
 
-#: app/core/site_search.py:80
+#: app/core/site_search.py:81
 msgid "Films"
 msgstr ""
 
@@ -1640,7 +1647,7 @@ msgstr ""
 msgid "Général"
 msgstr ""
 
-#: app/core/site_search.py:84
+#: app/core/site_search.py:85
 msgid "Histoire"
 msgstr ""
 
@@ -1652,7 +1659,7 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:668
+#: app/core/downloader.py:673
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
@@ -1723,7 +1730,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:785
+#: app/core/downloader.py:790
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1803,7 +1810,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:2189
+#: app/core/downloader.py:2237
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1855,7 +1862,7 @@ msgstr ""
 msgid "Jamais"
 msgstr ""
 
-#: app/core/site_search.py:91
+#: app/core/site_search.py:92
 msgid "Jeunesse"
 msgstr ""
 
@@ -1915,7 +1922,7 @@ msgstr ""
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
-#: app/core/downloader.py:775
+#: app/core/downloader.py:780
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -2054,7 +2061,7 @@ msgid ""
 " reprennent."
 msgstr ""
 
-#: app/core/downloader.py:627
+#: app/core/downloader.py:632
 msgid ""
 "Le dossier de téléchargement « {folder} » est introuvable.\n"
 "\n"
@@ -2128,11 +2135,18 @@ msgid ""
 "Attendez quelques minutes avant de relancer. Si cela se reproduit souvent, réduisez le nombre de téléchargements simultanés dans Préférences > Général."
 msgstr ""
 
-#: app/core/site_search.py:188
+#: app/core/site_search.py:189
 msgid ""
 "Le site n'a pas répondu correctement, même après un second essai.\n"
 "\n"
 "C'est en général passager. Vérifiez votre connexion Internet, puis relancez la recherche dans quelques instants."
+msgstr ""
+
+#: app/core/downloader.py:826
+msgid ""
+"Le site ne propose aucune vidéo à télécharger sur cette page.\n"
+"\n"
+"La vidéo n'est peut-être pas encore en ligne, ou n'est plus disponible. Vérifiez qu'elle se lit dans votre navigateur. Si c'est le cas, envoyez un rapport depuis cette fenêtre."
 msgstr ""
 
 #: app/ui/main_window.py:2751
@@ -2194,7 +2208,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:660
+#: app/core/downloader.py:665
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3069,7 +3083,7 @@ msgid ""
 "ce que vous voulez."
 msgstr ""
 
-#: app/core/site_search.py:83
+#: app/core/site_search.py:84
 msgid "Sciences"
 msgstr ""
 
@@ -3146,7 +3160,7 @@ msgstr ""
 msgid "Sous-titres uniquement"
 msgstr ""
 
-#: app/core/site_search.py:101
+#: app/core/site_search.py:102
 msgid "Sport"
 msgstr ""
 
@@ -3267,7 +3281,7 @@ msgstr ""
 msgid "Sélectionnez un site à supprimer."
 msgstr ""
 
-#: app/core/site_search.py:81 app/core/site_search.py:99
+#: app/core/site_search.py:100 app/core/site_search.py:82
 msgid "Séries et fictions"
 msgstr ""
 
@@ -3733,7 +3747,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:679
+#: app/core/downloader.py:684
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -3912,7 +3926,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:2052
+#: app/core/downloader.py:2100
 msgid "fin"
 msgstr ""
 
@@ -4135,15 +4149,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:644 app/ui/format_dialog.py:175
+#: app/core/downloader.py:649 app/ui/format_dialog.py:175
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:643 app/ui/format_dialog.py:173
+#: app/core/downloader.py:648 app/ui/format_dialog.py:173
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:641 app/ui/format_dialog.py:171
+#: app/core/downloader.py:646 app/ui/format_dialog.py:171
 msgid "{n:.1f} Go"
 msgstr ""
 
@@ -4264,7 +4278,7 @@ msgstr ""
 msgid "Échec de la mise à jour de yt-dlp."
 msgstr ""
 
-#: app/core/site_search.py:85
+#: app/core/site_search.py:86
 msgid "Émissions"
 msgstr ""
 

@@ -28,6 +28,7 @@ import logging
 import re
 import time
 import unicodedata
+from datetime import datetime, UTC
 
 from curl_cffi import requests as cffi_requests
 
@@ -401,6 +402,40 @@ def arte_video_id(url: str) -> str:
     """Identifiant de la video dans une URL Arte, ou chaine vide."""
     match = _ARTE_VIDEO_ID_RE.search(url or "")
     return match[1].upper() if match else ""
+
+
+_ARTE_PLAYER_URL = "https://api.arte.tv/api/player/v2/config/{lang}/{code}"
+_ARTE_URL_LANG_RE = re.compile(r"arte\.tv/([a-z]{2})/", re.I)
+
+
+def arte_upcoming_start(url: str, now: datetime | None = None) -> datetime | None:
+    """Date de mise en ligne d'une video Arte annoncee mais pas encore diffusee.
+
+    Arte publie la page (et les metadonnees) avant la video : le lecteur n'a
+    alors aucun flux, et yt-dlp repond « No video formats found! » en invitant
+    a signaler un bug — alors qu'il suffit d'attendre (rapports de Veronique,
+    0.2.3 : « Vril », en ligne le 30 septembre, essaye le 11).
+    Retourne la date (fuseau UTC) si elle est a venir, sinon None.
+    """
+    code = arte_video_id(url)
+    if not code:
+        return None
+    lang = _ARTE_URL_LANG_RE.search(url)
+    resp = cffi_requests.get(
+        _ARTE_PLAYER_URL.format(lang=_arte_lang(lang[1].lower() if lang else "fr"),
+                                code=code),
+        impersonate="chrome", timeout=_TIMEOUT)
+    resp.raise_for_status()
+    attrs = ((resp.json() or {}).get("data") or {}).get("attributes") or {}
+    if attrs.get("streams"):
+        return None
+    debut = (attrs.get("rights") or {}).get("begin")
+    if not debut:
+        return None
+    debut = datetime.fromisoformat(debut)
+    if debut.tzinfo is None:
+        debut = debut.replace(tzinfo=UTC)
+    return debut if debut > (now or datetime.now(UTC)) else None
 
 
 def _arte_api_token() -> str:
