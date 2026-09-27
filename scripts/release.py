@@ -180,7 +180,12 @@ def main() -> int:
     # 4. Commit + push
     step("Commit et push...")
     run(["git", "add", str(VERSION_PY), str(ISS_FILE)], cwd=ROOT)
-    run(["git", "commit", "-m", f"chore: version {version}"], cwd=ROOT)
+    # Version deja bumpee et commitee a la main : rien a commiter, et
+    # `git commit` echouerait (code 1) -- apres le build, avant le push.
+    if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT).returncode:
+        run(["git", "commit", "-m", f"chore: version {version}"], cwd=ROOT)
+    else:
+        ok("Version deja commitee, rien a ajouter")
     run(["git", "push"], cwd=ROOT)
     ok("Commit pousse")
 
