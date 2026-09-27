@@ -309,3 +309,32 @@ class TestLangueDeLaPisteAudio:
         opts = {}
         _apply_format(opts, "manual", format_id="audio1=96000")
         assert opts["format"] == "audio1=96000"
+
+
+class TestCheminFinal:
+    """Le chemin transmis a l'UI doit etre celui du fichier qui RESTE.
+
+    Les progress_hooks donnent le fichier intermediaire du dossier `.da-tmp`,
+    efface apres conversion ou fusion : « Ouvrir dans Access Media Converter »
+    restait grise dans le menu contextuel, et le passage automatique a AMC ne
+    partait jamais (signale apres 0.2.4).
+    """
+
+    def test_le_hook_final_transmet_le_chemin(self):
+        from app.core.downloader import Downloader
+        recus, etat = [], {}
+        hook = Downloader._make_final_hook("id1", recus.append, etat)
+        hook(r"C:\Musique\Titre.mp3")
+        assert etat["final_file"] == r"C:\Musique\Titre.mp3"
+        assert recus[-1].status == "located"
+        assert recus[-1].filepath == r"C:\Musique\Titre.mp3"
+
+    def test_chemin_vide_ignore(self):
+        from app.core.downloader import Downloader
+        recus = []
+        Downloader._make_final_hook("id1", recus.append, {})("")
+        assert recus == []
+
+    def test_options_utilisateur_ne_l_ecrasent_pas(self):
+        from app.core.downloader import _PROTECTED_OPTS
+        assert "post_hooks" in _PROTECTED_OPTS

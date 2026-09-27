@@ -48,7 +48,7 @@ _CUSTOM_VIDEO_SORT = ["res", "fps", "vcodec", "proto:http_dash_segments"]
 # peine de casser le telechargement (selection de format, dossiers, hooks...).
 _PROTECTED_OPTS = frozenset({
     "format", "format_sort", "outtmpl", "paths", "trim_file_name",
-    "postprocessors", "progress_hooks", "postprocessor_hooks",
+    "postprocessors", "progress_hooks", "postprocessor_hooks", "post_hooks",
     "merge_output_format", "allow_multiple_audio_streams",
     "concurrent_fragment_downloads", "js_runtimes", "extractor_args",
     "ffmpeg_location", "cookiefile", "cookiesfrombrowser",
@@ -220,7 +220,7 @@ class DownloadProgress:
     percent: float = 0.0
     speed: str = ""
     size: str = ""
-    status: str = "downloading"  # downloading | finished | error
+    status: str = "downloading"  # downloading | finished | located | error
     filepath: str = ""           # chemin du fichier final (status=finished)
 
 
@@ -1310,6 +1310,11 @@ class Downloader:
                                                pause_event, total_parts, expected_bytes,
                                                hook_state)],
             "postprocessor_hooks": [self._make_pp_hook(download_id, on_progress, hook_state)],
+            # Chemin FINAL, apres conversion et deplacement depuis `.da-tmp`.
+            # Celui des progress_hooks designe le fichier intermediaire, efface
+            # a la fin : le menu « Ouvrir dans Access Media Converter » restait
+            # grise, et le passage automatique a AMC ne partait jamais.
+            "post_hooks":     [self._make_final_hook(download_id, on_progress, hook_state)],
             "js_runtimes":    get_js_runtimes_opt(),
             "concurrent_fragment_downloads": fragments if fragments > 1 else 1,
             # Résilience réseau : sur une connexion instable, un stall doit durer
@@ -1549,7 +1554,7 @@ class Downloader:
                 download_id=download_id,
                 percent=100.0,
                 status="already_downloaded",
-                filepath=hook_state["last_file"],
+                filepath=hook_state.get("final_file") or hook_state["last_file"],
             ))
             return subtitle_warning
 
@@ -1665,6 +1670,20 @@ class Downloader:
                         filepath=filename,
                     ))
         return hook
+
+    @staticmethod
+    def _make_final_hook(download_id: str, on_progress: OnProgressCallback,
+                         hook_state: dict):
+        """`post_hooks` yt-dlp : recoit le chemin du fichier tel qu'il reste
+        sur le disque. Transmis a l'UI sans changer l'affichage (« located »)."""
+        def final_hook(filepath: str) -> None:
+            if not filepath:
+                return
+            hook_state["final_file"] = filepath
+            on_progress(DownloadProgress(
+                download_id=download_id, percent=100.0,
+                status="located", filepath=filepath))
+        return final_hook
 
     def _make_pp_hook(self, download_id: str, on_progress: OnProgressCallback,
                       hook_state: dict):

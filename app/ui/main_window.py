@@ -385,6 +385,9 @@ class MainWindow(wx.Frame):
             data = self._dl_data.get(prog.download_id)
             if data is not None:
                 data["filepath"] = prog.filepath
+        # Chemin final connu (apres conversion) : rien a afficher de plus.
+        if prog.status == "located":
+            return
         # Phase de préparation (analyse, manifestes) avant le premier octet
         if prog.status == "preparing":
             self.download_list.set_status(prog.download_id, STATUS_PREPARING)
