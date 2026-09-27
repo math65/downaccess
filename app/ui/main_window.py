@@ -48,6 +48,7 @@ from app.core import browser
 from app.core.downloader import (
     DownloadInfo,
     DownloadProgress,
+    destination_missing_message,
     drm_locked_video_message,
 )
 from app.core.ffmpeg_utils import get_ffmpeg_path
@@ -346,7 +347,12 @@ class MainWindow(wx.Frame):
             on_playlist=self._on_dl_playlist,
             on_warning=self._on_dl_warning,
             on_change=self._on_queue_changed,
+            on_held=self._on_queue_held,
         )
+        # File retenue (disque de destination introuvable) : on reessaie a
+        # intervalle regulier, et la file repart seule au retour du disque.
+        self._held_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_held_timer, self._held_timer)
 
     def _announce_download(self, text: str, interrupt: bool = False) -> None:
         """Annonce vocale d'un evenement de telechargement, selon le reglage
@@ -819,6 +825,13 @@ class MainWindow(wx.Frame):
                 self._on_login_required(download_id)
             return
 
+        # Disque de destination disparu avec des videos encore en attente : la
+        # file est retenue et sa propre fenetre explique deja tout. Deux
+        # fenetres pour la meme cause, ce serait une de trop.
+        if (message == destination_missing_message(self.settings.get("download_folder", ""))
+                and (self._queue.is_held or self._queue.pending_count)):
+            return
+
         # Image verrouillee, son accessible : proposer la bande-son sur place.
         # Le message explique deja la marche a suivre, mais la refaire a la
         # main coute un aller-retour — et deux testeurs sont alles changer le
@@ -835,6 +848,33 @@ class MainWindow(wx.Frame):
             self._redownload_as_audio(download_id)
         elif veut_rapport:
             self._start_error_report(download_id, message)
+
+    def _on_queue_held(self, folder: str) -> None:
+        """Le dossier de telechargement est introuvable : la file s'arrete.
+
+        Les videos restent « En attente » au lieu d'echouer une a une ; elles
+        repartent seules quand le disque revient (minuteur), ou tout de suite
+        si l'utilisateur choisit un autre dossier dans les Preferences.
+        """
+        self.set_status(_("Dossier de téléchargement introuvable : la file est "
+                          "en attente."))
+        if not self._held_timer.IsRunning():
+            self._held_timer.Start(5000)
+        dlg = wx.MessageDialog(self, destination_missing_message(folder),
+                               _("Dossier introuvable"), wx.OK | wx.ICON_WARNING)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def _on_held_timer(self, _event) -> None:
+        if self._queue.retry_held():
+            self._held_timer.Stop()
+            texte = _("Le dossier de téléchargement est de nouveau accessible : "
+                      "les téléchargements reprennent.")
+            self.set_status(texte)
+            speech.speak(texte)
+        elif not self._queue.is_held:
+            # Plus rien a attendre (file videe entre-temps).
+            self._held_timer.Stop()
 
     def _redownload_as_audio(self, download_id: str) -> None:
         """Relance en MP3 le telechargement refuse faute d'image accessible.
@@ -2423,6 +2463,9 @@ class MainWindow(wx.Frame):
                 self.settings = dlg.get_settings()
                 cfg.save(self.settings)
                 self._queue._settings = self.settings
+                # Un nouveau dossier peut debloquer une file retenue.
+                if self._queue.retry_held():
+                    self._held_timer.Stop()
                 # Le reglage de conservation vient peut-etre de changer :
                 # decocher doit effacer le fichier tout de suite, pas au
                 # prochain evenement de file.
@@ -3044,6 +3087,7 @@ class MainWindow(wx.Frame):
         # une derniere ecriture, cette fois d'une file vide — elle effacerait
         # ce qu'on vient tout juste de conserver.
         self._stop_queue_save_timer()
+        self._held_timer.Stop()
         self._save_queue_now(clean_exit=True)
         self._queue_save_frozen = True
 

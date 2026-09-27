@@ -630,3 +630,28 @@ class TestErreurSansIssue:
         assert not is_hopeless_error("ERROR: unable to download video data: "
                                      "Read timed out")
         assert not is_hopeless_error("HTTP Error 403: Forbidden")
+
+
+def test_disque_introuvable_message_clair():
+    from app.core.downloader import _humanize_error
+    brut = ("ERROR: Unable to create directory: [WinError 3] The system cannot "
+            "find the path specified: 'D:\\'")
+    msg = _humanize_error(brut, r"D:\youtube")
+    assert "introuvable" in msg and r"D:\youtube" in msg
+    assert "WinError" not in msg
+
+
+def test_reserve_premium_demande_connexion():
+    """« Only available to Music Premium members » : le compte abonne regle
+    le probleme, il faut donc le parcours de connexion (Arnaud, 0.2.3)."""
+    from app.core.downloader import _is_login_required
+    assert _is_login_required(
+        "ERROR: [youtube] Ho99jPbBIQk: This video is only available to "
+        "Music Premium members")
+
+
+def test_youtube_music_partage_le_jar_de_youtube():
+    from app.core.cookies import jar_path_for
+    yt = jar_path_for("https://www.youtube.com/watch?v=x")
+    assert jar_path_for("https://music.youtube.com/watch?v=x") == yt
+    assert jar_path_for("https://m.youtube.com/watch?v=x") == yt

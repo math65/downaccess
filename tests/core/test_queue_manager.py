@@ -348,3 +348,62 @@ class TestDemandeAudioSurVideoVerrouillee:
         q.add("https://m6/2", format_spec="auto")
         assert attendre(lambda: "https://m6/2" in vus)
         assert vus["https://m6/2"] is False
+
+
+class TestDossierIntrouvable:
+    """Disque de destination disparu (rapport de Brad, 0.2.3 : lecteur D:
+    debranche en pleine file de 1 300 videos). La file doit s'arreter au lieu
+    d'analyser chaque video sur le site pour la faire echouer a l'ecriture."""
+
+    def _file(self, journal, monkeypatch, disque):
+        from app.core import queue_manager
+        monkeypatch.setattr(queue_manager, "destination_unreachable",
+                            lambda dossier: not disque["present"])
+        retenues = []
+        file = QueueManager(
+            settings={"download_folder": r"D:\youtube", "max_concurrent_downloads": 2},
+            post_to_ui=lambda fn, *a: fn(*a),
+            on_info=journal.on_info,
+            on_progress=lambda p: None,
+            on_complete=journal.on_complete,
+            on_error=journal.on_error,
+            on_held=retenues.append,
+        )
+        _FILES_CREEES.append(file)
+        return file, retenues
+
+    def test_rien_ne_demarre_et_une_seule_alerte(self, faux, monkeypatch):
+        j = Journal()
+        disque = {"present": False}
+        q, retenues = self._file(j, monkeypatch, disque)
+        for i in range(5):
+            q.add(f"https://a/{i}")
+        assert q.is_held
+        assert retenues == [r"D:\youtube"]      # une alerte, pas cinq
+        assert faux.demarres == [] and j.erreurs == []
+        assert q.pending_count == 5              # toujours en attente
+
+    def test_la_file_repart_au_retour_du_disque(self, faux, monkeypatch):
+        j = Journal()
+        disque = {"present": False}
+        q, _ = self._file(j, monkeypatch, disque)
+        q.add("https://a/1")
+        assert not q.retry_held()                # toujours absent
+        disque["present"] = True
+        assert q.retry_held()
+        assert attendre(lambda: j.completes)
+        assert not q.is_held
+
+
+def test_volume_absent_detecte():
+    import os
+    import string
+    from app.core.downloader import destination_unreachable
+    libre = next((L for L in reversed(string.ascii_uppercase)
+                  if not os.path.exists(f"{L}:\\")), None)
+    if libre is None:
+        pytest.skip("aucune lettre de lecteur libre")
+    assert destination_unreachable(rf"{libre}:\youtube")
+    # Un dossier absent sur un disque present n'est pas « introuvable » :
+    # yt-dlp le cree.
+    assert not destination_unreachable(os.path.join(os.getcwd(), "pas-encore-cree"))

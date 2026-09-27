@@ -278,6 +278,9 @@ _LOGIN_REQUIRED_PATTERNS = (
     "confirm your age", "age-restricted", "sign in to confirm",
     "login_required", "this video is private", "private video",
     "members-only", "join this channel",
+    # YouTube Music / YouTube Premium : le compte abonne suffit, encore
+    # faut-il que yt-dlp le recoive (rapport d'Arnaud, 0.2.3).
+    "premium members",
     "cookies-from-browser", "for the authentication", "use --cookies",
     "sign in to", "log in to",
 )
@@ -599,6 +602,37 @@ def free_space_bytes(path: str) -> int:
             current = parent
 
 
+def destination_unreachable(folder: str) -> bool:
+    """Vrai si le volume du dossier de telechargement n'existe plus : disque
+    externe debranche ou mis en veille, lecteur reseau deconnecte.
+
+    Un dossier simplement absent ne compte pas (yt-dlp le cree) : seul le
+    volume introuvable empeche tout telechargement.
+    """
+    return bool(folder) and free_space_bytes(folder) < 0
+
+
+# yt-dlp ne peut pas creer le dossier de destination : « Unable to create
+# directory: [WinError 3] The system cannot find the path specified: 'D:\\' »
+# (rapport de Brad, 0.2.3 : disque D: disparu en pleine file de 1 300 videos).
+_DEST_MISSING_PATTERNS = ("unable to create directory",)
+
+
+def is_destination_missing_error(msg: str) -> bool:
+    return any(p in (msg or "").lower() for p in _DEST_MISSING_PATTERNS)
+
+
+def destination_missing_message(dest: str) -> str:
+    """Le dossier de telechargement est sur un disque devenu introuvable."""
+    return _(
+        "Le dossier de téléchargement « {folder} » est introuvable.\n\n"
+        "Le disque qui le contient est peut-être débranché, en veille, ou "
+        "déconnecté du réseau. Rebranchez-le, ou choisissez un autre dossier "
+        "dans les Préférences (Ctrl+P). Les téléchargements en attente "
+        "reprendront d'eux-mêmes dès que le dossier sera de nouveau accessible."
+    ).format(folder=dest or "?")
+
+
 def _fmt_size(size: int) -> str:
     """Taille lisible. Volontairement duplique de `app/ui/format_dialog.py` :
     `app/core` n'importe jamais `app/ui` (meme msgid -> meme traduction)."""
@@ -715,6 +749,11 @@ def _humanize_error(msg: str, dest: str = "") -> str:
     # grand public, alors que la cause est simple et la solution immediate.
     if is_disk_full_error(low):
         return disk_full_message(dest)
+
+    # Disque de destination disparu : le texte brut cite un chemin Windows
+    # en anglais, sans dire que c'est le disque qui manque.
+    if is_destination_missing_error(low):
+        return destination_missing_message(dest)
 
     # Contenu protege par DRM. Sans ce message, l'utilisateur lit « This video
     # is DRM protected » et cherche ce qu'il a mal regle : il n'y a rien a

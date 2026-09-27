@@ -318,3 +318,38 @@ class TestParcoursCategories:
         browse("arte", "DOR", 10, "fr", 1)
         browse("arte", "DOR", 10, "fr", 1)
         assert len(appels) == 2
+
+
+class TestRechercheSiteReessai:
+    """Arte a renvoye du JSON coupe (« Expecting value: line 2 column 1 (char
+    42671) », rapport de Veronique, 0.2.3) : un second essai suffit."""
+
+    def test_reponse_tronquee_puis_correcte(self, monkeypatch):
+        import json
+        from app.core import site_search
+        monkeypatch.setattr(site_search, "_RETRY_DELAY", 0)
+        appels = []
+
+        def arte(query, limit, lang, page):
+            appels.append(query)
+            if len(appels) == 1:
+                json.loads('{"data": [1,\n')   # leve JSONDecodeError
+            return {"entries": [{"title": "ok"}], "page": 1,
+                    "total_pages": 1, "total_count": 1}
+
+        monkeypatch.setattr(site_search, "_arte_search", arte)
+        r = site_search.search("arte", "chat", 20, "fr")
+        assert r["entries"] and len(appels) == 2
+
+    def test_deux_echecs_message_lisible(self, monkeypatch):
+        import pytest
+        from app.core import site_search
+        monkeypatch.setattr(site_search, "_RETRY_DELAY", 0)
+
+        def arte(*a):
+            raise ValueError("Expecting value: line 2 column 1 (char 42671)")
+
+        monkeypatch.setattr(site_search, "_arte_search", arte)
+        with pytest.raises(site_search.SiteSearchError) as err:
+            site_search.search("arte", "chat", 20, "fr")
+        assert "Expecting" not in str(err.value)

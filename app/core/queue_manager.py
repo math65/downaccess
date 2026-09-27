@@ -6,7 +6,7 @@ from collections.abc import Callable
 
 from app.core.downloader import (
     Downloader, DownloadError, DownloadInfo, DownloadProgress, LoginRequiredError,
-    accepts_audio_only, estimate_total_bytes,
+    accepts_audio_only, destination_unreachable, estimate_total_bytes,
 )
 
 _log = logging.getLogger("downaccess.queue")
@@ -43,6 +43,7 @@ OnError         = Callable[[str, str, bool], None]  # download_id, message, logi
 OnPlaylist      = Callable[[DownloadInfo], None]  # info avec is_playlist=True
 OnWarning       = Callable[[str, str], None]      # download_id, message
 OnChange        = Callable[[], None]              # la file a change (conservation)
+OnHeld          = Callable[[str], None]           # dossier introuvable : file retenue
 PostToUI        = Callable[..., None]             # ex: wx.CallAfter
 
 
@@ -64,6 +65,7 @@ class QueueManager:
         on_playlist: OnPlaylist | None = None,
         on_warning:  OnWarning  | None = None,
         on_change:   OnChange   | None = None,
+        on_held:     OnHeld     | None = None,
     ):
         self._settings    = settings
         self._post        = post_to_ui
@@ -77,6 +79,13 @@ class QueueManager:
         # disque. Sans cela, seule une fermeture propre conservait la file :
         # une fenetre tuee a l'Alt+F4 la perdait entierement (rapport de Brad).
         self._on_change   = on_change
+        # Dossier de telechargement introuvable (disque debranche) : la file
+        # ne demarre plus rien. Sans cela, chaque video partait quand meme,
+        # etait analysee sur le site pour rien — des centaines de requetes,
+        # de quoi declencher le controle anti-robot — puis echouait au moment
+        # d'ecrire (rapport de Brad, 0.2.3 : 1 300 videos, lecteur D: disparu).
+        self._on_held     = on_held
+        self._held        = False
 
         self._queue:   list[QueueItem]        = []
         self._active:  dict[str, QueueItem]   = {}   # download_id → item
@@ -269,7 +278,37 @@ class QueueManager:
     # Démarrage des workers
     # ------------------------------------------------------------------
 
+    @property
+    def is_held(self) -> bool:
+        """Vrai si la file est retenue faute de dossier de destination."""
+        return self._held
+
+    def retry_held(self) -> bool:
+        """Relance la file retenue si le dossier est revenu. Vrai si elle repart.
+
+        Appele periodiquement par l'UI tant que la file est retenue, et apres
+        un changement de dossier dans les Preferences.
+        """
+        if not self._held:
+            return False
+        self._try_start_next()
+        return not self._held
+
     def _try_start_next(self) -> None:
+        with self._lock:
+            attente = bool(self._queue) and len(self._active) < self.max_concurrent
+        if attente:
+            dossier = self._settings.get("download_folder", "")
+            introuvable = destination_unreachable(dossier)
+            vient_de_manquer = introuvable and not self._held
+            self._held = introuvable
+            if introuvable:
+                if vient_de_manquer:
+                    _log.warning("Dossier de destination introuvable, file retenue : %s",
+                                 dossier)
+                    if self._on_held:
+                        self._post(self._on_held, dossier)
+                return
         with self._lock:
             while len(self._active) < self.max_concurrent and self._queue:
                 item = self._queue.pop(0)

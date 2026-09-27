@@ -24,6 +24,7 @@ Aucun `import wx` ici (règle app/core).
 """
 
 import html
+import logging
 import re
 import time
 import unicodedata
@@ -31,6 +32,8 @@ import unicodedata
 from curl_cffi import requests as cffi_requests
 
 from app.core.i18n import _translate as _
+
+_log = logging.getLogger("downaccess.site_search")
 
 
 # Endpoints (vérifiés en conditions réelles, août 2026).
@@ -155,6 +158,40 @@ def _page_slice(entries: list[dict], page: int, limit: int) -> dict:
 
 # --- API publique ------------------------------------------------------------
 
+class SiteSearchError(Exception):
+    """Le site n'a pas rendu de reponse exploitable, meme au second essai.
+    Le message est destine a l'utilisateur."""
+
+
+# Pause avant le second essai (remplacee par 0 dans les tests).
+_RETRY_DELAY = 1.0
+
+
+def _with_retry(fn, *args):
+    """Appelle `fn`, et la relance une fois si le site repond mal.
+
+    Arte a deja renvoye une reponse coupee en plein milieu : l'utilisatrice a
+    lu « Expecting value: line 2 column 1 (char 42671) », du JSON tronque que
+    le meme appel, relance, lit sans probleme (rapport de Veronique, 0.2.3).
+    `ValueError` couvre le JSON illisible, `OSError` les erreurs reseau et HTTP
+    de curl_cffi.
+    """
+    try:
+        return fn(*args)
+    except (ValueError, OSError) as exc:
+        _log.warning("Recherche : reponse inexploitable, second essai (%s)", exc)
+    time.sleep(_RETRY_DELAY)
+    try:
+        return fn(*args)
+    except (ValueError, OSError) as exc:
+        _log.warning("Recherche : second essai en echec (%s)", exc)
+        raise SiteSearchError(_(
+            "Le site n'a pas répondu correctement, même après un second essai.\n\n"
+            "C'est en général passager. Vérifiez votre connexion Internet, puis "
+            "relancez la recherche dans quelques instants."
+        )) from exc
+
+
 def search(site_key: str, query: str, limit: int, lang: str, page: int = 1) -> dict:
     """Recherche par mots-clés.
 
@@ -165,9 +202,9 @@ def search(site_key: str, query: str, limit: int, lang: str, page: int = 1) -> d
     if not query:
         return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
     if site_key == "francetv":
-        return _page_slice(_francetv_search_all(query), page, limit)
+        return _page_slice(_with_retry(_francetv_search_all, query), page, limit)
     if site_key == "arte":
-        return _arte_search(query, limit, lang, page)
+        return _with_retry(_arte_search, query, limit, lang, page)
     return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
 
 
@@ -179,7 +216,8 @@ def browse(site_key: str, category: str, limit: int, lang: str, page: int = 1) -
         return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
     if site_key not in ("francetv", "arte"):
         return {"entries": [], "page": 1, "total_pages": 1, "total_count": 0}
-    return _page_slice(_browse_all_cached(site_key, category, lang), page, limit)
+    return _page_slice(_with_retry(_browse_all_cached, site_key, category, lang),
+                       page, limit)
 
 
 def _browse_all_cached(site_key: str, category: str, lang: str) -> list[dict]:

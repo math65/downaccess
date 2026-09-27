@@ -33,6 +33,12 @@ _YTDLP_BROWSER = {
 # Domaines qui partagent le même jar (liens courts -> site principal).
 _DOMAIN_ALIASES = {
     "youtu.be": "youtube.com",
+    # Meme compte Google, memes cookies `.youtube.com` : un seul jar. Deux jars
+    # separes vieillissaient chacun a leur rythme, et une connexion recente a
+    # YouTube laissait YouTube Music sur un jar perime — un abonne Premium se
+    # voyait refuser un titre « reserve aux membres Premium » (Arnaud, 0.2.3).
+    "music.youtube.com": "youtube.com",
+    "m.youtube.com": "youtube.com",
 }
 
 
