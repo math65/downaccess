@@ -95,8 +95,7 @@ class DownloadList(wx.ListCtrl):
         self._items[download_id] = idx
         self._status_codes[download_id] = STATUS_PENDING
         # Sélectionner le nouvel item → NVDA l'annonce
-        self.Select(idx)
-        self.Focus(idx)
+        self._select_only(idx)
         return idx
 
     def update_info(self, download_id: str, title: str, site: str, fmt: str = "") -> None:
@@ -188,6 +187,58 @@ class DownloadList(wx.ListCtrl):
         }
         return dl_id
 
+    def _select_only(self, idx: int) -> None:
+        """Selectionne cette ligne SEULE, et y met le focus.
+
+        La liste accepte la selection multiple (Ctrl+A, Maj+fleches) : un
+        simple `Select` ajouterait la ligne a la selection existante. Apres
+        une playlist de 200 videos, les 200 seraient restees selectionnees,
+        et Suppr les aurait toutes retirees.
+        """
+        i = self.GetFirstSelected()
+        while i != -1:
+            if i != idx:
+                self.Select(i, on=False)
+            i = self.GetNextSelected(i)
+        self.Select(idx)
+        self.Focus(idx)
+
+    def select_all(self) -> int:
+        """Selectionne toutes les lignes. Retourne leur nombre."""
+        n = self.GetItemCount()
+        for i in range(n):
+            self.Select(i)
+        if n:
+            self.Focus(0)
+        return n
+
+    def get_selected_ids(self) -> list[str]:
+        """download_id de toutes les lignes selectionnees, dans l'ordre de la liste."""
+        par_ligne = {v: k for k, v in self._items.items()}
+        ids = []
+        idx = self.GetFirstSelected()
+        while idx != -1:
+            if idx in par_ligne:
+                ids.append(par_ligne[idx])
+            idx = self.GetNextSelected(idx)
+        return ids
+
+    def get_status(self, download_id: str) -> str | None:
+        return self._status_codes.get(download_id)
+
+    def remove_ids(self, ids) -> None:
+        """Retire plusieurs lignes. Du bas vers le haut : chaque suppression
+        decale les lignes suivantes, pas celles qu'il reste a traiter."""
+        for dl_id in sorted((i for i in ids if i in self._items),
+                            key=self._items.__getitem__, reverse=True):
+            self.remove_item(dl_id)
+
+    def remove_by_status(self, codes) -> list[str]:
+        """Retire les lignes dont le statut est dans `codes`. Retourne leurs id."""
+        ids = [k for k, c in self._status_codes.items() if c in codes]
+        self.remove_ids(ids)
+        return ids
+
     def get_selected_id(self) -> str | None:
         idx = self.GetFirstSelected()
         if idx == -1:
@@ -221,8 +272,7 @@ class DownloadList(wx.ListCtrl):
                 self._items[k] = idx
                 break
         self._items[download_id] = idx - 1
-        self.Select(idx - 1)
-        self.Focus(idx - 1)
+        self._select_only(idx - 1)
         return True
 
     def move_item_down(self, download_id: str) -> bool:
@@ -235,8 +285,7 @@ class DownloadList(wx.ListCtrl):
                 self._items[k] = idx
                 break
         self._items[download_id] = idx + 1
-        self.Select(idx + 1)
-        self.Focus(idx + 1)
+        self._select_only(idx + 1)
         return True
 
     def _swap_rows(self, row_a: int, row_b: int) -> None:

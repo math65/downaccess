@@ -10,6 +10,7 @@ DEFAULTS: dict = {
     "post_processing": "auto",      # format par défaut (codes de add_url_dialog) :
                                     # auto | mp4 | mp3 | m4a | amc_video | amc_audio
     "open_folder_when_done": False,
+    "remove_completed": False,      # retirer de la liste les telechargements termines
     "amc_path": "",                  # emplacement de l'exe AMC (vide = détection auto)
     "ffmpeg_path": "ffmpeg",
     "proxy_http": "",

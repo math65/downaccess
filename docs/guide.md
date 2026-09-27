@@ -73,7 +73,7 @@ La fenêtre principale se compose de quatre zones, du haut vers le bas.
 Trois menus regroupent toutes les actions :
 
 - **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), télécharger un extrait (Ctrl+E), gérer les abonnements (Ctrl+B), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
-- **Téléchargements** : démarrer (F5), mettre en pause ou reprendre (Espace), annuler (Suppr), vider la liste (Maj+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
+- **Téléchargements** : démarrer (F5), mettre en pause ou reprendre (Espace), tout sélectionner (Ctrl+A), annuler (Suppr), vider la liste (Maj+Suppr), retirer les téléchargements terminés (Ctrl+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
 - **Aide** : afficher la liste des raccourcis clavier, mettre à jour le moteur de téléchargement ou l'application, contacter le support ou faire une suggestion, ouvrir la page du projet et afficher les informations « À propos ».
 
 #### La barre d'outils
@@ -447,6 +447,8 @@ La plupart des actions s'appliquent à l'élément actuellement sélectionné da
 - **Mettre en pause ou reprendre (Espace)** : suspend le téléchargement sélectionné s'il est en cours, ou le relance s'il était en pause. La même touche fait les deux : appuyez une fois pour mettre en pause, une fois de plus pour reprendre.
 - **Annuler / Supprimer (Suppr)** : retire le téléchargement sélectionné de la liste. S'il est en cours ou en attente, une confirmation vous est demandée avant l'annulation.
 - **Vider la liste (Maj+Suppr)** : annule tous les téléchargements et vide entièrement la file. S'il reste des téléchargements en cours ou en attente, DownAccess vous indique combien et demande confirmation.
+- **Retirer les terminés (Ctrl+Suppr)** : retire de la liste les téléchargements terminés, sans rien demander. Les fichiers restent sur votre disque, et l'historique (Ctrl+H) en garde la trace. Les téléchargements en erreur restent dans la liste, pour que vous puissiez les réessayer.
+- **Tout sélectionner (Ctrl+A)** : sélectionne toute la liste. Vous pouvez aussi sélectionner plusieurs éléments avec Maj+flèches ou Ctrl+Espace. Suppr, Espace et F2 agissent alors sur toute la sélection : Suppr retire les éléments choisis (en demandant confirmation une seule fois si certains sont en cours), Espace les met tous en pause ou les reprend tous, et F2 relance uniquement ceux qui sont en erreur. Pratique après une coupure : Ctrl+A puis F2 relance d'un coup tous les téléchargements échoués.
 - **Réessayer (F2)** : relance un téléchargement qui a échoué (statut « Erreur »). L'élément en erreur est retiré, puis le téléchargement repart avec les mêmes réglages.
 
 Quand un téléchargement se termine, DownAccess vous l'annonce. Si vous avez activé l'option correspondante dans les préférences, votre dossier de destination s'ouvre automatiquement une fois tous les téléchargements terminés.
@@ -790,6 +792,7 @@ Permet de télécharger un même fichier en plusieurs morceaux simultanés, ce q
 Trois cases à cocher, toutes **décochées** par défaut :
 
 - **Ouvrir le dossier de destination quand tout est terminé** : ouvre automatiquement le dossier dès que la liste est entièrement téléchargée.
+- **Retirer de la liste les téléchargements terminés** : chaque téléchargement disparaît de la liste dès qu'il est terminé. La liste ne garde que ce qui reste à faire ou à revoir. Désactivé par défaut.
 - **Organiser dans des sous-dossiers par site** : range chaque fichier dans un sous-dossier nommé d'après le site d'origine (par exemple un dossier par plateforme).
 - **Organiser dans des sous-dossiers par playlist** : range les vidéos d'une même playlist ensemble dans leur propre sous-dossier.
 
@@ -1087,6 +1090,8 @@ Voici tous les raccourcis disponibles dans DownAccess.
 | **Espace** | Mettre en pause ou reprendre le téléchargement sélectionné |
 | **Suppr** | Supprimer le téléchargement sélectionné de la liste |
 | **Maj+Suppr** | Vider toute la liste |
+| **Ctrl+Suppr** | Retirer les téléchargements terminés |
+| **Ctrl+A** | Sélectionner toute la liste |
 | **F2** | Réessayer le téléchargement échoué sélectionné |
 | **Alt+Haut** | Monter l'élément sélectionné dans la file |
 | **Alt+Bas** | Descendre l'élément sélectionné dans la file |

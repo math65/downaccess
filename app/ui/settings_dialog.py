@@ -230,6 +230,11 @@ class SettingsDialog(wx.Dialog):
         self.chk_open_folder = wx.CheckBox(page,
             label=_("Ouvrir le dossier de destination quand tout est terminé"),
             name=_("Ouvrir le dossier de destination quand tout est terminé"))
+        # Longues files (Brad, 1 300 videos) : la liste ne garde que ce qui
+        # reste a faire ou a revoir.
+        self.chk_remove_completed = wx.CheckBox(page,
+            label=_("Retirer de la liste les téléchargements terminés"),
+            name=_("Retirer de la liste les téléchargements terminés"))
         self.chk_organize = wx.CheckBox(page,
             label=_("Organiser dans des sous-dossiers par site"),
             name=_("Organiser dans des sous-dossiers par site"))
@@ -346,6 +351,7 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(lbl_fragments_hint,   0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(lbl_after,         0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.chk_open_folder,       0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(self.chk_remove_completed,  0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.chk_organize,          0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_organize_playlist, 0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(self.chk_resume_queue,      0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
@@ -670,6 +676,7 @@ class SettingsDialog(wx.Dialog):
         self.spin_concurrent.SetValue(s.get("max_concurrent_downloads", 2))
         self.spin_fragments.SetValue(s.get("concurrent_fragments", 1))
         self.chk_open_folder.SetValue(s.get("open_folder_when_done", False))
+        self.chk_remove_completed.SetValue(s.get("remove_completed", False))
         self.chk_organize.SetValue(s.get("organize_by_site", False))
         self.chk_organize_playlist.SetValue(s.get("organize_by_playlist", False))
         self.radio_paging.SetSelection(
@@ -753,6 +760,7 @@ class SettingsDialog(wx.Dialog):
         s["max_concurrent_downloads"] = self.spin_concurrent.GetValue()
         s["concurrent_fragments"]     = self.spin_fragments.GetValue()
         s["open_folder_when_done"]    = self.chk_open_folder.GetValue()
+        s["remove_completed"]         = self.chk_remove_completed.GetValue()
         s["organize_by_site"]         = self.chk_organize.GetValue()
         s["organize_by_playlist"]     = self.chk_organize_playlist.GetValue()
         s["results_paging"] = PAGING_CHOICES[max(0, self.radio_paging.GetSelection())]

@@ -73,7 +73,7 @@ The main window is made up of four areas, from top to bottom.
 Three menus bring together all the actions:
 
 - **File**: add one or more addresses (Ctrl+N), download an extract (Ctrl+E), manage subscriptions (Ctrl+B), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
-- **Downloads**: start (F5), pause or resume (Space), cancel (Delete), clear the list (Shift+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
+- **Downloads**: start (F5), pause or resume (Space), select all (Ctrl+A), cancel (Delete), clear the list (Shift+Delete), remove finished downloads (Ctrl+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
 - **Help**: show the list of keyboard shortcuts, update the download engine or the application, contact support or make a suggestion, open the project page and show the "About" information.
 
 #### The toolbar
@@ -447,6 +447,8 @@ Most actions apply to the item currently selected in the list. First select the 
 - **Pause or resume (Space)**: suspends the selected download if it is in progress, or restarts it if it was paused. The same key does both: press once to pause, press once more to resume.
 - **Cancel / Remove (Delete)**: removes the selected download from the list. If it is in progress or waiting, you are asked to confirm before it is cancelled.
 - **Clear the list (Shift+Delete)**: cancels all downloads and clears the entire queue. If any downloads are still in progress or waiting, DownAccess tells you how many and asks for confirmation.
+- **Remove finished (Ctrl+Delete)**: removes finished downloads from the list, without asking. The files stay on your drive, and the history (Ctrl+H) keeps a record of them. Failed downloads stay in the list so you can retry them.
+- **Select all (Ctrl+A)**: selects the whole list. You can also select several items with Shift+arrows or Ctrl+Space. Delete, Space and F2 then act on the whole selection: Delete removes the chosen items (asking only once if some are in progress), Space pauses them all or resumes them all, and F2 restarts only the ones that failed. Handy after an outage: Ctrl+A then F2 restarts every failed download at once.
 - **Try again (F2)**: restarts a download that failed (status "Error"). The failed item is removed, then the download starts again with the same settings.
 
 When a download finishes, DownAccess announces it. If you have enabled the matching option in the preferences, your destination folder opens automatically once all downloads are finished.
@@ -788,6 +790,7 @@ Lets you download a single file in several simultaneous pieces, which can speed 
 Three checkboxes, all **unchecked** by default:
 
 - **Open the destination folder when everything is finished**: automatically opens the folder as soon as the list has fully downloaded.
+- **Remove finished downloads from the list**: each download disappears from the list as soon as it is finished. The list only keeps what is left to do or to check. Off by default.
 - **Organise into subfolders by site**: places each file in a subfolder named after the source site (for example, a folder per platform).
 - **Organise into subfolders by playlist**: groups the videos from the same playlist together in their own subfolder.
 
@@ -1086,6 +1089,8 @@ Here are all the shortcuts available in DownAccess.
 | **Space** | Pause or resume the selected download |
 | **Del** | Remove the selected download from the list |
 | **Shift+Del** | Clear the entire list |
+| **Ctrl+Del** | Remove finished downloads |
+| **Ctrl+A** | Select the whole list |
 | **F2** | Retry the selected failed download |
 | **Alt+Up** | Move the selected item up in the queue |
 | **Alt+Down** | Move the selected item down in the queue |

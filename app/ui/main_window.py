@@ -64,6 +64,7 @@ from app.ui.download_list import (
     STATUS_PROCESSING,
     STATUS_DONE,
     STATUS_ALREADY,
+    STATUS_ERROR,
 )
 from app.ui.format_dialog import FormatDialog
 from app.ui.audio_track_dialog import AudioTrackDialog
@@ -105,6 +106,8 @@ ID_START        = wx.NewIdRef()
 ID_PAUSE        = wx.NewIdRef()
 ID_CANCEL       = wx.NewIdRef()
 ID_CLEAR_ALL    = wx.NewIdRef()
+ID_CLEAR_DONE   = wx.NewIdRef()
+ID_SELECT_ALL   = wx.NewIdRef()
 ID_RETRY        = wx.NewIdRef()
 ID_MOVE_UP      = wx.NewIdRef()
 ID_MOVE_DOWN    = wx.NewIdRef()
@@ -436,6 +439,10 @@ class MainWindow(wx.Frame):
         # Ouvrir le dossier si tous les téléchargements sont terminés
         if self.settings.get("open_folder_when_done") and self._all_done():
             self._open_download_folder()
+        # En dernier : `_all_done` compte les lignes terminees, et le retrait
+        # avant lui empecherait le dossier de s'ouvrir.
+        if self.settings.get("remove_completed"):
+            self._forget_items([download_id])
 
     # ------------------------------------------------------------------
     # Abonnements (chaines suivies et podcasts)
@@ -1732,6 +1739,14 @@ class MainWindow(wx.Frame):
             ID_CLEAR_ALL, _("&Vider la liste\tShift+Delete"),
             _("Annuler tous les téléchargements et vider la liste"),
         )
+        dl_menu.Append(
+            ID_CLEAR_DONE, _("Ret&irer les terminés\tCtrl+Delete"),
+            _("Retirer de la liste les téléchargements terminés"),
+        )
+        dl_menu.Append(
+            ID_SELECT_ALL, _("&Tout sélectionner\tCtrl+A"),
+            _("Sélectionner tous les téléchargements de la liste"),
+        )
         dl_menu.AppendSeparator()
         self.mi_retry = dl_menu.Append(
             ID_RETRY, _("&Réessayer\tF2"),
@@ -1874,6 +1889,8 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_pause,          id=ID_PAUSE)
         self.Bind(wx.EVT_MENU, self._on_cancel,         id=ID_CANCEL)
         self.Bind(wx.EVT_MENU, self._on_clear_all,      id=ID_CLEAR_ALL)
+        self.Bind(wx.EVT_MENU, self._on_clear_done,     id=ID_CLEAR_DONE)
+        self.Bind(wx.EVT_MENU, self._on_select_all,     id=ID_SELECT_ALL)
         self.Bind(wx.EVT_MENU, self._on_retry,          id=ID_RETRY)
         self.Bind(wx.EVT_MENU, self._on_move_up,        id=ID_MOVE_UP)
         self.Bind(wx.EVT_MENU, self._on_move_down,      id=ID_MOVE_DOWN)
@@ -2496,11 +2513,34 @@ class MainWindow(wx.Frame):
             APP_NAME, wx.OK | wx.ICON_INFORMATION,
         )
 
+    # Statuts d'un element que la file fait encore avancer : le retirer de la
+    # liste doit aussi l'annuler, sinon il continue en arriere-plan, invisible.
+    # (Avant 0.2.4, seuls « En cours » et « En attente » etaient annules : un
+    # element en Preparation, en Pause ou en Traitement survivait au retrait.)
+    _UNFINISHED = (STATUS_PENDING, STATUS_PREPARING, STATUS_ACTIVE,
+                   STATUS_PAUSED, STATUS_PROCESSING)
+
+    def _on_select_all(self, _event) -> None:
+        # Ctrl+A dans un champ texte de la fenetre garde son sens habituel.
+        focus = wx.Window.FindFocus()
+        if isinstance(focus, wx.TextCtrl):
+            focus.SelectAll()
+            return
+        n = self.download_list.select_all()
+        self.download_list.SetFocus()
+        texte = _("{count} téléchargements sélectionnés.").format(count=n)
+        self.set_status(texte)
+        speech.speak(texte)
+
     def _on_pause(self, _event) -> None:
-        dl_id = self.download_list.get_selected_id()
-        if dl_id is None:
+        ids = self.download_list.get_selected_ids()
+        if not ids:
             speech.speak(_("Aucun téléchargement sélectionné."))
             return
+        if len(ids) > 1:
+            self._pause_many(ids)
+            return
+        dl_id = ids[0]
         if not self._queue.is_active(dl_id):
             self.set_status(_("Ce téléchargement n'est pas en cours."))
             speech.speak(_("Ce téléchargement n'est pas en cours."))
@@ -2516,26 +2556,77 @@ class MainWindow(wx.Frame):
             speech.speak(_("Téléchargement mis en pause."))
             self.set_status(_("Téléchargement mis en pause."))
 
+    def _pause_many(self, ids: list[str]) -> None:
+        """Espace sur plusieurs elements : une touche, un etat coherent.
+        S'il en tourne au moins un, tous passent en pause ; s'ils sont tous
+        deja en pause, tous reprennent."""
+        actifs = [i for i in ids if self._queue.is_active(i)]
+        if not actifs:
+            texte = _("Aucun des téléchargements sélectionnés n'est en cours.")
+        elif any(not self._queue.is_paused(i) for i in actifs):
+            for i in actifs:
+                self._queue.pause(i)
+                self.download_list.set_status(i, STATUS_PAUSED)
+            texte = _("{count} téléchargements mis en pause.").format(count=len(actifs))
+        else:
+            for i in actifs:
+                self._queue.resume(i)
+                self.download_list.set_status(i, STATUS_ACTIVE)
+            texte = _("{count} téléchargements repris.").format(count=len(actifs))
+        self.set_status(texte)
+        speech.speak(texte)
+
+    def _forget_items(self, ids) -> None:
+        """Retire des elements de la liste et oublie leur etat."""
+        self.download_list.remove_ids(ids)
+        for dl_id in ids:
+            self._progress.pop(dl_id, None)
+            self._dl_data.pop(dl_id, None)
+        if self._gauge_dl_id in ids:
+            self._reset_gauge()
+        self.set_count(self.download_list.count())
+
     def _on_cancel(self, _event) -> None:
-        dl_id = self.download_list.get_selected_id()
-        if dl_id is None:
+        ids = self.download_list.get_selected_ids()
+        if not ids:
             self.set_status(_("Aucun téléchargement sélectionné."))
             return
-        status = self.download_list.get_selected_status()
-        if status in (STATUS_ACTIVE, STATUS_PENDING):
-            if wx.MessageBox(
-                _("Annuler ce téléchargement ?"),
-                _("Confirmer l'annulation"),
-                wx.YES_NO | wx.ICON_QUESTION,
-            ) != wx.YES:
+        en_cours = [i for i in ids
+                    if self.download_list.get_status(i) in self._UNFINISHED]
+        if en_cours:
+            if len(ids) == 1:
+                question = _("Annuler ce téléchargement ?")
+            else:
+                question = _("{count} téléchargements sont en cours ou en attente.\n\n"
+                             "Les annuler et retirer les {total} éléments sélectionnés ?"
+                             ).format(count=len(en_cours), total=len(ids))
+            if wx.MessageBox(question, _("Confirmer l'annulation"),
+                             wx.YES_NO | wx.ICON_QUESTION) != wx.YES:
                 return
-            self._queue.cancel(dl_id)
-        self.download_list.remove_selected()
-        self._progress.pop(dl_id, None)
-        self._dl_data.pop(dl_id, None)
-        self.set_status(_("Téléchargement supprimé de la liste."))
-        speech.speak(_("Supprimé."))
-        self.set_count(self.download_list.count())
+            for dl_id in en_cours:
+                self._queue.cancel(dl_id)
+        self._forget_items(ids)
+        if len(ids) == 1:
+            self.set_status(_("Téléchargement supprimé de la liste."))
+            speech.speak(_("Supprimé."))
+        else:
+            texte = _("{count} éléments retirés de la liste.").format(count=len(ids))
+            self.set_status(texte)
+            speech.speak(texte)
+
+    def _on_clear_done(self, _event) -> None:
+        """Retire les telechargements termines. Rien n'est annule et les
+        fichiers restent sur le disque : pas de confirmation."""
+        ids = [i for i in self.download_list.get_all_ids()
+               if self.download_list.get_status(i) in (STATUS_DONE, STATUS_ALREADY)]
+        if not ids:
+            texte = _("Aucun téléchargement terminé dans la liste.")
+        else:
+            self._forget_items(ids)
+            texte = _("{count} téléchargements terminés retirés de la liste.").format(
+                count=len(ids))
+        self.set_status(texte)
+        speech.speak(texte)
 
     def _on_clear_all(self, _event) -> None:
         if self.download_list.count() == 0:
@@ -2564,17 +2655,35 @@ class MainWindow(wx.Frame):
         speech.speak(_("Liste vidée."))
 
     def _on_retry(self, _event) -> None:
-        dl_id = self.download_list.get_selected_id()
-        if dl_id is None:
+        ids = self.download_list.get_selected_ids()
+        if not ids:
             self.set_status(_("Aucun téléchargement sélectionné."))
             return
+        if len(ids) == 1:
+            if self._retry_one(ids[0]):
+                self.set_status(_("Téléchargement relancé."))
+            else:
+                self.set_status(_("Impossible de réessayer : données introuvables."))
+            return
+        # Plusieurs : seuls les echecs repartent. Apres un Ctrl+A, relancer
+        # aussi les termines ou les en-cours serait un piege. C'est le geste
+        # de Brad apres son disque debranche : Ctrl+A puis F2.
+        echecs = [i for i in ids
+                  if self.download_list.get_status(i) == STATUS_ERROR]
+        relances = sum(1 for i in echecs if self._retry_one(i))
+        if relances:
+            texte = _("{count} téléchargements relancés.").format(count=relances)
+        else:
+            texte = _("Aucun téléchargement en erreur dans la sélection.")
+        self.set_status(texte)
+        speech.speak(texte)
+
+    def _retry_one(self, dl_id: str) -> bool:
+        """Retire l'element et le remet en file. Faux sans donnees."""
         data = self._dl_data.get(dl_id)
         if not data:
-            self.set_status(_("Impossible de réessayer : données introuvables."))
-            return
-        # Supprimer l'item échoué et relancer
-        self.download_list.remove_selected()
-        self._dl_data.pop(dl_id, None)
+            return False
+        self._forget_items([dl_id])
         self._enqueue_url(
             data["url"],
             data.get("format_spec", "auto"),
@@ -2586,7 +2695,7 @@ class MainWindow(wx.Frame):
             playlist_title=data.get("playlist_title"),
             playlist_number=data.get("playlist_number"),
         )
-        self.set_status(_("Téléchargement relancé."))
+        return True
 
     def _on_move_up(self, _event) -> None:
         dl_id = self.download_list.get_selected_id()
@@ -2760,6 +2869,8 @@ class MainWindow(wx.Frame):
             "Espace           Pause / Reprendre\n"
             "Suppr            Supprimer de la liste\n"
             "Maj+Suppr        Vider toute la liste\n"
+            "Ctrl+Suppr       Retirer les téléchargements terminés\n"
+            "Ctrl+A           Tout sélectionner\n"
             "F2               Réessayer\n"
             "Alt+Haut         Monter dans la file\n"
             "Alt+Bas          Descendre dans la file\n"

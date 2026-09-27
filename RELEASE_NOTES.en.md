@@ -10,6 +10,38 @@ More generally, **one failure affecting your whole list now opens only one windo
 
 Thanks to Brad.
 
+### Tidying up the list
+
+On a long queue, the list filled up with finished downloads, and you had to remove them one by one. Three new things:
+
+- **Ctrl+Delete** removes every finished download at once. Failed ones stay, so you can retry them.
+- **Ctrl+A** selects the whole list. Delete, Space and F2 then act on the whole selection. For example, Ctrl+A then F2 restarts every failed download in one go.
+- A new option in Preferences > General, **Remove finished downloads from the list**, makes them disappear on their own as soon as they are done. It is off by default.
+
+Along the way, removing a download that is being prepared or paused now really cancels it: before, it carried on in the background without you seeing it.
+
+Thanks to Brad.
+
+### An unplugged drive no longer makes the whole queue fail
+
+If the drive your downloads go to disappears (an external drive unplugged or asleep, a network drive disconnected), DownAccess kept starting every video in the queue, only to see each one fail when saving. On a long list, all of them ended up failed, and those hundreds of pointless requests could also trigger the site's robot check.
+
+Now the queue goes on hold and a single window explains that the folder cannot be found. Plug the drive back in and downloads resume on their own. You can also choose another folder in Preferences.
+
+Thanks to Brad.
+
+### YouTube Music recognises your Premium subscription
+
+YouTube and YouTube Music use the same account, but DownAccess kept their sign-ins separately. The YouTube Music one could go stale without you knowing: a Premium subscriber would then be refused a track "only available to Premium members". Both now share the same sign-in. If that message still appears, DownAccess offers to sign you in again.
+
+Thanks to Arnaud.
+
+### Searching Arte and france.tv now retries on its own
+
+Sometimes the site sends back an incomplete answer. The search then stopped with an unreadable technical message. DownAccess now asks a second time, which almost always works. If the site still does not answer, a clear message invites you to try again a little later.
+
+Thanks to Véronique.
+
 ### The "Delete cookies for this site" button finally works
 
 In the site sign-in window, this button was not actually deleting any cookies. You thought you were signed out, while DownAccess kept using your old session. When something went wrong, it showed a technical message on top, sometimes in the wrong language.

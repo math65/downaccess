@@ -10,6 +10,38 @@ Plus largement, **une même panne qui frappe toute votre liste n'ouvre plus qu'u
 
 Merci à Brad.
 
+### Faire le ménage dans la liste
+
+Sur une longue file, la liste se remplissait de téléchargements terminés, et il fallait les retirer un par un. Trois nouveautés :
+
+- **Ctrl+Suppr** retire d'un coup tous les téléchargements terminés. Ceux en erreur restent, pour que vous puissiez les réessayer.
+- **Ctrl+A** sélectionne toute la liste. Suppr, Espace et F2 agissent alors sur toute la sélection. Par exemple, Ctrl+A puis F2 relance en une fois tous les téléchargements échoués.
+- Une nouvelle option dans Préférences > Général, **Retirer de la liste les téléchargements terminés**, les fait disparaître d'eux-mêmes dès qu'ils sont finis. Elle est désactivée par défaut.
+
+Au passage, retirer de la liste un téléchargement en préparation ou en pause l'annule vraiment : avant, il continuait en arrière-plan sans que vous le voyiez.
+
+Merci à Brad.
+
+### Un disque débranché ne fait plus échouer toute la file
+
+Si le disque où vont vos téléchargements disparaît (disque externe débranché ou mis en veille, lecteur réseau déconnecté), DownAccess continuait de lancer chaque vidéo de la file, pour la voir échouer au moment de l'enregistrer. Sur une longue liste, toutes finissaient en erreur, et ces centaines de demandes inutiles pouvaient en plus déclencher la vérification anti-robot du site.
+
+Désormais, la file se met en attente et une seule fenêtre vous explique que le dossier est introuvable. Rebranchez le disque : les téléchargements reprennent d'eux-mêmes. Vous pouvez aussi choisir un autre dossier dans les Préférences.
+
+Merci à Brad.
+
+### YouTube Music reconnaît votre abonnement Premium
+
+YouTube et YouTube Music utilisent le même compte, mais DownAccess gardait leurs connexions séparément. Celle de YouTube Music pouvait vieillir sans que vous le sachiez : un abonné Premium se voyait alors refuser un titre « réservé aux membres Premium ». Les deux partagent maintenant la même connexion. Si ce message apparaît encore, DownAccess vous propose de vous reconnecter.
+
+Merci à Arnaud.
+
+### La recherche sur Arte et france.tv réessaie d'elle-même
+
+Il arrive que le site renvoie une réponse incomplète. La recherche s'arrêtait alors sur un message technique incompréhensible. DownAccess refait maintenant la demande une seconde fois, ce qui suffit presque toujours. Si le site ne répond toujours pas, un message clair vous invite à réessayer un peu plus tard.
+
+Merci à Véronique.
+
 ### Le bouton « Supprimer les cookies du site » fonctionne enfin
 
 Dans la fenêtre de connexion à un site, ce bouton ne supprimait en réalité aucun cookie. Vous vous croyiez déconnecté, et DownAccess continuait d'utiliser votre ancienne session. En cas de problème, il affichait par-dessus un message technique parfois dans la mauvaise langue.
