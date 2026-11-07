@@ -351,7 +351,11 @@ class MainWindow(wx.Frame):
             on_warning=self._on_dl_warning,
             on_change=self._on_queue_changed,
             on_held=self._on_queue_held,
+            on_bot_pause=self._on_bot_pause,
+            on_bot_resume=self._on_bot_resume,
+            on_requeued=self._on_requeued,
         )
+        self._bot_pause_explained = False   # fenetre de pause : une par session
         # File retenue (disque de destination introuvable) : on reessaie a
         # intervalle regulier, et la file repart seule au retour du disque.
         self._held_timer = wx.Timer(self)
@@ -874,6 +878,54 @@ class MainWindow(wx.Frame):
                                _("Dossier introuvable"), wx.OK | wx.ICON_WARNING)
         dlg.ShowModal()
         dlg.Destroy()
+
+    def _on_requeued(self, download_id: str) -> None:
+        """Telechargement interrompu par le controle anti-robot : il repasse
+        en attente, il repartira a la fin de la pause."""
+        self._progress.pop(download_id, None)
+        if self._gauge_dl_id == download_id:
+            self._reset_gauge()
+        self.download_list.set_status(download_id, STATUS_PENDING)
+
+    def _on_bot_pause(self, minutes: float) -> None:
+        """Le site a oppose son controle anti-robot : la file fait une pause.
+
+        Rien n'echoue : les videos touchees sont de nouveau « En attente » et
+        tout repart seul a la fin de la pause. Une seule fenetre par session —
+        la file tourne souvent sans personne devant l'ecran, et une longue
+        nuit peut enchainer plusieurs pauses.
+        """
+        duree = max(1, round(minutes))
+        texte = _("Le site demande de vérifier que vous n'êtes pas un robot. "
+                  "Les téléchargements reprendront seuls dans {count} minutes.").format(
+                      count=duree)
+        self.set_status(texte)
+        if self._bot_pause_explained:
+            speech.speak(texte)
+            return
+        self._bot_pause_explained = True
+        dlg = wx.MessageDialog(
+            self,
+            _("Le site a interrompu les téléchargements pour vérifier que vous "
+              "n'êtes pas un robot. C'est une limite déclenchée par le nombre de "
+              "téléchargements lancés coup sur coup ; vous connecter n'y "
+              "changerait rien.\n\n"
+              "DownAccess fait donc une pause de {count} minutes, puis reprend "
+              "la file tout seul. Aucune vidéo n'est perdue : celles qui ont été "
+              "interrompues sont de nouveau en attente.\n\n"
+              "Pour reprendre avant la fin de la pause, appuyez sur F5. Si cela "
+              "se reproduit souvent, réduisez le nombre de téléchargements "
+              "simultanés dans Préférences > Général.").format(count=duree),
+            _("Pause des téléchargements"),
+            wx.OK | wx.ICON_INFORMATION,
+        )
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def _on_bot_resume(self) -> None:
+        texte = _("Fin de la pause : les téléchargements reprennent.")
+        self.set_status(texte)
+        speech.speak(texte)
 
     def _on_held_timer(self, _event) -> None:
         if self._queue.retry_held():
@@ -2510,6 +2562,12 @@ class MainWindow(wx.Frame):
         self.Close()
 
     def _on_start(self, _event) -> None:
+        # Pause anti-robot en cours : F5 reprend tout de suite.
+        if self._queue.resume_bot_pause():
+            texte = _("Pause levée : les téléchargements reprennent.")
+            self.set_status(texte)
+            speech.speak(texte)
+            return
         # Sera connecté au QueueManager en Phase 2
         wx.MessageBox(
             _("Démarrage de la file disponible en Phase 2."),
@@ -3202,6 +3260,7 @@ class MainWindow(wx.Frame):
         # ce qu'on vient tout juste de conserver.
         self._stop_queue_save_timer()
         self._held_timer.Stop()
+        self._queue.stop_bot_pause_timer()
         self._save_queue_now(clean_exit=True)
         self._queue_save_frozen = True
 

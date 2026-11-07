@@ -487,6 +487,14 @@ Deux réglages, dans les **Préférences** (Ctrl+P), contrôlent ce comportement
 - **Téléchargements simultanés** : le nombre de téléchargements menés en parallèle (2 par défaut). Augmentez-le pour traiter plus de fichiers à la fois.
 - **Fragments en parallèle par téléchargement** : utilise plusieurs connexions pour accélérer un même téléchargement (1 par défaut, ce qui désactive l'option). Une valeur plus élevée peut accélérer les gros fichiers.
 
+#### Quand un site vérifie que vous n'êtes pas un robot
+
+Si vous lancez beaucoup de téléchargements coup sur coup, un site comme YouTube peut les interrompre pour vérifier que vous n'êtes pas un robot. Ce n'est pas un problème de compte : vous connecter n'y changerait rien, seul le temps lève cette limite.
+
+DownAccess met alors la file en **pause** pendant 5 minutes. Rien n'échoue : les vidéos interrompues repassent « En attente », et la file reprend toute seule à la fin de la pause. Une fenêtre vous l'explique la première fois ; ensuite, la barre de statut indique la durée de chaque pause. Si le site bloque de nouveau juste après la reprise, la pause suivante dure deux fois plus longtemps, jusqu'à une heure au maximum.
+
+Pour reprendre sans attendre, appuyez sur **F5**. La durée de la pause se règle dans les Préférences (voir plus loin). Si ces pauses reviennent souvent, réduisez le nombre de téléchargements simultanés.
+
 ### Télécharger une playlist
 
 Quand l'adresse que vous ajoutez pointe vers une playlist, DownAccess la détecte automatiquement et ouvre une fenêtre de sélection. Vous y choisissez précisément ce que vous voulez récupérer :
@@ -786,6 +794,10 @@ Définit combien de fichiers peuvent être téléchargés en même temps. La val
 #### Fragments en parallèle par téléchargement
 
 Permet de télécharger un même fichier en plusieurs morceaux simultanés, ce qui peut accélérer un téléchargement. La valeur va de **1** à **16**, et la valeur par défaut est **1** (c'est-à-dire désactivé). Laissez **1** si vous n'avez pas de raison particulière de changer.
+
+#### Pause après une vérification anti-robot (minutes)
+
+Durée de la pause que fait la file quand un site interrompt les téléchargements pour vérifier que vous n'êtes pas un robot. La valeur va de **0** à **60**, et la valeur par défaut est **5**. À **0**, la pause est désactivée : chaque vidéo interrompue est alors marquée en erreur.
 
 #### Action après téléchargement
 

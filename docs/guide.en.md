@@ -487,6 +487,14 @@ Two settings, in the **Preferences** (Ctrl+P), control this behaviour:
 - **Simultaneous downloads**: the number of downloads run in parallel (2 by default). Increase it to handle more files at once.
 - **Parallel fragments per download**: uses several connections to speed up a single download (1 by default, which disables the option). A higher value can speed up large files.
 
+#### When a site checks that you are not a robot
+
+If you start many downloads in a row, a site like YouTube may stop them to check that you are not a robot. It is not an account problem: signing in would not change anything, only time lifts this limit.
+
+DownAccess then **pauses** the queue for 5 minutes. Nothing fails: the interrupted videos go back to "Waiting", and the queue resumes on its own when the pause ends. A window explains this the first time; after that, the status bar shows how long each pause lasts. If the site blocks again right after resuming, the next pause lasts twice as long, up to one hour at most.
+
+To resume without waiting, press **F5**. The length of the pause is set in the Preferences (see below). If these pauses come back often, lower the number of simultaneous downloads.
+
 ### Downloading a playlist
 
 When the address you add points to a playlist, DownAccess detects it automatically and opens a selection window. There you choose exactly what you want to retrieve:
@@ -784,6 +792,10 @@ Sets how many files can be downloaded at the same time. The value ranges from **
 #### Parallel fragments per download
 
 Lets you download a single file in several simultaneous pieces, which can speed up a download. The value ranges from **1** to **16**, and the default is **1** (that is, disabled). Leave it at **1** unless you have a particular reason to change it.
+
+#### Pause after a bot check (minutes)
+
+How long the queue pauses when a site stops your downloads to check that you are not a robot. The value ranges from **0** to **60**, and the default is **5**. At **0**, the pause is turned off: each interrupted video is then marked as failed.
 
 #### Action after download
 

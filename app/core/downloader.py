@@ -876,6 +876,11 @@ def _raise_download_error(raw_msg: str, cause: Exception, dest: str = "",
         if debut is not None:
             raise DownloadError(not_yet_online_message(debut)) from cause
     friendly = _humanize_error(raw_msg, dest)
+    # Type a part : la file met alors tout en pause au lieu d'enchainer les
+    # echecs (cf. QueueManager). Le message, lui, est traduit : on ne peut pas
+    # le reconnaitre apres coup.
+    if is_bot_check_error(raw_msg):
+        raise BotCheckError(friendly) from cause
     if _is_login_required(raw_msg):
         raise LoginRequiredError(friendly) from cause
     raise DownloadError(friendly) from cause
@@ -2290,6 +2295,12 @@ class DownloadError(Exception):
 class LoginRequiredError(DownloadError):
     """Échec parce que le site exige une connexion (adulte, privé, membres…).
     Déclenche le parcours de connexion guidée côté UI."""
+    pass
+
+
+class BotCheckError(DownloadError):
+    """Le site a oppose son controle anti-robot (limite de debit sur
+    l'adresse IP). Seul le temps le leve : la file se met en pause."""
     pass
 
 

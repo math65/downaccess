@@ -225,6 +225,19 @@ class SettingsDialog(wx.Dialog):
         )
         lbl_fragments_hint.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
 
+        # Pause apres un controle anti-robot
+        lbl_bot_pause = wx.StaticText(
+            page, label=_("Pause après une vérification anti-robot (minutes) :"))
+        self.spin_bot_pause = wx.SpinCtrl(page, min=0, max=60, initial=5,
+                                          name=_("Pause après une vérification anti-robot"))
+        lbl_bot_pause_hint = wx.StaticText(
+            page,
+            label=_("Quand un site bloque les téléchargements pour vérifier que vous "
+                    "n'êtes pas un robot, la file attend puis reprend seule. "
+                    "0 = désactivé."),
+        )
+        lbl_bot_pause_hint.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
+
         # Action après téléchargement
         lbl_after = wx.StaticText(page, label=_("Action après téléchargement :"))
         self.chk_open_folder = wx.CheckBox(page,
@@ -349,6 +362,9 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(lbl_fragments,     0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.spin_fragments,  0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_fragments_hint,   0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
+        sizer.Add(lbl_bot_pause,     0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        sizer.Add(self.spin_bot_pause,  0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(lbl_bot_pause_hint,   0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(lbl_after,         0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.chk_open_folder,       0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_remove_completed,  0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
@@ -675,6 +691,7 @@ class SettingsDialog(wx.Dialog):
         self.txt_folder.SetValue(s.get("download_folder", ""))
         self.spin_concurrent.SetValue(s.get("max_concurrent_downloads", 2))
         self.spin_fragments.SetValue(s.get("concurrent_fragments", 1))
+        self.spin_bot_pause.SetValue(int(s.get("bot_check_pause_minutes", 5)))
         self.chk_open_folder.SetValue(s.get("open_folder_when_done", False))
         self.chk_remove_completed.SetValue(s.get("remove_completed", False))
         self.chk_organize.SetValue(s.get("organize_by_site", False))
@@ -759,6 +776,7 @@ class SettingsDialog(wx.Dialog):
         s["download_folder"]          = self.txt_folder.GetValue().strip()
         s["max_concurrent_downloads"] = self.spin_concurrent.GetValue()
         s["concurrent_fragments"]     = self.spin_fragments.GetValue()
+        s["bot_check_pause_minutes"]  = self.spin_bot_pause.GetValue()
         s["open_folder_when_done"]    = self.chk_open_folder.GetValue()
         s["remove_completed"]         = self.chk_remove_completed.GetValue()
         s["organize_by_site"]         = self.chk_organize.GetValue()

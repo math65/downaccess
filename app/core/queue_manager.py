@@ -1,11 +1,13 @@
 import logging
 import threading
+import time
 import uuid
 from dataclasses import dataclass, field
 from collections.abc import Callable
 
 from app.core.downloader import (
-    Downloader, DownloadError, DownloadInfo, DownloadProgress, LoginRequiredError,
+    BotCheckError, Downloader, DownloadError, DownloadInfo, DownloadProgress,
+    LoginRequiredError,
     accepts_audio_only, destination_unreachable, estimate_total_bytes,
 )
 
@@ -44,7 +46,16 @@ OnPlaylist      = Callable[[DownloadInfo], None]  # info avec is_playlist=True
 OnWarning       = Callable[[str, str], None]      # download_id, message
 OnChange        = Callable[[], None]              # la file a change (conservation)
 OnHeld          = Callable[[str], None]           # dossier introuvable : file retenue
+OnBotPause      = Callable[[float], None]         # controle anti-robot : pause (minutes)
+OnBotResume     = Callable[[], None]              # fin de la pause anti-robot
+OnRequeued      = Callable[[str], None]           # download_id remis en attente
 PostToUI        = Callable[..., None]             # ex: wx.CallAfter
+
+# Pause apres un controle anti-robot : duree de depart (reglage, en minutes),
+# doublee a chaque nouveau controle tant qu'aucun telechargement lance apres
+# la reprise n'a abouti, plafonnee a une heure.
+DEFAULT_BOT_PAUSE_MINUTES = 5
+MAX_BOT_PAUSE_MINUTES = 60
 
 
 class QueueManager:
@@ -66,6 +77,9 @@ class QueueManager:
         on_warning:  OnWarning  | None = None,
         on_change:   OnChange   | None = None,
         on_held:     OnHeld     | None = None,
+        on_bot_pause:  OnBotPause  | None = None,
+        on_bot_resume: OnBotResume | None = None,
+        on_requeued:   OnRequeued  | None = None,
     ):
         self._settings    = settings
         self._post        = post_to_ui
@@ -86,6 +100,20 @@ class QueueManager:
         # d'ecrire (rapport de Brad, 0.2.3 : 1 300 videos, lecteur D: disparu).
         self._on_held     = on_held
         self._held        = False
+
+        # Controle anti-robot (« confirm you're not a bot ») : la limite porte
+        # sur l'adresse IP, et chaque nouvelle requete la prolonge. Continuer a
+        # depiler la file, c'etait faire echouer toutes les videos suivantes
+        # une a une, et entretenir le blocage (demande de Brad, 2026-11-07 :
+        # « faire attendre le programme quelques minutes »). La file s'arrete,
+        # les videos touchees repassent en attente, et tout repart seul.
+        self._on_bot_pause  = on_bot_pause
+        self._on_bot_resume = on_bot_resume
+        self._on_requeued   = on_requeued
+        self._pause_until   = 0.0          # time.monotonic() de la reprise
+        self._pause_timer: threading.Timer | None = None
+        self._pause_streak  = 0            # pauses d'affilee sans reussite
+        self._pause_epoch   = 0            # numero de la derniere pause
 
         self._queue:   list[QueueItem]        = []
         self._active:  dict[str, QueueItem]   = {}   # download_id → item
@@ -129,6 +157,36 @@ class QueueManager:
         """Vrai si plus rien ne tourne ni n'attend : la rafale est finie."""
         with self._lock:
             return not self._active and not self._queue
+
+    @property
+    def is_bot_paused(self) -> bool:
+        """Vrai pendant la pause qui suit un controle anti-robot."""
+        with self._lock:
+            return self._pause_until > time.monotonic()
+
+    @property
+    def bot_pause_remaining(self) -> float:
+        """Secondes restantes avant la reprise automatique (0 hors pause)."""
+        with self._lock:
+            return max(0.0, self._pause_until - time.monotonic())
+
+    def resume_bot_pause(self) -> bool:
+        """Leve la pause anti-robot tout de suite. Vrai s'il y en avait une."""
+        with self._lock:
+            if self._pause_until <= time.monotonic():
+                return False
+            if self._pause_timer is not None:
+                self._pause_timer.cancel()
+        self._end_bot_pause(announce=False)
+        return True
+
+    def stop_bot_pause_timer(self) -> None:
+        """Arrete le minuteur de reprise sans toucher a la file (fermeture de
+        l'application : il ne doit plus rien poster a une fenetre detruite)."""
+        with self._lock:
+            if self._pause_timer is not None:
+                self._pause_timer.cancel()
+                self._pause_timer = None
 
     def add(self, url: str, format_spec: str = "auto", format_id: str | None = None,
             audio_groups: list[list[str]] | None = None,
@@ -264,6 +322,11 @@ class QueueManager:
             for item in self._active.values():
                 item.stop_event.set()
             self._queue.clear()
+            # Plus rien a reprendre : la pause n'a plus d'objet.
+            if self._pause_timer is not None:
+                self._pause_timer.cancel()
+                self._pause_timer = None
+            self._pause_until = 0.0
         self._notify_change()
 
     def get_state(self) -> dict:
@@ -296,6 +359,8 @@ class QueueManager:
 
     def _try_start_next(self) -> None:
         with self._lock:
+            if self._pause_until > time.monotonic():
+                return      # pause anti-robot : le minuteur relancera la file
             attente = bool(self._queue) and len(self._active) < self.max_concurrent
         if attente:
             dossier = self._settings.get("download_folder", "")
@@ -320,6 +385,85 @@ class QueueManager:
                 )
                 t.start()
 
+    # ------------------------------------------------------------------
+    # Pause apres un controle anti-robot
+    # ------------------------------------------------------------------
+
+    def _bot_pause_minutes(self) -> float:
+        """Duree de depart de la pause (reglage). 0 = fonction desactivee."""
+        try:
+            return max(0.0, float(self._settings.get(
+                "bot_check_pause_minutes", DEFAULT_BOT_PAUSE_MINUTES)))
+        except (TypeError, ValueError):
+            return float(DEFAULT_BOT_PAUSE_MINUTES)
+
+    def _defer_for_bot_check(self, item: QueueItem) -> bool:
+        """Remet l'item en tete de file et met la file en pause.
+
+        Vrai si l'item a ete remis en attente : l'appelant ne signale alors
+        pas d'erreur. Les telechargements deja partis qui butent ensuite sur
+        le meme controle sont remis en attente sans relancer de pause.
+        """
+        minutes = self._bot_pause_minutes()
+        if minutes <= 0:
+            return False
+        with self._lock:
+            if item.stop_event.is_set():
+                return False
+            self._active.pop(item.download_id, None)
+            item.pause_event.clear()
+            self._queue.insert(0, item)
+            maintenant = time.monotonic()
+            deja = self._pause_until > maintenant
+            duree = 0.0
+            if not deja:
+                # Un controle qui revient juste apres la reprise : le site
+                # n'a pas encore leve sa limite, on attend deux fois plus.
+                duree = min(minutes * (2 ** self._pause_streak),
+                            float(MAX_BOT_PAUSE_MINUTES))
+                self._pause_streak += 1
+                self._pause_epoch += 1
+                self._pause_until = maintenant + duree * 60
+                self._pause_timer = threading.Timer(
+                    duree * 60, self._end_bot_pause,
+                    kwargs={"epoch": self._pause_epoch})
+                self._pause_timer.daemon = True
+                self._pause_timer.start()
+        if deja:
+            _log.info("Controle anti-robot pendant la pause, remis en attente id=%s",
+                      item.download_id)
+        else:
+            _log.warning("Controle anti-robot : file en pause %.1f min (id=%s)",
+                         duree, item.download_id)
+        self._notify_change()
+        if self._on_requeued:
+            self._post(self._on_requeued, item.download_id)
+        if not deja and self._on_bot_pause:
+            self._post(self._on_bot_pause, duree)
+        return True
+
+    def _end_bot_pause(self, epoch: int | None = None, announce: bool = True) -> None:
+        """Fin de la pause (minuteur, ou reprise demandee) : la file repart."""
+        with self._lock:
+            # Minuteur d'une pause deja levee a la main, puis remplacee par
+            # une nouvelle : il ne doit pas lever celle-ci.
+            if epoch is not None and epoch != self._pause_epoch:
+                return
+            self._pause_timer = None
+            self._pause_until = 0.0
+            reste = bool(self._queue)
+        _log.info("Fin de la pause anti-robot, la file repart")
+        if announce and reste and self._on_bot_resume:
+            self._post(self._on_bot_resume)
+        self._try_start_next()
+
+    def _note_success(self, epoch: int) -> None:
+        """Un telechargement lance apres la derniere pause a abouti : le site
+        a leve sa limite, la prochaine pause repartira de la duree de depart."""
+        with self._lock:
+            if epoch == self._pause_epoch:
+                self._pause_streak = 0
+
     def _worker(self, item: QueueItem) -> None:
         """Enveloppe robuste : quoi qu'il arrive, l'item est libéré (`_finish`)
         et signalé en erreur si une exception inattendue survient. Sans ça, une
@@ -339,6 +483,7 @@ class QueueManager:
     def _run_worker(self, item: QueueItem) -> None:
         dl = Downloader(self._settings)
         dl_id = item.download_id
+        epoch = self._pause_epoch
         _log.info("Démarrage worker id=%s url=%s", dl_id, item.url)
 
         # Signaler « Préparation » : entre le démarrage du worker et le premier
@@ -386,6 +531,8 @@ class QueueManager:
                     # Annulation : ce n'est pas une panne, on ne montre pas de
                     # message d'erreur a l'utilisateur qui vient de la demander.
                     _log.info("Analyse annulee id=%s", dl_id)
+                    return
+                if isinstance(exc, BotCheckError) and self._defer_for_bot_check(item):
                     return
                 _log.error("Erreur fetch_info id=%s — %s", dl_id, exc)
                 self._post(self._on_error, dl_id, str(exc),
@@ -435,8 +582,11 @@ class QueueManager:
             if warning and self._on_warning:
                 self._post(self._on_warning, dl_id, warning)
             _log.info("Terminé avec succès id=%s url=%s", dl_id, item.url)
+            self._note_success(epoch)
             self._post(self._on_complete, dl_id)
         except DownloadError as exc:
+            if isinstance(exc, BotCheckError) and self._defer_for_bot_check(item):
+                return
             if not item.stop_event.is_set():
                 _log.error("Échec téléchargement id=%s — %s", dl_id, exc)
                 self._post(self._on_error, dl_id, str(exc),

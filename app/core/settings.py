@@ -7,6 +7,10 @@ DEFAULTS: dict = {
     "download_folder": str(Path.home() / "Downloads"),
     "max_concurrent_downloads": 2,
     "concurrent_fragments": 1,      # 1=désactivé, >1=fragments en parallèle (-N)
+    # Pause (minutes) quand un site oppose son controle anti-robot : la file
+    # attend puis repart seule (demande de Brad). Doublee si le controle
+    # revient aussitot, plafonnee a 60. 0 = ancien comportement (echecs).
+    "bot_check_pause_minutes": 5,
     "post_processing": "auto",      # format par défaut (codes de add_url_dialog) :
                                     # auto | mp4 | mp3 | m4a | amc_video | amc_audio
     "open_folder_when_done": False,

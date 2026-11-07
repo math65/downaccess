@@ -714,3 +714,15 @@ def test_aucun_flux_sans_date_message_clair(monkeypatch):
         downloader._raise_download_error(_SANS_FLUX, Exception(), "", url="https://x/y")
     assert "github" not in str(err.value).lower()
     assert "aucune vidéo" in str(err.value)
+
+
+def test_controle_anti_robot_a_son_propre_type():
+    """La file doit reconnaitre le controle anti-robot pour se mettre en pause.
+    Le message, traduit, ne le permet pas : c'est le type qui le porte."""
+    from app.core import downloader
+    brut = ("ERROR: [youtube] abc: Sign in to confirm you're not a bot. "
+            "Use --cookies-from-browser or --cookies for the authentication.")
+    with pytest.raises(downloader.BotCheckError) as err:
+        downloader._raise_download_error(brut, Exception(), "")
+    # Surtout pas une demande de connexion (rapport de Brad, 0.2.3).
+    assert not isinstance(err.value, downloader.LoginRequiredError)

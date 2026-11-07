@@ -407,3 +407,139 @@ def test_volume_absent_detecte():
     # Un dossier absent sur un disque present n'est pas « introuvable » :
     # yt-dlp le cree.
     assert not destination_unreachable(os.path.join(os.getcwd(), "pas-encore-cree"))
+
+
+class TestPauseAntiRobot:
+    """Controle anti-robot (demande de Brad, 2026-11-07) : la file s'arrete,
+    les videos touchees repassent en attente au lieu d'echouer, et tout
+    repart seul a la fin de la pause."""
+
+    BRUT = "Le site a interrompu le telechargement (robot)"
+
+    def _file(self, journal, minutes=5, max_concurrent=1):
+        ev = {"pauses": [], "reprises": 0, "remises": []}
+
+        def reprise():
+            ev["reprises"] += 1
+
+        file = QueueManager(
+            settings={"download_folder": ".", "max_concurrent_downloads": max_concurrent,
+                      "bot_check_pause_minutes": minutes},
+            post_to_ui=lambda fn, *a: fn(*a),
+            on_info=journal.on_info,
+            on_progress=lambda p: None,
+            on_complete=journal.on_complete,
+            on_error=journal.on_error,
+            on_bot_pause=ev["pauses"].append,
+            on_bot_resume=reprise,
+            on_requeued=ev["remises"].append,
+        )
+        _FILES_CREEES.append(file)
+        return file, ev
+
+    def test_pause_au_lieu_d_echouer(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j)
+        id1 = q.add("https://a/1")
+        q.add("https://a/2")
+        q.add("https://a/3")
+        assert attendre(lambda: ev["pauses"])
+        assert ev["pauses"] == [5]
+        assert ev["remises"] == [id1]
+        assert j.erreurs == []                   # rien n'est marque en echec
+        assert q.is_bot_paused
+        assert 0 < q.bot_pause_remaining <= 5 * 60
+        assert q.pending_count == 3              # la video touchee en tete
+        assert q.get_state()["pending"][0]["id"] == id1
+        time.sleep(0.2)
+        assert faux.demarres == ["https://a/1"]  # rien d'autre n'est parti
+
+    def test_reprise_a_la_main_relance_tout(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j)
+        q.add("https://a/1")
+        q.add("https://a/2")
+        assert attendre(lambda: q.is_bot_paused)
+        del faux.erreurs["https://a/1"]          # le site a leve sa limite
+        assert q.resume_bot_pause()
+        assert attendre(lambda: len(j.completes) == 2)
+        assert not q.is_bot_paused
+        assert ev["reprises"] == 0               # reprise demandee : pas d'annonce
+        assert not q.resume_bot_pause()          # plus de pause a lever
+
+    def test_reprise_automatique(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j, minutes=0.002)     # ~0,1 s
+        q.add("https://a/1")
+        assert attendre(lambda: ev["pauses"])
+        del faux.erreurs["https://a/1"]
+        assert attendre(lambda: j.completes)
+        assert ev["reprises"] == 1
+
+    def test_la_pause_double_si_le_controle_revient(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j)
+        q.add("https://a/1")
+        assert attendre(lambda: ev["pauses"] == [5])
+        q.resume_bot_pause()                     # le controle est toujours la
+        assert attendre(lambda: ev["pauses"] == [5, 10])
+        q.resume_bot_pause()
+        assert attendre(lambda: ev["pauses"] == [5, 10, 20])
+        # Une reussite apres la reprise : la prochaine pause repart de 5.
+        del faux.erreurs["https://a/1"]
+        q.resume_bot_pause()
+        assert attendre(lambda: j.completes)
+        faux.erreurs["https://a/2"] = BotCheckError(self.BRUT)
+        q.add("https://a/2")
+        assert attendre(lambda: ev["pauses"] == [5, 10, 20, 5])
+
+    def test_plafond_d_une_heure(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j, minutes=40)
+        q.add("https://a/1")
+        assert attendre(lambda: ev["pauses"] == [40])
+        q.resume_bot_pause()
+        assert attendre(lambda: ev["pauses"] == [40, 60])
+
+    def test_une_seule_pause_pour_plusieurs_videos_touchees(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.barriere = threading.Barrier(3)     # trois partent ensemble
+        for i in range(3):
+            faux.erreurs[f"https://a/{i}"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j, max_concurrent=3)
+        for i in range(3):
+            q.add(f"https://a/{i}")
+        assert attendre(lambda: len(ev["remises"]) == 3)
+        assert ev["pauses"] == [5]
+        assert j.erreurs == []
+        assert q.pending_count == 3
+
+    def test_desactivee_l_echec_remonte_comme_avant(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j, minutes=0)
+        q.add("https://a/1")
+        assert attendre(lambda: j.erreurs)
+        assert ev["pauses"] == [] and not q.is_bot_paused
+
+    def test_vider_la_file_leve_la_pause(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = self._file(j)
+        q.add("https://a/1")
+        assert attendre(lambda: q.is_bot_paused)
+        q.cancel_all()
+        assert not q.is_bot_paused and q.pending_count == 0
