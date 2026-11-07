@@ -1,7 +1,9 @@
-## DownAccess 0.2.5
+## DownAccess 0.2.6
 
-### « Ouvrir dans Access Media Converter » fonctionne à nouveau
+### Une pause automatique quand YouTube vérifie que vous n'êtes pas un robot
 
-Depuis plusieurs versions, l'envoi d'un téléchargement vers Access Media Converter ne marchait plus. Dans le menu contextuel de la liste, l'entrée « Ouvrir dans Access Media Converter » restait grisée, même une fois le fichier bien téléchargé. Et les formats « Ouvrir avec Access Media Converter » ne transmettaient jamais le fichier à la fin du téléchargement.
+Quand vous lancez beaucoup de téléchargements à la suite, YouTube peut les interrompre pour vérifier que vous n'êtes pas un robot. Jusqu'ici, DownAccess continuait malgré tout à lancer les vidéos suivantes : elles échouaient l'une après l'autre, et chaque nouvel essai prolongeait le blocage.
 
-En cause : DownAccess retenait l'emplacement d'un fichier de travail provisoire, effacé une fois la conversion terminée, au lieu de celui du fichier final. C'est corrigé : les deux fonctionnent de nouveau. Au passage, l'historique (Ctrl+H) affiche de nouveau la bonne taille des fichiers.
+Désormais, DownAccess met la file en pause pendant 5 minutes, puis la relance tout seul. Rien n'échoue : les vidéos interrompues repassent « En attente ». Si YouTube bloque de nouveau juste après la reprise, la pause suivante dure deux fois plus longtemps, jusqu'à une heure au maximum. Une fenêtre vous l'explique la première fois ; ensuite, la barre de statut suffit, pour que vous puissiez laisser la file tourner sans surveiller.
+
+Pour reprendre sans attendre, appuyez sur F5. La durée de la pause se règle dans Préférences > Général (« Pause après une vérification anti-robot »). À 0, la pause est désactivée.
