@@ -4724,7 +4724,7 @@ msgid ""
 "Après la pause anti-robot, un seul téléchargement à la fois, le temps de "
 "vérifier que le site répond de nouveau."
 msgstr ""
-"After the robot check pause, one download at a time, until the site is "
+"After the bot check pause, one download at a time, until the site is "
 "confirmed to respond again."
 
 #: app/ui/main_window.py:1799
@@ -4745,7 +4745,7 @@ msgstr "Delay between downloads: {count} seconds"
 
 #: app/ui/main_window.py:2826
 msgid "En attente : {count}"
-msgstr "Waiting: {count}"
+msgstr "Pending: {count}"
 
 #: app/ui/main_window.py:2813
 msgid "En cours : {count}"
@@ -4756,18 +4756,17 @@ msgid ""
 "Espace le démarrage des téléchargements pour éviter la vérification anti-"
 "robot de YouTube sur les longues listes. 0 = aucun délai."
 msgstr ""
-"Spaces out the start of each download to avoid YouTube's robot check on long"
-" lists. 0 = no delay."
+"Spaces out the start of each download to avoid YouTube's bot check on long "
+"lists. 0 = no delay."
 
 #: app/ui/main_window.py:2835
 msgid ""
 "Pause anti-robot : reprise dans {count} minutes. F5 reprend tout de suite."
-msgstr ""
-"Robot check pause: resuming in {count} minutes. F5 resumes right away."
+msgstr "Bot check pause: resuming in {count} minutes. F5 resumes right away."
 
 #: app/ui/main_window.py:2803
 msgid "Seuls les téléchargements en attente se déplacent."
-msgstr "Only waiting downloads can be moved."
+msgstr "Only pending downloads can be moved."
 
 #: app/ui/main_window.py:2827
 msgid "Terminés : {done}, déjà présents : {already}, en erreur : {error}"
