@@ -125,6 +125,7 @@ ID_HISTORY      = wx.NewIdRef()
 ID_USER_GUIDE   = wx.NewIdRef()
 ID_ADD_SECTION  = wx.NewIdRef()
 ID_SUBSCRIPTIONS = wx.NewIdRef()
+ID_QUEUE_STATUS = wx.NewIdRef()
 
 
 def _docs_dir() -> Path:
@@ -1223,6 +1224,16 @@ class MainWindow(wx.Frame):
         et ramenait le fichier audio que ce garde-fou existe pour eviter, en
         annoncant « le fichier est complet » (rapport Seb, 0.2.1).
         """
+        if not url:
+            # Rien a rejouer : yt-dlp repondait « '' is not a valid URL » et ce
+            # message remplacait l'erreur d'origine dans le rapport (Brad,
+            # 2026-11-09, sur une video reprise sans ligne dans la liste).
+            return (
+                "[DownAccess] Relance de diagnostic non tentée : l'adresse du "
+                "téléchargement est inconnue. Le rapport porte sur l'échec "
+                "initial." + "\n\n" + (error_message or ""),
+                None,
+            )
         if is_hopeless_error(error_message):
             return (
                 "[DownAccess] Relance de diagnostic non tentée : l'erreur "
@@ -1783,6 +1794,10 @@ class MainWindow(wx.Frame):
             ID_START, _("Dé&marrer\tF5"),
             _("Démarrer les téléchargements en attente"),
         )
+        dl_menu.Append(
+            ID_QUEUE_STATUS, _("État de la &file...\tCtrl+I"),
+            _("Combien de téléchargements tournent, attendent ou ont échoué"),
+        )
         self.mi_pause = dl_menu.Append(
             ID_PAUSE, _("&Pause / Reprendre\tSpace"),
             _("Mettre en pause ou reprendre le téléchargement sélectionné"),
@@ -1949,6 +1964,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_select_all,     id=ID_SELECT_ALL)
         self.Bind(wx.EVT_MENU, self._on_retry,          id=ID_RETRY)
         self.Bind(wx.EVT_MENU, self._on_move_up,        id=ID_MOVE_UP)
+        self.Bind(wx.EVT_MENU, self._on_queue_status,   id=ID_QUEUE_STATUS)
         self.Bind(wx.EVT_MENU, self._on_move_down,      id=ID_MOVE_DOWN)
         self.Bind(wx.EVT_MENU, self._on_clip_toggle,    id=ID_CLIP_TOGGLE)
         self.Bind(wx.EVT_MENU, self._on_shortcuts,      id=ID_SHORTCUTS)
@@ -2753,26 +2769,91 @@ class MainWindow(wx.Frame):
         return True
 
     def _on_move_up(self, _event) -> None:
+        self._move_in_queue(-1)
+
+    def _on_move_down(self, _event) -> None:
+        self._move_in_queue(+1)
+
+    def _move_in_queue(self, sens: int) -> None:
+        """Échange le téléchargement sélectionné avec son voisin DANS LA FILE.
+
+        La liste mêle terminés, en cours et en attente ; la file, elle, ne
+        contient que les attentes. Échanger avec la ligne voisine de la liste
+        (ancien comportement) désaccordait les deux : la ligne bougeait à
+        l'écran, mais l'ordre réel des téléchargements n'était plus celui
+        affiché (rapport de Brad, 2026-11-09). On échange donc la ligne avec
+        celle du voisin réel dans la file.
+        """
         dl_id = self.download_list.get_selected_id()
         if dl_id is None:
             return
-        moved = self._queue.move_up(dl_id)
-        if moved:
-            self.download_list.move_item_up(dl_id)
-            speech.speak(_("Déplacé vers le haut."), interrupt=False)
+        attente = [p["id"] for p in self._queue.get_state()["pending"]]
+        voisin = None
+        if dl_id in attente:
+            j = attente.index(dl_id) + sens
+            if 0 <= j < len(attente):
+                voisin = attente[j]
+        moved = (self._queue.move_up(dl_id) if sens < 0
+                 else self._queue.move_down(dl_id))
+        if moved and voisin is not None:
+            self.download_list.swap_items(dl_id, voisin)
+            speech.speak(_("Déplacé vers le haut.") if sens < 0
+                         else _("Déplacé vers le bas."), interrupt=False)
+        elif dl_id not in attente:
+            speech.speak(_("Seuls les téléchargements en attente se déplacent."),
+                         interrupt=False)
         else:
             speech.speak(_("Impossible de déplacer."), interrupt=False)
 
-    def _on_move_down(self, _event) -> None:
-        dl_id = self.download_list.get_selected_id()
-        if dl_id is None:
-            return
-        moved = self._queue.move_down(dl_id)
-        if moved:
-            self.download_list.move_item_down(dl_id)
-            speech.speak(_("Déplacé vers le bas."), interrupt=False)
+    def _queue_status_text(self) -> str:
+        """Résumé de la file pour Ctrl+I (demande de Brad, 2026-11-09 : savoir
+        ce qui tourne, ce qui attend, combien à la fois)."""
+        liste = self.download_list
+        etat = self._queue.get_state()
+        lignes = [_("En cours : {count}").format(count=len(etat["active"]))]
+        for a in etat["active"]:
+            titre = ""
+            idx = liste._items.get(a["id"])
+            if idx is not None:
+                titre = liste.GetItemText(idx, 0)
+            titre = titre or a["url"]
+            pct = self._progress.get(a["id"])
+            if pct:
+                lignes.append(_("  - {title} ({percent} %)").format(
+                    title=titre, percent=int(pct)))
+            else:
+                lignes.append(_("  - {title} (analyse)").format(title=titre))
+        lignes.append(_("En attente : {count}").format(count=len(etat["pending"])))
+        lignes.append(_("Terminés : {done}, déjà présents : {already}, "
+                        "en erreur : {error}").format(
+            done=liste.count_by_status(STATUS_DONE),
+            already=liste.count_by_status(STATUS_ALREADY),
+            error=liste.count_by_status(STATUS_ERROR)))
+        lignes.append("")
+        if self._queue.is_bot_paused:
+            minutes = max(1, round(self._queue.bot_pause_remaining / 60))
+            lignes.append(_("Pause anti-robot : reprise dans {count} minutes. "
+                            "F5 reprend tout de suite.").format(count=minutes))
+        elif self._queue.is_probing:
+            lignes.append(_("Après la pause anti-robot, un seul téléchargement "
+                            "à la fois, le temps de vérifier que le site "
+                            "répond de nouveau."))
         else:
-            speech.speak(_("Impossible de déplacer."), interrupt=False)
+            lignes.append(_("Téléchargements simultanés : {count}").format(
+                count=self._queue.max_concurrent))
+        delai = int(self._queue.start_delay)
+        if delai:
+            lignes.append(_("Délai entre deux téléchargements : {count} secondes")
+                          .format(count=delai))
+        return "\n".join(lignes)
+
+    def _on_queue_status(self, _event) -> None:
+        dlg = wx.MessageDialog(self, self._queue_status_text(),
+                               _("État de la file — DownAccess"),
+                               wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
+        wx.CallAfter(self.download_list.SetFocus)
 
     def _on_import_urls(self, _event) -> None:
         """Importe un fichier texte contenant des URLs (une par ligne)."""
@@ -2921,6 +3002,7 @@ class MainWindow(wx.Frame):
             "Ctrl+Shift+V     Activer/désactiver la surveillance du presse-papiers\n"
             "Ctrl+H           Afficher l'historique\n"
             "F5               Démarrer la file\n"
+            "Ctrl+I           État de la file\n"
             "Espace           Pause / Reprendre\n"
             "Suppr            Supprimer de la liste\n"
             "Maj+Suppr        Vider toute la liste\n"

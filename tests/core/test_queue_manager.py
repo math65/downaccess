@@ -11,7 +11,9 @@ from typing import ClassVar
 
 import pytest
 
-from app.core.downloader import DownloadError, DownloadInfo, LoginRequiredError
+from app.core.downloader import (
+    DownloadError, DownloadInfo, DownloadProgress, LoginRequiredError,
+)
 from app.core.queue_manager import QueueManager
 
 
@@ -22,6 +24,8 @@ class FauxDownloader:
     erreurs: ClassVar[dict] = {}
     duree = 0.0
     barriere = None
+    porte = None            # Event : retient le telechargement AVANT les octets
+    progression = False     # signaler « downloading » (les octets arrivent)
 
     def __init__(self, settings):
         self.settings = settings
@@ -32,6 +36,10 @@ class FauxDownloader:
 
     def download(self, download_id, url, on_progress, stop_event, **kw):
         type(self).demarres.append(url)
+        if type(self).porte is not None:
+            type(self).porte.wait(timeout=DELAI_BLOCAGE)
+        if type(self).progression and not type(self).erreurs.get(url):
+            on_progress(DownloadProgress(download_id=download_id, status="downloading"))
         if type(self).barriere is not None:
             try:
                 type(self).barriere.wait(timeout=DELAI_BLOCAGE)
@@ -59,11 +67,14 @@ def faux(monkeypatch):
     from app.core import queue_manager
     double = type("FauxDownloaderTest", (FauxDownloader,), {
         "demarres": [], "erreurs": {}, "duree": 0.0, "barriere": None,
+        "porte": None, "progression": False,
     })
     monkeypatch.setattr(queue_manager, "Downloader", double)
     yield double
     if double.barriere is not None:
         double.barriere.abort()
+    if double.porte is not None:
+        double.porte.set()
 
     # Draine les files creees par le test. Un worker encore vivant instancierait
     # `queue_manager.Downloader`, c'est-a-dire le double du test SUIVANT (le
@@ -543,3 +554,98 @@ class TestPauseAntiRobot:
         assert attendre(lambda: q.is_bot_paused)
         q.cancel_all()
         assert not q.is_bot_paused and q.pending_count == 0
+
+
+class TestSondageApresPause:
+    """Apres une pause anti-robot, un seul telechargement repart d'abord
+    (Brad, 2026-11-09 : relancer tous les creneaux d'un coup faisait buter
+    chacun sur le controle deux secondes apres la reprise)."""
+
+    BRUT = TestPauseAntiRobot.BRUT
+
+    def test_un_seul_repart_puis_les_creneaux_se_rouvrent(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/0"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, _ev = TestPauseAntiRobot._file(None, j, max_concurrent=3)
+        q.add("https://a/0")
+        assert attendre(lambda: q.is_bot_paused)
+        q.add("https://a/1")
+        q.add("https://a/2")
+        # Le site a leve sa limite ; les telechargements restent en cours.
+        del faux.erreurs["https://a/0"]
+        faux.porte = threading.Event()
+        faux.barriere = threading.Barrier(99)
+        faux.progression = True
+        assert q.resume_bot_pause()
+        assert attendre(lambda: q.active_count == 1)
+        time.sleep(0.2)
+        assert q.active_count == 1 and q.is_probing, "un seul creneau pendant le sondage"
+        faux.porte.set()                         # les octets arrivent
+        assert attendre(lambda: q.active_count == 3)
+        assert not q.is_probing
+
+    def test_le_sondage_bute_encore_la_pause_double(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/0"] = BotCheckError(self.BRUT)
+        faux.erreurs["https://a/1"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, ev = TestPauseAntiRobot._file(None, j, max_concurrent=3)
+        q.add("https://a/0")
+        assert attendre(lambda: ev["pauses"] == [5])
+        q.add("https://a/1")
+        q.resume_bot_pause()
+        assert attendre(lambda: ev["pauses"] == [5, 10])
+        assert faux.demarres == ["https://a/0", "https://a/0"],             "seul le premier de la file a sonde le site"
+
+    def test_tout_annuler_met_fin_au_sondage(self, faux):
+        from app.core.downloader import BotCheckError
+        faux.erreurs["https://a/0"] = BotCheckError(self.BRUT)
+        j = Journal()
+        q, _ev = TestPauseAntiRobot._file(None, j, max_concurrent=3)
+        q.add("https://a/0")
+        assert attendre(lambda: q.is_bot_paused)
+        faux.porte = threading.Event()
+        q.resume_bot_pause()
+        assert attendre(lambda: q.is_probing)
+        q.cancel_all()
+        assert not q.is_probing
+
+
+class TestDelaiEntreTelechargements:
+    """Reglage `delay_between_downloads` (Brad, 2026-11-09) : espacer les
+    demarrages pour ne pas declencher le controle anti-robot."""
+
+    def _file(self, journal, delai, max_concurrent=3):
+        file = QueueManager(
+            settings={"download_folder": ".", "max_concurrent_downloads": max_concurrent,
+                      "delay_between_downloads": delai},
+            post_to_ui=lambda fn, *a: fn(*a),
+            on_info=journal.on_info,
+            on_progress=lambda p: None,
+            on_complete=journal.on_complete,
+            on_error=journal.on_error,
+        )
+        _FILES_CREEES.append(file)
+        return file
+
+    def test_les_demarrages_sont_espaces(self, faux):
+        faux.barriere = threading.Barrier(99)    # restent en cours
+        q = self._file(Journal(), delai=0.3)
+        debut = time.monotonic()
+        for i in range(3):
+            q.add(f"https://a/{i}")
+        assert q.active_count == 1, "le premier part tout de suite, seul"
+        assert attendre(lambda: q.active_count == 3)
+        assert time.monotonic() - debut >= 0.55
+
+    def test_sans_delai_tout_part_ensemble(self, faux):
+        faux.barriere = threading.Barrier(99)
+        q = self._file(Journal(), delai=0)
+        for i in range(3):
+            q.add(f"https://a/{i}")
+        assert q.active_count == 3
+
+    def test_un_reglage_illisible_vaut_zero(self, faux):
+        q = self._file(Journal(), delai="beaucoup")
+        assert q.start_delay == 0.0

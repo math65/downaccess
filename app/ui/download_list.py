@@ -288,6 +288,21 @@ class DownloadList(wx.ListCtrl):
         self._select_only(idx + 1)
         return True
 
+    def swap_items(self, id_a: str, id_b: str) -> bool:
+        """Échange les lignes de deux téléchargements, où qu'elles soient.
+
+        La sélection suit `id_a` (celui que l'utilisateur déplace).
+        """
+        row_a = self._items.get(id_a)
+        row_b = self._items.get(id_b)
+        if row_a is None or row_b is None or row_a == row_b:
+            return False
+        self._swap_rows(row_a, row_b)
+        self._items[id_a], self._items[id_b] = row_b, row_a
+        self._select_only(row_b)
+        self.EnsureVisible(row_b)
+        return True
+
     def _swap_rows(self, row_a: int, row_b: int) -> None:
         n_cols = len(_column_specs())
         data_a = [self.GetItemText(row_a, col) for col in range(n_cols)]

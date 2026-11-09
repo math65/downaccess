@@ -11,6 +11,9 @@ DEFAULTS: dict = {
     # attend puis repart seule (demande de Brad). Doublee si le controle
     # revient aussitot, plafonnee a 60. 0 = ancien comportement (echecs).
     "bot_check_pause_minutes": 5,
+    # Secondes minimum entre deux demarrages de telechargement : espace les
+    # requetes vers le site, contre son controle anti-robot. 0 = aucun delai.
+    "delay_between_downloads": 0,
     "post_processing": "auto",      # format par défaut (codes de add_url_dialog) :
                                     # auto | mp4 | mp3 | m4a | amc_video | amc_audio
     "open_folder_when_done": False,

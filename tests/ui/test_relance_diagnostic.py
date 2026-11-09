@@ -90,3 +90,27 @@ class TestRelanceDeDiagnostic:
         assert len(essais) == 1
         assert recupere is None
         assert log == "log yt-dlp verbeux"
+
+
+def test_sans_adresse_rien_n_est_rejoue(monkeypatch):
+    """Rapport d'une video sans adresse connue (Brad, 2026-11-09) : la relance
+    partait avec une adresse vide, et « '' is not a valid URL » remplacait
+    l'erreur d'origine dans le rapport."""
+    from app.ui import main_window as mw
+
+    essais = []
+
+    class FauxTelechargeur:
+        def __init__(self, settings):
+            pass
+
+        def download(self, **kw):
+            essais.append(kw)
+
+    monkeypatch.setattr(mw, "Downloader", FauxTelechargeur)
+    log, recupere = MainWindow._diagnostic_rerun(
+        FausseFenetre(), "", "auto", None, None, None,
+        "erreur d'origine", threading.Event(), threading.Event())
+    assert essais == []
+    assert recupere is None
+    assert "erreur d'origine" in log

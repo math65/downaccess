@@ -73,7 +73,7 @@ La fenêtre principale se compose de quatre zones, du haut vers le bas.
 Trois menus regroupent toutes les actions :
 
 - **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), télécharger un extrait (Ctrl+E), gérer les abonnements (Ctrl+B), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
-- **Téléchargements** : démarrer (F5), mettre en pause ou reprendre (Espace), tout sélectionner (Ctrl+A), annuler (Suppr), vider la liste (Maj+Suppr), retirer les téléchargements terminés (Ctrl+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
+- **Téléchargements** : démarrer (F5), voir l'état de la file (Ctrl+I), mettre en pause ou reprendre (Espace), tout sélectionner (Ctrl+A), annuler (Suppr), vider la liste (Maj+Suppr), retirer les téléchargements terminés (Ctrl+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
 - **Aide** : afficher la liste des raccourcis clavier, mettre à jour le moteur de téléchargement ou l'application, contacter le support ou faire une suggestion, ouvrir la page du projet et afficher les informations « À propos ».
 
 #### La barre d'outils
@@ -476,7 +476,7 @@ Si plusieurs téléchargements attendent leur tour, vous pouvez changer leur ord
 - **Monter dans la file (Alt+Haut)** : remonte l'élément sélectionné d'une position.
 - **Descendre dans la file (Alt+Bas)** : descend l'élément sélectionné d'une position.
 
-DownAccess confirme chaque déplacement à voix haute. Si un déplacement n'est pas possible (élément déjà tout en haut, par exemple), il vous le signale.
+DownAccess confirme chaque déplacement à voix haute. Si un déplacement n'est pas possible (élément déjà tout en haut, par exemple), il vous le signale. Seuls les téléchargements en attente se déplacent : un élément est échangé avec le téléchargement en attente voisin, même si des téléchargements terminés s'intercalent entre eux dans la liste.
 
 ### Plusieurs téléchargements à la fois
 
@@ -487,13 +487,19 @@ Deux réglages, dans les **Préférences** (Ctrl+P), contrôlent ce comportement
 - **Téléchargements simultanés** : le nombre de téléchargements menés en parallèle (2 par défaut). Augmentez-le pour traiter plus de fichiers à la fois.
 - **Fragments en parallèle par téléchargement** : utilise plusieurs connexions pour accélérer un même téléchargement (1 par défaut, ce qui désactive l'option). Une valeur plus élevée peut accélérer les gros fichiers.
 
+Pour savoir où en est la file, appuyez sur **Ctrl+I** (menu Téléchargements, **État de la file**). Une fenêtre indique combien de téléchargements sont en cours, avec leur titre et leur progression, combien attendent, combien sont terminés ou en erreur, et combien peuvent tourner à la fois. Elle signale aussi une pause anti-robot en cours, avec le temps restant.
+
+Si vous fermez DownAccess pendant que des téléchargements sont en cours ou en attente, ils reviennent dans la liste au démarrage suivant et repartent d'eux-mêmes. Le focus arrive alors directement sur la liste.
+
 #### Quand un site vérifie que vous n'êtes pas un robot
 
 Si vous lancez beaucoup de téléchargements coup sur coup, un site comme YouTube peut les interrompre pour vérifier que vous n'êtes pas un robot. Ce n'est pas un problème de compte : vous connecter n'y changerait rien, seul le temps lève cette limite.
 
 DownAccess met alors la file en **pause** pendant 5 minutes. Rien n'échoue : les vidéos interrompues repassent « En attente », et la file reprend toute seule à la fin de la pause. Une fenêtre vous l'explique la première fois ; ensuite, la barre de statut indique la durée de chaque pause. Si le site bloque de nouveau juste après la reprise, la pause suivante dure deux fois plus longtemps, jusqu'à une heure au maximum.
 
-Pour reprendre sans attendre, appuyez sur **F5**. La durée de la pause se règle dans les Préférences (voir plus loin). Si ces pauses reviennent souvent, réduisez le nombre de téléchargements simultanés.
+À la fin de la pause, un **seul** téléchargement repart d'abord, pour vérifier que le site répond de nouveau. Dès que ses données arrivent, les autres reprennent à leur rythme habituel. S'il bute encore sur la vérification, la file repart en pause sans avoir sollicité le site plusieurs fois.
+
+Pour reprendre sans attendre, appuyez sur **F5**. Mais seul le temps lève la limite du site : reprendre trop tôt relance souvent une pause plus longue. La durée de la pause se règle dans les Préférences (voir plus loin). Si ces pauses reviennent souvent, réduisez le nombre de téléchargements simultanés, ou réglez un **délai entre deux téléchargements**.
 
 ### Télécharger une playlist
 
@@ -799,6 +805,10 @@ Permet de télécharger un même fichier en plusieurs morceaux simultanés, ce q
 
 Durée de la pause que fait la file quand un site interrompt les téléchargements pour vérifier que vous n'êtes pas un robot. La valeur va de **0** à **60**, et la valeur par défaut est **5**. À **0**, la pause est désactivée : chaque vidéo interrompue est alors marquée en erreur.
 
+#### Délai entre deux téléchargements (secondes)
+
+Temps minimum que DownAccess laisse passer entre le démarrage de deux téléchargements. La valeur va de **0** à **600**, et la valeur par défaut est **0** (aucun délai). Sur une longue liste YouTube, quelques dizaines de secondes espacent les demandes faites au site et évitent souvent sa vérification anti-robot. Le délai s'ajoute au nombre de téléchargements simultanés : avec 2 simultanés et 30 secondes, deux téléchargements tournent toujours en même temps, mais un nouveau ne démarre jamais moins de 30 secondes après le précédent.
+
 #### Action après téléchargement
 
 Trois cases à cocher, toutes **décochées** par défaut :
@@ -1099,6 +1109,7 @@ Voici tous les raccourcis disponibles dans DownAccess.
 | **Ctrl+Maj+V** | Activer ou désactiver la surveillance du presse-papiers |
 | **Ctrl+H** | Afficher l'historique des téléchargements |
 | **F5** | Démarrer les téléchargements en attente |
+| **Ctrl+I** | Voir l'état de la file (en cours, en attente, en erreur) |
 | **Espace** | Mettre en pause ou reprendre le téléchargement sélectionné |
 | **Suppr** | Supprimer le téléchargement sélectionné de la liste |
 | **Maj+Suppr** | Vider toute la liste |

@@ -238,6 +238,19 @@ class SettingsDialog(wx.Dialog):
         )
         lbl_bot_pause_hint.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
 
+        # Delai entre deux telechargements (contre le controle anti-robot)
+        lbl_delay = wx.StaticText(
+            page, label=_("Délai entre deux téléchargements (secondes) :"))
+        self.spin_delay = wx.SpinCtrl(page, min=0, max=600, initial=0,
+                                      name=_("Délai entre deux téléchargements"))
+        lbl_delay_hint = wx.StaticText(
+            page,
+            label=_("Espace le démarrage des téléchargements pour éviter la "
+                    "vérification anti-robot de YouTube sur les longues listes. "
+                    "0 = aucun délai."),
+        )
+        lbl_delay_hint.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT))
+
         # Action après téléchargement
         lbl_after = wx.StaticText(page, label=_("Action après téléchargement :"))
         self.chk_open_folder = wx.CheckBox(page,
@@ -365,6 +378,9 @@ class SettingsDialog(wx.Dialog):
         sizer.Add(lbl_bot_pause,     0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.spin_bot_pause,  0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(lbl_bot_pause_hint,   0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
+        sizer.Add(lbl_delay,         0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        sizer.Add(self.spin_delay,      0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+        sizer.Add(lbl_delay_hint,       0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         sizer.Add(lbl_after,         0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         sizer.Add(self.chk_open_folder,       0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
         sizer.Add(self.chk_remove_completed,  0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
@@ -692,6 +708,7 @@ class SettingsDialog(wx.Dialog):
         self.spin_concurrent.SetValue(s.get("max_concurrent_downloads", 2))
         self.spin_fragments.SetValue(s.get("concurrent_fragments", 1))
         self.spin_bot_pause.SetValue(int(s.get("bot_check_pause_minutes", 5)))
+        self.spin_delay.SetValue(int(s.get("delay_between_downloads", 0)))
         self.chk_open_folder.SetValue(s.get("open_folder_when_done", False))
         self.chk_remove_completed.SetValue(s.get("remove_completed", False))
         self.chk_organize.SetValue(s.get("organize_by_site", False))
@@ -777,6 +794,7 @@ class SettingsDialog(wx.Dialog):
         s["max_concurrent_downloads"] = self.spin_concurrent.GetValue()
         s["concurrent_fragments"]     = self.spin_fragments.GetValue()
         s["bot_check_pause_minutes"]  = self.spin_bot_pause.GetValue()
+        s["delay_between_downloads"]  = self.spin_delay.GetValue()
         s["open_folder_when_done"]    = self.chk_open_folder.GetValue()
         s["remove_completed"]         = self.chk_remove_completed.GetValue()
         s["organize_by_site"]         = self.chk_organize.GetValue()

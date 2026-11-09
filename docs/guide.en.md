@@ -73,7 +73,7 @@ The main window is made up of four areas, from top to bottom.
 Three menus bring together all the actions:
 
 - **File**: add one or more addresses (Ctrl+N), download an extract (Ctrl+E), manage subscriptions (Ctrl+B), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
-- **Downloads**: start (F5), pause or resume (Space), select all (Ctrl+A), cancel (Delete), clear the list (Shift+Delete), remove finished downloads (Ctrl+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
+- **Downloads**: start (F5), view the queue status (Ctrl+I), pause or resume (Space), select all (Ctrl+A), cancel (Delete), clear the list (Shift+Delete), remove finished downloads (Ctrl+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
 - **Help**: show the list of keyboard shortcuts, update the download engine or the application, contact support or make a suggestion, open the project page and show the "About" information.
 
 #### The toolbar
@@ -476,7 +476,7 @@ If several downloads are waiting their turn, you can change the order in which t
 - **Move up in the queue (Alt+Up)**: moves the selected item up one position.
 - **Move down in the queue (Alt+Down)**: moves the selected item down one position.
 
-DownAccess confirms each move out loud. If a move is not possible (the item is already at the very top, for example), it lets you know.
+DownAccess confirms each move out loud. If a move is not possible (the item is already at the very top, for example), it lets you know. Only waiting downloads can be moved: an item swaps places with the next waiting download, even if finished downloads sit between them in the list.
 
 ### Several downloads at once
 
@@ -487,13 +487,19 @@ Two settings, in the **Preferences** (Ctrl+P), control this behaviour:
 - **Simultaneous downloads**: the number of downloads run in parallel (2 by default). Increase it to handle more files at once.
 - **Parallel fragments per download**: uses several connections to speed up a single download (1 by default, which disables the option). A higher value can speed up large files.
 
+To see where the queue stands, press **Ctrl+I** (Downloads menu, **Queue status**). A window shows how many downloads are in progress, with their title and progress, how many are waiting, how many are finished or failed, and how many can run at once. It also tells you about a robot check pause in progress, with the time left.
+
+If you close DownAccess while downloads are in progress or waiting, they come back in the list the next time you start it and resume on their own. The focus then lands directly on the list.
+
 #### When a site checks that you are not a robot
 
 If you start many downloads in a row, a site like YouTube may stop them to check that you are not a robot. It is not an account problem: signing in would not change anything, only time lifts this limit.
 
 DownAccess then **pauses** the queue for 5 minutes. Nothing fails: the interrupted videos go back to "Waiting", and the queue resumes on its own when the pause ends. A window explains this the first time; after that, the status bar shows how long each pause lasts. If the site blocks again right after resuming, the next pause lasts twice as long, up to one hour at most.
 
-To resume without waiting, press **F5**. The length of the pause is set in the Preferences (see below). If these pauses come back often, lower the number of simultaneous downloads.
+When the pause ends, **one** download starts first, to check that the site responds again. As soon as its data arrives, the others resume at their usual pace. If it hits the check again, the queue goes back into pause without having contacted the site several times.
+
+To resume without waiting, press **F5**. But only time lifts the site's limit: resuming too early often leads to a longer pause. The length of the pause is set in the Preferences (see below). If these pauses come back often, lower the number of simultaneous downloads, or set a **delay between downloads**.
 
 ### Downloading a playlist
 
@@ -797,6 +803,10 @@ Lets you download a single file in several simultaneous pieces, which can speed 
 
 How long the queue pauses when a site stops your downloads to check that you are not a robot. The value ranges from **0** to **60**, and the default is **5**. At **0**, the pause is turned off: each interrupted video is then marked as failed.
 
+#### Delay between downloads (seconds)
+
+The minimum time DownAccess waits between the start of two downloads. The value ranges from **0** to **600**, and the default is **0** (no delay). On a long YouTube list, a few dozen seconds space out the requests made to the site and often avoid its robot check. The delay works together with the number of simultaneous downloads: with 2 simultaneous downloads and 30 seconds, two downloads still run at the same time, but a new one never starts less than 30 seconds after the previous one.
+
 #### Action after download
 
 Three checkboxes, all **unchecked** by default:
@@ -1098,6 +1108,7 @@ Here are all the shortcuts available in DownAccess.
 | **Ctrl+Shift+V** | Turn clipboard monitoring on or off |
 | **Ctrl+H** | Show the download history |
 | **F5** | Start pending downloads |
+| **Ctrl+I** | View the queue status (in progress, waiting, failed) |
 | **Space** | Pause or resume the selected download |
 | **Del** | Remove the selected download from the list |
 | **Shift+Del** | Clear the entire list |

@@ -114,6 +114,18 @@ class QueueManager:
         self._pause_timer: threading.Timer | None = None
         self._pause_streak  = 0            # pauses d'affilee sans reussite
         self._pause_epoch   = 0            # numero de la derniere pause
+        # Apres une pause, un seul telechargement repart d'abord, pour sonder
+        # le site. Relancer tous les creneaux d'un coup faisait buter chacun
+        # sur le controle deux secondes apres la reprise, et la pause doublait
+        # aussitot (rapport de Brad, 2026-11-09 : « it checks a download then
+        # goes straight back to the robot check »).
+        self._probing       = False
+
+        # Delai entre deux demarrages (reglage `delay_between_downloads`, en
+        # secondes) : espacer les requetes vers le site, pour ne pas declencher
+        # son controle anti-robot (demande de Brad, 2026-11-09).
+        self._last_start: float | None = None
+        self._spacing_timer: threading.Timer | None = None
 
         self._queue:   list[QueueItem]        = []
         self._active:  dict[str, QueueItem]   = {}   # download_id → item
@@ -180,13 +192,32 @@ class QueueManager:
         self._end_bot_pause(announce=False)
         return True
 
+    @property
+    def is_probing(self) -> bool:
+        """Vrai apres une pause anti-robot, tant que le telechargement-test
+        n'a pas franchi l'analyse : la file ne tourne que sur un creneau."""
+        with self._lock:
+            return self._probing
+
+    @property
+    def start_delay(self) -> float:
+        """Delai minimal entre deux demarrages (secondes, 0 = aucun)."""
+        try:
+            return max(0.0, float(self._settings.get("delay_between_downloads", 0)))
+        except (TypeError, ValueError):
+            return 0.0
+
     def stop_bot_pause_timer(self) -> None:
-        """Arrete le minuteur de reprise sans toucher a la file (fermeture de
-        l'application : il ne doit plus rien poster a une fenetre detruite)."""
+        """Arrete les minuteurs de la file sans toucher a son contenu
+        (fermeture de l'application : ils ne doivent plus rien poster a une
+        fenetre detruite)."""
         with self._lock:
             if self._pause_timer is not None:
                 self._pause_timer.cancel()
                 self._pause_timer = None
+            if self._spacing_timer is not None:
+                self._spacing_timer.cancel()
+                self._spacing_timer = None
 
     def add(self, url: str, format_spec: str = "auto", format_id: str | None = None,
             audio_groups: list[list[str]] | None = None,
@@ -329,7 +360,11 @@ class QueueManager:
             if self._pause_timer is not None:
                 self._pause_timer.cancel()
                 self._pause_timer = None
+            if self._spacing_timer is not None:
+                self._spacing_timer.cancel()
+                self._spacing_timer = None
             self._pause_until = 0.0
+            self._probing = False
         self._notify_change()
 
     def get_state(self) -> dict:
@@ -364,7 +399,7 @@ class QueueManager:
         with self._lock:
             if self._pause_until > time.monotonic():
                 return      # pause anti-robot : le minuteur relancera la file
-            attente = bool(self._queue) and len(self._active) < self.max_concurrent
+            attente = bool(self._queue) and len(self._active) < self._slots()
         if attente:
             dossier = self._settings.get("download_folder", "")
             introuvable = destination_unreachable(dossier)
@@ -377,16 +412,41 @@ class QueueManager:
                     if self._on_held:
                         self._post(self._on_held, dossier)
                 return
+        delai = self.start_delay
         with self._lock:
-            while len(self._active) < self.max_concurrent and self._queue:
+            while len(self._active) < self._slots() and self._queue:
+                if delai > 0 and self._last_start is not None:
+                    reste = self._last_start + delai - time.monotonic()
+                    if reste > 0:
+                        self._arm_spacing_timer(reste)
+                        break
                 item = self._queue.pop(0)
                 self._active[item.download_id] = item
+                self._last_start = time.monotonic()
                 t = threading.Thread(
                     target=self._worker,
                     args=(item,),
                     daemon=True,
                 )
                 t.start()
+
+    def _slots(self) -> int:
+        """Creneaux ouverts : un seul pendant le sondage d'apres-pause.
+        Appele verrou tenu."""
+        return 1 if self._probing else max(1, int(self.max_concurrent))
+
+    def _arm_spacing_timer(self, secondes: float) -> None:
+        """Programme le prochain demarrage espace. Appele verrou tenu."""
+        if self._spacing_timer is not None:
+            return          # deja programme : il relancera la file
+        self._spacing_timer = threading.Timer(secondes, self._on_spacing_timer)
+        self._spacing_timer.daemon = True
+        self._spacing_timer.start()
+
+    def _on_spacing_timer(self) -> None:
+        with self._lock:
+            self._spacing_timer = None
+        self._try_start_next()
 
     # ------------------------------------------------------------------
     # Pause apres un controle anti-robot
@@ -454,6 +514,9 @@ class QueueManager:
                 return
             self._pause_timer = None
             self._pause_until = 0.0
+            # Un seul telechargement repart : s'il franchit l'analyse, le site
+            # a leve sa limite et les autres creneaux se rouvrent.
+            self._probing = True
             reste = bool(self._queue)
         _log.info("Fin de la pause anti-robot, la file repart")
         if announce and reste and self._on_bot_resume:
@@ -466,6 +529,17 @@ class QueueManager:
         with self._lock:
             if epoch == self._pause_epoch:
                 self._pause_streak = 0
+        self._note_passed(epoch)
+
+    def _note_passed(self, epoch: int) -> None:
+        """Un telechargement lance apres la derniere pause a franchi l'analyse
+        (les octets arrivent) : fin du sondage, tous les creneaux se rouvrent."""
+        with self._lock:
+            if not self._probing or epoch != self._pause_epoch:
+                return
+            self._probing = False
+        _log.info("Le site repond de nouveau : la file reprend son rythme")
+        self._try_start_next()
 
     def _worker(self, item: QueueItem) -> None:
         """Enveloppe robuste : quoi qu'il arrive, l'item est libéré (`_finish`)
@@ -548,6 +622,8 @@ class QueueManager:
 
         # 2. Téléchargement
         def on_progress(prog: DownloadProgress) -> None:
+            if prog.status in ("downloading", "already_downloaded", "processing"):
+                self._note_passed(epoch)
             self._post(self._on_progress, prog)
 
         # Estimation de la taille totale -> barre de progression pondérée
