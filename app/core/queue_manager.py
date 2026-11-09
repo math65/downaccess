@@ -236,8 +236,11 @@ class QueueManager:
                       if not i.stop_event.is_set()]
             return actifs + list(self._queue)
 
-    def restore(self, entrees: list[dict]) -> list[str]:
-        """Remet en file des téléchargements conservés. Retourne leurs ids.
+    def restore(self, entrees: list[dict]) -> list[tuple[str, dict]]:
+        """Remet en file des téléchargements conservés.
+
+        Retourne les couples (download_id, entree) de ceux qui ont repris :
+        l'appelant en a besoin pour afficher leur ligne dans la liste.
 
         Chaque entree passe par `add()` : elle repart donc exactement comme un
         ajout normal, analyse comprise — une adresse devenue invalide echoue
@@ -246,7 +249,7 @@ class QueueManager:
         ids = []
         for entree in entrees:
             try:
-                ids.append(self.add(**entree))
+                ids.append((self.add(**entree), entree))
             except TypeError as exc:
                 # Fichier ecrit par une version differente : on ignore l'entree
                 # plutot que d'empecher le demarrage.

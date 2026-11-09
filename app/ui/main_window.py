@@ -295,8 +295,9 @@ class MainWindow(wx.Frame):
         self._init_queue()
         self._init_clipboard()
         self.Maximize()
-        # Focus initial sur le message — NVDA lit son contenu directement
-        wx.CallAfter(self.lbl_empty.SetFocus)
+        # Focus initial : passe apres la reprise de la file (main.py), qui
+        # tourne avant la boucle d'evenements.
+        wx.CallAfter(self._initial_focus)
 
     # ------------------------------------------------------------------
     # Queue
@@ -2335,15 +2336,8 @@ class MainWindow(wx.Frame):
                                 skip_info=skip_info,
                                 subtitles_override=subtitles_override,
                                 section=section)
-        if format_spec == "auto":
-            label = _("Auto")
-        elif format_spec == "subtitles_only":
-            label = _("Sous-titres")
-        else:
-            label = format_spec.upper()
-        if track_label:
-            label = f"{label} — {track_label}"
-        self.download_list.add_item(dl_id, url, site="—", fmt=label)
+        self.download_list.add_item(dl_id, url, site="—",
+                                    fmt=self._format_label(format_spec, track_label))
         # Stocker pour retry et rapport d'erreur
         self._dl_data[dl_id] = {
             "url": url, "format_spec": format_spec, "format_id": format_id,
@@ -3232,11 +3226,57 @@ class MainWindow(wx.Frame):
         # boucle, mais la file etant desormais reecrite a chaque changement,
         # l'effacement n'aurait tenu qu'une seconde. C'est `queue_store.load()`
         # qui tient ce role, en decomptant les reprises sur le disque.
-        ids = self._queue.restore(entrees)
-        if ids:
+        repris = self._queue.restore(entrees)
+        # Chaque telechargement repris a besoin de sa ligne. Sans elle (bug
+        # de 0.2.3 a 0.2.6), la file tournait en silence derriere le message
+        # « Aucun telechargement » : Brad rajoutait ses playlists, d'ou des
+        # doublons et encore plus de requetes vers YouTube.
+        for dl_id, entree in repris:
+            url = entree.get("url", "")
+            format_spec = entree.get("format_spec") or "auto"
+            self.download_list.add_item(dl_id, url, site="—",
+                                        fmt=self._format_label(format_spec))
+            self._dl_data[dl_id] = {
+                "url": url, "format_spec": format_spec,
+                "format_id": entree.get("format_id"),
+                "audio_groups": entree.get("audio_groups"),
+                "track_label": None, "referer": None, "cookies": None,
+                "site": "",
+                "playlist_title": entree.get("playlist_title"),
+                "playlist_number": entree.get("playlist_number"),
+            }
+        if repris:
+            self.set_count(self.download_list.count())
             self.set_status(
                 _("{count} téléchargement(s) repris de la session précédente.")
-                .format(count=len(ids)))
+                .format(count=len(repris)))
+
+    def _initial_focus(self) -> None:
+        """Focus au lancement : la liste si la file a repris, sinon le message.
+
+        Le message d'accueil est cache des que la liste a des lignes : y
+        laisser le focus faisait lire « Aucun telechargement » a NVDA alors
+        que la file reprise tournait (demande de Brad, 2026-11-09 : arriver
+        directement sur la liste).
+        """
+        if self.download_list.count():
+            self.download_list._select_only(0)
+            self.download_list.SetFocus()
+        else:
+            self.lbl_empty.SetFocus()
+
+    @staticmethod
+    def _format_label(format_spec: str, track_label: str | None = None) -> str:
+        """Libelle de la colonne Format pour un ajout a la file."""
+        if format_spec == "auto":
+            label = _("Auto")
+        elif format_spec == "subtitles_only":
+            label = _("Sous-titres")
+        else:
+            label = format_spec.upper()
+        if track_label:
+            label = f"{label} — {track_label}"
+        return label
 
     def _on_close(self, event) -> None:
         n_active = self._queue.active_count
