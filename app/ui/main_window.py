@@ -126,6 +126,7 @@ ID_USER_GUIDE   = wx.NewIdRef()
 ID_ADD_SECTION  = wx.NewIdRef()
 ID_SUBSCRIPTIONS = wx.NewIdRef()
 ID_QUEUE_STATUS = wx.NewIdRef()
+ID_ANNOUNCE_TOGGLE = wx.NewIdRef()
 
 
 def _docs_dir() -> Path:
@@ -1837,6 +1838,14 @@ class MainWindow(wx.Frame):
             ID_CLIP_TOGGLE, _("&Surveiller le presse-papiers\tCtrl+Shift+V"),
             _("Détecter automatiquement les URLs copiées"),
         )
+        self.mi_announce_toggle = dl_menu.AppendCheckItem(
+            ID_ANNOUNCE_TOGGLE,
+            _("&Annonces vocales des téléchargements\tCtrl+Shift+A"),
+            _("Couper ou rétablir les annonces « Téléchargement démarré » et "
+              "« Téléchargement terminé »"),
+        )
+        self.mi_announce_toggle.Check(
+            self.settings.get("download_announcements", "always") != "never")
         dl_menu.AppendSeparator()
         self.mi_history = dl_menu.Append(
             ID_HISTORY, _("&Historique...\tCtrl+H"),
@@ -1967,6 +1976,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_queue_status,   id=ID_QUEUE_STATUS)
         self.Bind(wx.EVT_MENU, self._on_move_down,      id=ID_MOVE_DOWN)
         self.Bind(wx.EVT_MENU, self._on_clip_toggle,    id=ID_CLIP_TOGGLE)
+        self.Bind(wx.EVT_MENU, self._on_announce_toggle, id=ID_ANNOUNCE_TOGGLE)
         self.Bind(wx.EVT_MENU, self._on_shortcuts,      id=ID_SHORTCUTS)
         self.Bind(wx.EVT_MENU, self._on_update_ytdlp,   id=ID_UPDATE_YDL)
         self.Bind(wx.EVT_MENU, self._on_update_app,     id=ID_UPDATE_APP)
@@ -2553,6 +2563,8 @@ class MainWindow(wx.Frame):
                 # prochain evenement de file.
                 self._save_queue_now()
                 browser.set_preferred_browser(self.settings.get("browser_choice", "auto"))
+                self.mi_announce_toggle.Check(
+                    self.settings.get("download_announcements", "always") != "never")
                 speech.speak(_("Préférences enregistrées."))
                 if dlg.restart_requested():
                     self._restart_app()
@@ -2969,6 +2981,22 @@ class MainWindow(wx.Frame):
             speech.speak(_("Surveillance du presse-papiers désactivée."))
             self.set_status(_("Surveillance du presse-papiers désactivée."))
 
+    def _on_announce_toggle(self, _event) -> None:
+        """Coupe ou rétablit les annonces de téléchargement (demande de Seb).
+
+        La confirmation est toujours dite, même en coupant : c'est la réponse
+        à une touche, pas une annonce de téléchargement.
+        """
+        active = cfg.toggle_download_announcements(self.settings)
+        cfg.save(self.settings)
+        self.mi_announce_toggle.Check(active)
+        if active:
+            texte = _("Annonces de téléchargement activées.")
+        else:
+            texte = _("Annonces de téléchargement désactivées.")
+        speech.speak(texte)
+        self.set_status(texte)
+
     def _on_clip_tick(self, _event) -> None:
         """Appelé toutes les 1,5 s — vérifie si une nouvelle URL a été copiée."""
         text = _clipboard_text()
@@ -3000,6 +3028,7 @@ class MainWindow(wx.Frame):
             "Ctrl+G           Extraction guidée (navigateur intégré)\n"
             "Ctrl+V           Coller URL depuis le presse-papiers\n"
             "Ctrl+Shift+V     Activer/désactiver la surveillance du presse-papiers\n"
+            "Ctrl+Shift+A     Couper/rétablir les annonces de téléchargement\n"
             "Ctrl+H           Afficher l'historique\n"
             "F5               Démarrer la file\n"
             "Ctrl+I           État de la file\n"

@@ -73,7 +73,7 @@ La fenêtre principale se compose de quatre zones, du haut vers le bas.
 Trois menus regroupent toutes les actions :
 
 - **Fichier** : ajouter une ou plusieurs adresses (Ctrl+N), télécharger un extrait (Ctrl+E), gérer les abonnements (Ctrl+B), lancer l'extraction guidée (Ctrl+G), se connecter à un site, rechercher des médias (Ctrl+F), importer une liste d'adresses, ouvrir le dossier de destination (Ctrl+O), accéder aux préférences (Ctrl+P) et quitter (Alt+F4).
-- **Téléchargements** : démarrer (F5), voir l'état de la file (Ctrl+I), mettre en pause ou reprendre (Espace), tout sélectionner (Ctrl+A), annuler (Suppr), vider la liste (Maj+Suppr), retirer les téléchargements terminés (Ctrl+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V) et consulter l'historique (Ctrl+H).
+- **Téléchargements** : démarrer (F5), voir l'état de la file (Ctrl+I), mettre en pause ou reprendre (Espace), tout sélectionner (Ctrl+A), annuler (Suppr), vider la liste (Maj+Suppr), retirer les téléchargements terminés (Ctrl+Suppr), réessayer un téléchargement échoué (F2), monter (Alt+Haut) ou descendre (Alt+Bas) un élément dans la file, surveiller le presse-papiers (Ctrl+Maj+V), couper ou rétablir les annonces de téléchargement (Ctrl+Maj+A) et consulter l'historique (Ctrl+H).
 - **Aide** : afficher la liste des raccourcis clavier, mettre à jour le moteur de téléchargement ou l'application, contacter le support ou faire une suggestion, ouvrir la page du projet et afficher les informations « À propos ».
 
 #### La barre d'outils
@@ -183,6 +183,7 @@ DownAccess reconnaît les adresses même si le fichier contient d'autres lignes 
 | Abonnements (chaînes, podcasts, collections Arte) | Ctrl+B |
 | Coller une URL depuis le presse-papiers | Ctrl+V |
 | Activer/désactiver la surveillance du presse-papiers | Ctrl+Shift+V |
+| Couper/rétablir les annonces de téléchargement | Ctrl+Shift+A |
 
 Vous retrouvez la liste complète des raccourcis à tout moment dans le menu **Aide**, via **Raccourcis clavier**.
 
@@ -430,7 +431,7 @@ La file se présente sous la forme d'un tableau natif, parfaitement lu par NVDA 
 
 #### Note d'accessibilité
 
-Quand un téléchargement est ajouté, sa ligne est automatiquement sélectionnée : votre lecteur d'écran l'annonce aussitôt. Pour parcourir le tableau, utilisez les flèches Haut et Bas pour passer d'une ligne à l'autre, et les flèches Gauche et Droite pour entendre chaque colonne d'une même ligne. Sous la liste, une barre de progression suit le téléchargement actif et la barre de statut, en bas de la fenêtre, affiche les messages importants.
+Quand un téléchargement est ajouté, sa ligne est automatiquement sélectionnée : votre lecteur d'écran l'annonce aussitôt. Pour parcourir le tableau, utilisez les flèches Haut et Bas pour passer d'une ligne à l'autre : votre lecteur d'écran lit la ligne entière. Les flèches Gauche et Droite détaillent ensuite la ligne, une colonne à la fois : votre lecteur d'écran annonce par exemple « Statut : Terminé » ou « Taille : 1,2 Go ». Sur une nouvelle ligne, la flèche Droite repart du titre et la flèche Gauche commence par la dernière colonne. Sous la liste, une barre de progression suit le téléchargement actif et la barre de statut, en bas de la fenêtre, affiche les messages importants.
 
 #### Les statuts possibles
 
@@ -1078,7 +1079,7 @@ DownAccess respecte plusieurs principes qui garantissent une expérience fluide 
 - **Des contrôles standards uniquement.** Tous les éléments de l'interface (boutons, listes, cases à cocher, zones de texte) sont des contrôles Windows natifs. NVDA et JAWS les reconnaissent et les lisent sans réglage particulier.
 - **Un ordre de tabulation logique.** Dans chaque fenêtre, la touche Tab vous déplace d'un élément au suivant dans un ordre naturel, de haut en bas. Maj+Tab revient en arrière.
 - **Le focus se place sur le contenu.** Quand une fenêtre s'ouvre, le focus est placé sur l'élément utile (une zone de saisie, une liste), jamais sur un bouton par défaut. Vous savez immédiatement où vous êtes et ce que vous pouvez faire.
-- **Des annonces vocales aux moments clés.** Votre lecteur d'écran vous informe automatiquement des évènements importants : un téléchargement qui démarre, un téléchargement terminé, une URL ajoutée à la file, une erreur, une playlist détectée, ou encore une connexion mémorisée.
+- **Des annonces vocales aux moments clés.** Votre lecteur d'écran vous informe automatiquement des évènements importants : un téléchargement qui démarre, un téléchargement terminé, une URL ajoutée à la file, une erreur, une playlist détectée, ou encore une connexion mémorisée. Les annonces « Téléchargement démarré » et « Téléchargement terminé » se coupent et se rétablissent d'une touche avec **Ctrl+Maj+A** (menu **Téléchargements**, **Annonces vocales des téléchargements**) ; le réglage complet se trouve dans les Préférences, onglet Général.
 - **Des messages clairs en cas d'erreur.** Les erreurs et les questions s'affichent dans des fenêtres de dialogue standards, que votre lecteur d'écran lit aussitôt à voix haute.
 
 #### À l'ouverture de l'application
@@ -1107,6 +1108,7 @@ Voici tous les raccourcis disponibles dans DownAccess.
 | **Ctrl+G** | Extraction guidée (navigateur intégré) |
 | **Ctrl+V** | Coller une URL depuis le presse-papiers |
 | **Ctrl+Maj+V** | Activer ou désactiver la surveillance du presse-papiers |
+| **Ctrl+Maj+A** | Couper ou rétablir les annonces de téléchargement |
 | **Ctrl+H** | Afficher l'historique des téléchargements |
 | **F5** | Démarrer les téléchargements en attente |
 | **Ctrl+I** | Voir l'état de la file (en cours, en attente, en erreur) |

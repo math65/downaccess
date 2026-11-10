@@ -33,6 +33,11 @@ def speak(text: str, interrupt: bool = True) -> None:
             pass
 
 
+def is_screen_reader_active() -> bool:
+    """True si NVDA ou JAWS tourne (sinon speak() ne dit rien)."""
+    return active_screen_reader() != "aucun"
+
+
 def active_screen_reader() -> str:
     """Retourne le nom du lecteur d'écran actif ('NVDA', 'Jaws') ou 'aucun'.
     Utile pour les rapports de diagnostic."""

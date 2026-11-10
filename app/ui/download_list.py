@@ -1,5 +1,7 @@
 import wx
 
+from app.core import speech
+
 # Codes de statut internes (jamais traduits — utilises pour comparaison).
 STATUS_PENDING    = "pending"
 STATUS_PREPARING  = "preparing"
@@ -70,6 +72,12 @@ class DownloadList(wx.ListCtrl):
         self._items: dict[str, int] = {}
         # download_id (str) -> code de statut interne (str)
         self._status_codes: dict[str, str] = {}
+        # Colonne lue par les flèches Gauche/Droite, et la ligne où on l'a
+        # choisie. Changer de ligne (Haut/Bas : le lecteur d'écran lit alors
+        # la ligne entière) repart de zéro : Droite redonne le titre.
+        self._current_col = -1
+        self._col_row = -1
+        self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
 
     # ------------------------------------------------------------------
     # Setup
@@ -78,6 +86,51 @@ class DownloadList(wx.ListCtrl):
     def _setup_columns(self) -> None:
         for i, (label, _code, width) in enumerate(_column_specs()):
             self.InsertColumn(i, label, width=width)
+
+    # ------------------------------------------------------------------
+    # Lecture colonne par colonne (flèches Gauche / Droite)
+    # ------------------------------------------------------------------
+
+    def _on_key_down(self, event: wx.KeyEvent) -> None:
+        # Le guide promettait Gauche/Droite pour entendre chaque colonne, mais
+        # une liste Windows native ne fait que défiler à l'horizontale et NVDA
+        # n'annonce rien (rapport Brad, 0.2.7). Sans lecteur d'écran, on laisse
+        # le défilement natif.
+        key = event.GetKeyCode()
+        if (key in (wx.WXK_LEFT, wx.WXK_RIGHT) and not event.HasAnyModifiers()
+                and speech.is_screen_reader_active()):
+            text = self.move_column(-1 if key == wx.WXK_LEFT else 1)
+            if text:
+                speech.speak(text)
+            return
+        event.Skip()
+
+    def move_column(self, step: int) -> str:
+        """Passe à la colonne voisine de la ligne courante et renvoie le texte
+        à annoncer (« Statut : Terminé »).
+
+        Sur une ligne qu'on vient d'atteindre, Droite donne la première
+        colonne et Gauche la dernière. Aux bords, on réentend la première ou
+        la dernière colonne. Chaîne vide si aucune ligne."""
+        row = self.GetFocusedItem()
+        if row < 0:
+            row = self.GetFirstSelected()
+        if row < 0:
+            return ""
+        last = self.GetColumnCount() - 1
+        if row != self._col_row or self._current_col < 0:
+            self._col_row = row
+            self._current_col = 0 if step > 0 else last
+        else:
+            self._current_col = max(0, min(last, self._current_col + step))
+        return self.column_announcement(row, self._current_col)
+
+    def column_announcement(self, row: int, col: int) -> str:
+        label = self.GetColumn(col).GetText()
+        value = self.GetItemText(row, col).strip()
+        if not value:
+            return _("{column} : vide").format(column=label)
+        return _("{column} : {value}").format(column=label, value=value)
 
     # ------------------------------------------------------------------
     # Public API

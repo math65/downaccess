@@ -73,7 +73,7 @@ The main window is made up of four areas, from top to bottom.
 Three menus bring together all the actions:
 
 - **File**: add one or more addresses (Ctrl+N), download an extract (Ctrl+E), manage subscriptions (Ctrl+B), start guided extraction (Ctrl+G), sign in to a site, search for media (Ctrl+F), import a list of addresses, open the destination folder (Ctrl+O), access the preferences (Ctrl+P) and quit (Alt+F4).
-- **Downloads**: start (F5), view the queue status (Ctrl+I), pause or resume (Space), select all (Ctrl+A), cancel (Delete), clear the list (Shift+Delete), remove finished downloads (Ctrl+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V) and view the history (Ctrl+H).
+- **Downloads**: start (F5), view the queue status (Ctrl+I), pause or resume (Space), select all (Ctrl+A), cancel (Delete), clear the list (Shift+Delete), remove finished downloads (Ctrl+Delete), retry a failed download (F2), move an item up (Alt+Up) or down (Alt+Down) in the queue, monitor the clipboard (Ctrl+Shift+V), mute or restore download announcements (Ctrl+Shift+A) and view the history (Ctrl+H).
 - **Help**: show the list of keyboard shortcuts, update the download engine or the application, contact support or make a suggestion, open the project page and show the "About" information.
 
 #### The toolbar
@@ -183,6 +183,7 @@ DownAccess recognizes the addresses even if the file contains other lines of tex
 | Subscriptions (channels, podcasts, Arte collections) | Ctrl+B |
 | Paste a URL from the clipboard | Ctrl+V |
 | Turn clipboard monitoring on/off | Ctrl+Shift+V |
+| Mute/restore download announcements | Ctrl+Shift+A |
 
 You can find the full list of shortcuts at any time in the **Help** menu, via **Keyboard shortcuts**.
 
@@ -430,7 +431,7 @@ The queue appears as a native table, fully read by NVDA and JAWS. Each row corre
 
 #### Accessibility note
 
-When a download is added, its row is automatically selected: your screen reader announces it right away. To move through the table, use the Up and Down arrows to go from one row to another, and the Left and Right arrows to hear each column of the same row. Below the list, a progress bar tracks the active download, and the status bar at the bottom of the window shows important messages.
+When a download is added, its row is automatically selected: your screen reader announces it right away. To move through the table, use the Up and Down arrows to go from one row to another: your screen reader reads the whole row. The Left and Right arrows then go through the row one column at a time: your screen reader says, for example, "Status: Finished" or "Size: 1.2 GB". On a new row, Right arrow starts again from the title and Left arrow starts with the last column. Below the list, a progress bar tracks the active download, and the status bar at the bottom of the window shows important messages.
 
 #### The possible statuses
 
@@ -1078,7 +1079,7 @@ DownAccess follows several principles that guarantee a smooth experience with a 
 - **Standard controls only.** Every element of the interface (buttons, lists, checkboxes, text fields) is a native Windows control. NVDA and JAWS recognize and read them without any special setup.
 - **A logical tab order.** In every window, the Tab key moves you from one element to the next in a natural order, from top to bottom. Shift+Tab moves back.
 - **The focus lands on the content.** When a window opens, the focus is placed on the element you need (a text field, a list), never on a default button. You immediately know where you are and what you can do.
-- **Spoken announcements at key moments.** Your screen reader automatically informs you of important events: a download starting, a download finishing, a URL added to the queue, an error, a detected playlist, or a saved login.
+- **Spoken announcements at key moments.** Your screen reader automatically informs you of important events: a download starting, a download finishing, a URL added to the queue, an error, a detected playlist, or a saved login. The "Download started" and "Download finished" announcements can be muted and restored with one key, **Ctrl+Shift+A** (**Downloads** menu, **Spoken download announcements**); the full setting is in Preferences, General tab.
 - **Clear messages when something goes wrong.** Errors and questions appear in standard dialog windows, which your screen reader reads out loud right away.
 
 #### When the application opens
@@ -1106,6 +1107,7 @@ Here are all the shortcuts available in DownAccess.
 | **Ctrl+G** | Guided extraction (built-in browser) |
 | **Ctrl+V** | Paste a URL from the clipboard |
 | **Ctrl+Shift+V** | Turn clipboard monitoring on or off |
+| **Ctrl+Shift+A** | Mute or restore download announcements |
 | **Ctrl+H** | Show the download history |
 | **F5** | Start pending downloads |
 | **Ctrl+I** | View the queue status (in progress, waiting, failed) |

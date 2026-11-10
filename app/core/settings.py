@@ -141,3 +141,23 @@ def load() -> dict:
 def save(settings: dict) -> None:
     with open(_config_file(), "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=2, ensure_ascii=False)
+
+
+def toggle_download_announcements(settings: dict) -> bool:
+    """Coupe ou rétablit les annonces vocales de téléchargement (Ctrl+Maj+A).
+
+    Couper retient le mode d'avant (« toujours » ou « au premier plan ») pour
+    le rendre au rallumage : on ne veut pas écraser le choix fait dans les
+    Préférences. Modifie `settings` en place ; renvoie True si les annonces
+    sont maintenant actives.
+    """
+    mode = settings.get("download_announcements", "always")
+    if mode != "never":
+        settings["download_announcements_before_mute"] = mode
+        settings["download_announcements"] = "never"
+        return False
+    before = settings.get("download_announcements_before_mute", "always")
+    if before not in ("always", "foreground"):
+        before = "always"
+    settings["download_announcements"] = before
+    return True
