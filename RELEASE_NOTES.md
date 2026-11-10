@@ -1,26 +1,16 @@
-## DownAccess 0.2.7
+## DownAccess 0.2.8
 
-### Vos téléchargements repris au démarrage sont de nouveau visibles
+### Lire le tableau colonne par colonne
 
-Depuis la version 0.2.3, DownAccess reprend au démarrage les téléchargements laissés en cours. Mais un défaut les rendait invisibles : ils se téléchargeaient bien, sans jamais apparaître dans la liste, qui affichait « Aucun téléchargement pour le moment ». On pouvait croire sa file perdue et rajouter les mêmes vidéos, qui étaient alors téléchargées deux fois.
+Dans la liste des téléchargements, les flèches Gauche et Droite ne faisaient rien, alors que le guide promettait de pouvoir écouter chaque colonne. C'est corrigé :
 
-C'est corrigé : chaque téléchargement repris retrouve sa ligne dans la liste, et vous arrivez directement dessus au démarrage.
+- **flèches Haut et Bas** : votre lecteur d'écran lit la ligne entière, comme avant ;
+- **flèches Gauche et Droite** : il détaille la ligne, une colonne à la fois, par exemple « Statut : Terminé » ou « Taille : 1,2 Go ».
 
-### Voir où en est la file : Ctrl+I
+Sur une nouvelle ligne, la flèche Droite repart du titre et la flèche Gauche commence par la dernière colonne.
 
-Une nouvelle commande, **État de la file** (menu Téléchargements, ou Ctrl+I), vous dit en un coup d'œil :
+### Couper les annonces de téléchargement d'une touche : Ctrl+Maj+A
 
-- quels téléchargements sont en cours, avec leur progression ;
-- combien attendent leur tour, combien sont terminés, combien ont échoué ;
-- combien de téléchargements peuvent tourner en même temps ;
-- s'il y a une pause anti-robot, et dans combien de minutes elle se termine.
+Les annonces « Téléchargement démarré » et « Téléchargement terminé » se coupent et se rétablissent avec **Ctrl+Maj+A**, ou depuis le menu Téléchargements, **Annonces vocales des téléchargements**. DownAccess vous confirme à chaque fois si elles sont activées ou désactivées.
 
-### Moins de vérifications anti-robot sur YouTube
-
-- **À la fin d'une pause anti-robot, un seul téléchargement repart d'abord.** S'il passe, les autres reprennent aussitôt. S'il est de nouveau bloqué, la file repart en pause sans avoir sollicité YouTube plusieurs fois. Jusqu'ici, tous les téléchargements repartaient ensemble et le blocage revenait quelques secondes après la reprise.
-- **Nouveau réglage : délai entre deux téléchargements.** Dans Préférences > Général, vous pouvez imposer quelques secondes entre le démarrage de deux téléchargements. Sur une longue liste YouTube, une trentaine de secondes suffit souvent à éviter la vérification. Le réglage est à 0 par défaut : rien ne change si vous n'y touchez pas.
-
-### Corrections
-
-- **Monter ou descendre dans la file (Alt+Haut, Alt+Bas)** : quand des téléchargements terminés se trouvaient entre deux vidéos en attente, l'ordre affiché ne correspondait plus à l'ordre réel. Le déplacement suit maintenant l'ordre de passage.
-- **Rapport d'erreur** : un rapport envoyé pour un téléchargement dont l'adresse était inconnue ne contient plus un message d'erreur sans rapport avec le problème.
+Quand vous les rétablissez, vous retrouvez le réglage choisi dans les Préférences, par exemple « Seulement quand DownAccess est au premier plan ».
