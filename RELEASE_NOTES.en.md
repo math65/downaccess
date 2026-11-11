@@ -1,16 +1,12 @@
-## DownAccess 0.2.8
+## DownAccess 0.2.9
 
-### Reading the table column by column
+### DownAccess no longer gets stuck at startup after an update
 
-In the download list, the Left and Right arrows did nothing, even though the guide said you could listen to each column. This is fixed:
+If you accepted the DownAccess update while its download engine (yt-dlp) was updating in the background, the engine could be left half installed. DownAccess then showed an error at every startup, for example "cannot import name 'compat_ord'", and would not open.
 
-- **Up and Down arrows**: your screen reader reads the whole row, as before;
-- **Left and Right arrows**: it goes through the row one column at a time, for example "Status: Finished" or "Size: 1.2 GB".
+This is fixed:
 
-On a new row, Right arrow starts again from the title and Left arrow starts with the last column.
+- the engine update can no longer leave it half installed, even if DownAccess closes at the wrong moment;
+- if the installed engine is damaged, DownAccess still starts with its built-in version, then reinstalls the engine in the background.
 
-### Mute download announcements with one key: Ctrl+Shift+A
-
-The "Download started" and "Download finished" announcements can be muted and restored with **Ctrl+Shift+A**, or from the Downloads menu, **Spoken download announcements**. DownAccess confirms each time whether they are on or off.
-
-When you turn them back on, you get back the setting chosen in Preferences, for example "Only when DownAccess is in the foreground".
+If you already had this problem, install this version: DownAccess repairs itself the first time it starts, with nothing to delete by hand.
