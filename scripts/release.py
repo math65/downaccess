@@ -2,7 +2,13 @@
 release.py — Bump version, build, génère l'installeur et publie la release GitHub.
 
 Usage :
-    python scripts/release.py 0.1.13
+    python scripts/release.py 0.1.13                 # tout, d'une traite (PC)
+    python scripts/release.py 0.1.13 --build-only    # etapes 1-4 (rien n'est publie)
+    python scripts/release.py 0.1.13 --publish-only  # etapes 5-6 (installeur deja construit)
+
+Le runner GitHub (.github/workflows/release.yml) enchaine --build-only, la
+verification de l'installeur (scripts/ci_check_installer.py), puis
+--publish-only : rien n'est publie si l'installeur ne demarre pas.
 
 Les release notes sont prises depuis RELEASE_NOTES.md (FR) et
 RELEASE_NOTES.en.md (EN) si presents, concatenes dans le body de la release
@@ -11,17 +17,16 @@ GitHub. Sinon, generes depuis git log (commits depuis le dernier tag).
 Prérequis :
   - `uv sync` fait (cree .venv avec PyInstaller, utilise par build.py)
   - gh CLI installé et authentifié
-  - Inno Setup 6 installé dans le chemin standard
+  - Inno Setup 6 installé (chemin standard, ou variable ISCC)
 
 Étapes (ordre important — la version DOIT être bumpée AVANT le build,
 sinon l'auto-update boucle car l'exe contiendrait l'ancienne version) :
   1. Bumpe la version dans app/version.py et installer/downaccess.iss
   2. Lance scripts/build.py (PyInstaller + smoke test)
-  3. Génère les release notes
-  4. Commit + push
-  5. Lance Inno Setup → installer_output/DownAccess-Setup.exe
-  6. Calcule SHA-256 de l'installeur → DownAccess-Setup.exe.sha256
-  7. Crée la release GitHub avec installeur + .sha256 en pièces jointes
+  3. Lance Inno Setup → installer_output/DownAccess-Setup.exe
+  4. Calcule SHA-256 de l'installeur → DownAccess-Setup.exe.sha256
+  5. Commit + push de la version
+  6. Crée la release GitHub avec installeur + .sha256 en pièces jointes
 """
 import hashlib
 import re
@@ -36,7 +41,23 @@ ISS_FILE     = ROOT / "installer" / "downaccess.iss"
 INSTALLER    = ROOT / "installer_output" / "DownAccess-Setup.exe"
 SHA_FILE     = ROOT / "installer_output" / "DownAccess-Setup.exe.sha256"
 BUILD_PY     = ROOT / "scripts" / "build.py"
-ISCC         = Path(r"C:\Users\mathi\AppData\Local\Programs\Inno Setup 6\ISCC.exe")
+# Inno Setup : variable ISCC si definie, sinon installation par utilisateur
+# (PC de dev), sinon installation systeme (runner GitHub, via choco).
+_ISCC_CANDIDATES = [
+    Path(r"C:\Users\mathi\AppData\Local\Programs\Inno Setup 6\ISCC.exe"),
+    Path(r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"),
+    Path(r"C:\Program Files\Inno Setup 6\ISCC.exe"),
+]
+
+
+def _find_iscc() -> Path:
+    import os
+    if os.environ.get("ISCC"):
+        return Path(os.environ["ISCC"])
+    return next((p for p in _ISCC_CANDIDATES if p.exists()), _ISCC_CANDIDATES[0])
+
+
+ISCC         = _find_iscc()
 VENV_PY      = ROOT / ".venv" / "Scripts" / "python.exe"
 
 
@@ -138,15 +159,8 @@ def _file_sha256(path: Path) -> str:
     return h.hexdigest().lower()
 
 
-def main() -> int:
-    if len(sys.argv) < 2:
-        print("Usage : python scripts/release.py <version>")
-        print("  Ex  : python scripts/release.py 0.1.13")
-        return 1
-
-    version = sys.argv[1].lstrip("v")
-    tag     = f"v{version}"
-
+def build(version: str) -> int:
+    """Bump, build PyInstaller, installeur et SHA-256. Ne publie rien."""
     # 1. Bumper version AVANT le build (l'exe doit contenir la nouvelle version)
     step(f"Bump version -> {version}...")
     content = VERSION_PY.read_text(encoding="utf-8")
@@ -168,32 +182,11 @@ def main() -> int:
         return 1
     ok(f"Exe genere : {EXE}")
 
-    # 3. Generer les release notes
-    step("Generation des release notes...")
-    notes = _generate_notes(tag)
-    try:
-        print(notes)
-    except UnicodeEncodeError:
-        print(notes.encode("ascii", errors="replace").decode())
-    ok("Release notes generees")
-
-    # 4. Commit + push
-    step("Commit et push...")
-    run(["git", "add", str(VERSION_PY), str(ISS_FILE)], cwd=ROOT)
-    # Version deja bumpee et commitee a la main : rien a commiter, et
-    # `git commit` echouerait (code 1) -- apres le build, avant le push.
-    if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT).returncode:
-        run(["git", "commit", "-m", f"chore: version {version}"], cwd=ROOT)
-    else:
-        ok("Version deja commitee, rien a ajouter")
-    run(["git", "push"], cwd=ROOT)
-    ok("Commit pousse")
-
-    # 5. Inno Setup
+    # 3. Inno Setup
     step("Build installeur Inno Setup...")
     if not ISCC.exists():
         print(f"  ERR ISCC introuvable : {ISCC}")
-        print("  -> Installe Inno Setup 6 ou verifie le chemin dans ce script")
+        print("  -> Installe Inno Setup 6, ou indique son chemin dans la variable ISCC")
         return 1
     (ROOT / "installer_output").mkdir(exist_ok=True)
     run([str(ISCC), str(ISS_FILE)], cwd=ROOT)
@@ -203,23 +196,87 @@ def main() -> int:
     size_mb = INSTALLER.stat().st_size / 1_048_576
     ok(f"Installeur genere ({size_mb:.1f} Mo)")
 
-    # 6. SHA-256 de l'installeur (verifie par l'auto-updater cote client)
+    # 4. SHA-256 de l'installeur (verifie par l'auto-updater cote client)
     step("Generation du SHA-256...")
     sha_hex = _file_sha256(INSTALLER)
     SHA_FILE.write_text(f"{sha_hex}  {INSTALLER.name}\n", encoding="utf-8")
     ok(f"SHA-256 : {sha_hex}")
+    return 0
 
-    # 7. Release GitHub (installeur + .sha256)
+
+def publish(version: str) -> int:
+    """Commit + push de la version, puis release GitHub (installeur + .sha256)."""
+    tag = f"v{version}"
+    if not (INSTALLER.exists() and SHA_FILE.exists()):
+        print("  ERR Installeur ou .sha256 absent : lancer d'abord --build-only")
+        return 1
+
+    # Notes oubliees = notes de la version precedente publiees telles quelles.
+    # Sur le runner (lance depuis un telephone), personne ne relit la sortie :
+    # on refuse plutot que de publier des notes perimees.
+    for rn in (ROOT / "RELEASE_NOTES.md", ROOT / "RELEASE_NOTES.en.md"):
+        if rn.exists():
+            first = rn.read_text(encoding="utf-8").strip().splitlines()[:1]
+            if not first or f"DownAccess {version}" not in first[0]:
+                print(f"  ERR {rn.name} ne commence pas par « ## DownAccess {version} » :"
+                      " notes de version pas a jour ?")
+                return 1
+
+    # Les notes AVANT le commit de version : en repli sur git log, elles
+    # listent les commits depuis le dernier tag.
+    step("Generation des release notes...")
+    notes = _generate_notes(tag)
+    try:
+        print(notes)
+    except UnicodeEncodeError:
+        print(notes.encode("ascii", errors="replace").decode())
+    ok("Release notes generees")
+
+    step("Commit et push...")
+    run(["git", "add", str(VERSION_PY), str(ISS_FILE)], cwd=ROOT)
+    # Version deja bumpee et commitee a la main : rien a commiter, et
+    # `git commit` echouerait (code 1).
+    if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT).returncode:
+        run(["git", "commit", "-m", f"chore: version {version}"], cwd=ROOT)
+    else:
+        ok("Version deja commitee, rien a ajouter")
+    # HEAD explicite : sur le runner, la branche n'a pas forcement d'amont.
+    run(["git", "push", "origin", "HEAD"], cwd=ROOT)
+    ok("Commit pousse")
+
     step(f"Creation de la release GitHub {tag}...")
     run([
         "gh", "release", "create", tag,
         str(INSTALLER), str(SHA_FILE),
         "--title", f"DownAccess {tag}",
         "--notes", notes,
+        "--target", subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
+        ).stdout.strip(),
     ], cwd=ROOT)
     ok(f"Release {tag} publiee sur GitHub")
+    return 0
 
-    print(f"\nOK  Release {tag} terminee avec succes !")
+
+def main() -> int:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    unknown = flags - {"--build-only", "--publish-only"}
+    if len(args) != 1 or unknown or flags == {"--build-only", "--publish-only"}:
+        print("Usage : python scripts/release.py <version> [--build-only | --publish-only]")
+        print("  Ex  : python scripts/release.py 0.1.13")
+        return 1
+
+    version = args[0].lstrip("v")
+    if "--publish-only" not in flags:
+        if build(version):
+            return 1
+    if "--build-only" in flags:
+        print(f"\nOK  Installeur {version} pret (non publie) : {INSTALLER}")
+        return 0
+    if publish(version):
+        return 1
+    print(f"\nOK  Release v{version} terminee avec succes !")
     return 0
 
 
