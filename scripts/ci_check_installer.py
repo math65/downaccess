@@ -88,14 +88,22 @@ def dump(appdata: Path) -> None:
 
 def launch(exe: Path, appdata: Path) -> subprocess.Popen:
     env = dict(os.environ, APPDATA=str(appdata))
-    return subprocess.Popen([str(exe)], env=env, cwd=str(exe.parent))
+    proc = subprocess.Popen([str(exe)], env=env, cwd=str(exe.parent))
+    # Le journal s'accumule d'un lancement a l'autre : on ne lira que ce que
+    # CE lancement y ajoute.
+    proc.log_start = len(read_log(appdata))
+    return proc
+
+
+def new_log(proc: subprocess.Popen, appdata: Path) -> str:
+    return read_log(appdata)[proc.log_start:]
 
 
 def wait_started(proc: subprocess.Popen, appdata: Path) -> str:
     """Attend la ligne « yt-dlp effectif » et retourne l'emplacement charge."""
     deadline = time.time() + START_TIMEOUT
     while time.time() < deadline:
-        for line in read_log(appdata).splitlines():
+        for line in new_log(proc, appdata).splitlines():
             if STARTED in line:
                 return line
         if proc.poll() is not None:
@@ -211,7 +219,7 @@ def main() -> int:
     def scenario_broken(proc):
         line = wait_started(proc, broken)
         expect_location(line, broken, want_appdata=False)
-        if "incomplete" not in read_log(broken):
+        if "incomplete" not in new_log(proc, broken):
             raise CheckFailed("copie abimee non signalee dans le journal")
         ok("Demarre malgre la copie abimee (repli sur l'embarque)")
         wait_ytdlp_complete(proc, broken_ytdlp)
