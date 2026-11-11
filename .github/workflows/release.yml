@@ -99,7 +99,10 @@ jobs:
       - name: Verification de l'installeur
         run: uv run python scripts/ci_check_installer.py installer_output/DownAccess-Setup.exe
 
+      # Essai a blanc seulement : une vraie publication met deja l'installeur
+      # dans la release, inutile d'en garder une seconde copie.
       - uses: actions/upload-artifact@v4
+        if: env.PUBLIER != 'true'
         with:
           name: DownAccess-Setup-${{ env.VERSION }}
           path: |
