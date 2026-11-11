@@ -1,3 +1,4 @@
+import csv
 import importlib.machinery
 import json
 import logging
@@ -62,6 +63,56 @@ def get_installed_version() -> str | None:
         return None
 
 
+def _newest_dist_info(ytdlp_dir: Path) -> Path | None:
+    """dist-info de la version la plus recente presente dans `ytdlp_dir`."""
+    found = []
+    for dist_info in ytdlp_dir.glob("yt_dlp-*.dist-info"):
+        try:
+            with open(dist_info / "METADATA", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("Version:"):
+                        found.append((line.split(":", 1)[1].strip(), dist_info))
+                        break
+        except Exception:
+            pass
+    if not found:
+        return None
+    return max(found, key=lambda vd: _version_key(vd[0]))[1]
+
+
+def is_install_complete(ytdlp_dir: Path | None = None) -> bool:
+    """La copie AppData de yt-dlp est-elle entiere ?
+
+    On confronte le dossier au RECORD du dist-info (la liste des fichiers du
+    wheel) : chaque fichier de `yt_dlp/` qui y figure doit exister.
+
+    Pourquoi : une mise a jour interrompue (l'app fermee pour lancer
+    l'installeur de DownAccess pendant que yt-dlp se mettait a jour en
+    arriere-plan) laissait un yt_dlp/ a moitie efface. Il etait quand meme
+    charge au demarrage suivant, et l'app plantait avant d'afficher sa
+    fenetre : « cannot import name 'compat_ord' from 'yt_dlp.compat'
+    (unknown location) » — compat/ avait perdu son __init__.py.
+    """
+    ytdlp_dir = ytdlp_dir or get_ytdlp_dir()
+    if not (ytdlp_dir / "yt_dlp" / "__init__.py").is_file():
+        return False
+    dist_info = _newest_dist_info(ytdlp_dir)
+    if dist_info is None:
+        return False  # version inconnue : on ne s'y fie pas
+    try:
+        with open(dist_info / "RECORD", encoding="utf-8", newline="") as f:
+            rows = list(csv.reader(f))
+    except Exception:
+        return False
+    expected = [
+        row[0] for row in rows
+        if row and row[0].startswith("yt_dlp/") and "__pycache__" not in row[0]
+    ]
+    if not expected:
+        return False
+    return all((ytdlp_dir / rel).is_file() for rel in expected)
+
+
 def get_latest_version() -> str | None:
     """Derniere version yt-dlp du canal NIGHTLY.
 
@@ -121,7 +172,11 @@ def check_and_update(on_done=None) -> None:
         # '2026.6.30.234726.dev0' doivent se comparer composant par composant,
         # et une eventuelle difference de forme (zero-padding) ne doit pas
         # declencher un re-telechargement en boucle.
-        if not first_install and current and _version_key(current) >= _version_key(latest):
+        # Une copie incomplete (mise a jour interrompue) est reinstallee meme
+        # si sa version est la bonne : c'est ce qui repare l'app toute seule.
+        if (not first_install and current
+                and _version_key(current) >= _version_key(latest)
+                and is_install_complete(target)):
             if on_done:
                 on_done("up_to_date", current)
             return
@@ -169,9 +224,6 @@ def _install_wheel(target: Path, version: str) -> None:
     un simple zip dont l'extraction reproduit le resultat de
     `pip install --target` (paquet yt_dlp/ + yt_dlp-<version>.dist-info/).
     """
-    import io
-    import zipfile
-
     url = f"https://pypi.org/pypi/yt-dlp/{version}/json"
     req = urllib.request.Request(url, headers={"User-Agent": "DownAccess-Updater"})
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -190,30 +242,81 @@ def _install_wheel(target: Path, version: str) -> None:
     with urllib.request.urlopen(wreq, timeout=120) as r:
         payload = r.read()
 
-    # Installation ATOMIQUE : on extrait d'abord dans un dossier temporaire (la
-    # partie longue/faillible = reseau + extraction), puis on bascule chaque
-    # element vers `target` par un deplacement local rapide. Si l'operation est
-    # interrompue pendant le telechargement/extraction, l'installation existante
-    # reste intacte (avant : rmtree puis extract laissait yt_dlp/ casse en cas
-    # de coupure au mauvais moment).
+    _install_wheel_payload(target, payload)
+
+
+def _purge_leftovers(target: Path) -> None:
+    """Efface les dossiers de travail d'une installation precedente
+    interrompue (`.staging-*`, `.old-*`)."""
+    for leftover in list(target.glob(".staging-*")) + list(target.glob(".old-*")):
+        shutil.rmtree(leftover, ignore_errors=True)
+
+
+def _rename(src: Path, dst: Path, attempts: int = 5) -> None:
+    """os.rename, retente quelques fois : sous Windows, l'antivirus garde
+    brievement ouverts les fichiers qu'on vient d'extraire, et le renommage
+    du dossier echoue alors en « acces refuse »."""
+    import time
+
+    for i in range(attempts):
+        try:
+            os.rename(src, dst)
+            return
+        except PermissionError:
+            if i == attempts - 1:
+                raise
+            time.sleep(0.2 * (i + 1))
+
+
+def _install_wheel_payload(target: Path, payload: bytes) -> None:
+    """Extrait le wheel `payload` et le met en place dans `target`.
+
+    La mise en place ne fait que des RENOMMAGES (instantanes, sur le meme
+    disque) : l'ancien element est d'abord ecarte dans `.old-*`, puis le
+    nouveau prend sa place. On ne supprime l'ancien qu'une fois le nouveau en
+    place.
+
+    Avant, on effacait l'ancien yt_dlp/ (rmtree) PUIS on deplacait le nouveau.
+    Si l'app se fermait pendant l'effacement — typiquement pour lancer
+    l'installeur de DownAccess, la mise a jour de yt-dlp tournant encore en
+    arriere-plan — il restait un yt_dlp/ a moitie efface, qui faisait planter
+    l'app a chaque demarrage. Et si l'effacement echouait en partie (fichier
+    verrouille par l'antivirus), `shutil.move` rangeait le nouveau DANS l'ancien
+    (yt_dlp/yt_dlp/). Desormais, une coupure laisse au pire yt_dlp/ absent :
+    l'app retombe sur sa copie embarquee et reinstalle au demarrage suivant.
+    """
+    import io
     import tempfile
+    import zipfile
+
+    _purge_leftovers(target)
     staging = Path(tempfile.mkdtemp(dir=str(target), prefix=".staging-"))
+    trash = Path(tempfile.mkdtemp(dir=str(target), prefix=".old-"))
     try:
+        # Partie longue et faillible : rien n'est encore touche dans `target`.
         with zipfile.ZipFile(io.BytesIO(payload)) as zf:
             zf.extractall(staging)
-        for item in staging.iterdir():
+        # Le paquet d'abord, le dist-info en dernier : c'est lui qui annonce
+        # la version installee.
+        items = sorted(staging.iterdir(), key=lambda p: p.name.endswith(".dist-info"))
+        for item in items:
             dest = target / item.name
-            if dest.exists():
-                if dest.is_dir():
-                    shutil.rmtree(dest, ignore_errors=True)
-                else:
+            parked = trash / item.name
+            had_old = dest.exists()
+            if had_old:
+                _rename(dest, parked)
+            try:
+                _rename(item, dest)
+            except OSError:
+                if had_old:
                     try:
-                        dest.unlink()
+                        _rename(parked, dest)  # remet l'ancien en place
                     except OSError:
                         pass
-            shutil.move(str(item), str(dest))
+                raise
     finally:
         shutil.rmtree(staging, ignore_errors=True)
+        shutil.rmtree(trash, ignore_errors=True)
 
 
 def _cleanup_old_dist_info(ytdlp_dir: Path, keep_version: str) -> None:
@@ -303,7 +406,13 @@ def activate_appdata_ytdlp() -> str | None:
 
     ytdlp_dir = get_ytdlp_dir()
     if not (ytdlp_dir / "yt_dlp" / "__init__.py").is_file():
-        return None  # rien d'installe (ou installation incomplete)
+        return None  # rien d'installe
+    if not is_install_complete(ytdlp_dir):
+        # Mise a jour interrompue : on garde la copie embarquee, et
+        # check_and_update() reinstalle proprement en arriere-plan.
+        _log.warning("Copie AppData de yt-dlp incomplete (%s) : copie embarquee "
+                     "utilisee, reinstallation au prochain controle.", ytdlp_dir)
+        return None
 
     installed = get_installed_version()
     reference = get_reference_version()
@@ -322,7 +431,20 @@ def activate_appdata_ytdlp() -> str | None:
         )
         return None
 
-    sys.meta_path.insert(0, _AppDataYtDlpFinder(ytdlp_dir))
+    finder = _AppDataYtDlpFinder(ytdlp_dir)
+    sys.meta_path.insert(0, finder)
+    # Import d'essai : si la copie AppData ne se charge pas, pour quelque raison
+    # que ce soit, on la retire et l'app demarre sur la copie embarquee au lieu
+    # de planter avant meme d'afficher sa fenetre.
+    try:
+        import yt_dlp  # noqa: F401
+    except Exception as exc:
+        sys.meta_path.remove(finder)
+        for name in [m for m in sys.modules if m == "yt_dlp" or m.startswith("yt_dlp.")]:
+            del sys.modules[name]
+        _log.warning("yt-dlp %s (AppData) ne se charge pas (%s) : copie "
+                     "embarquee utilisee.", installed, exc)
+        return None
     _inject_path(ytdlp_dir)  # coherence pour les outils qui lisent sys.path
     _activated = True
     _log.info("yt-dlp %s (AppData) prioritaire sur %s (embarque).",
