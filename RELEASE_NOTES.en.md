@@ -1,12 +1,17 @@
-## DownAccess 0.2.9
+## DownAccess 0.2.10
 
-### DownAccess no longer gets stuck at startup after an update
+### New
 
-If you accepted the DownAccess update while its download engine (yt-dlp) was updating in the background, the engine could be left half installed. DownAccess then showed an error at every startup, for example "cannot import name 'compat_ord'", and would not open.
+- **ici.fr (formerly France Bleu)**: paste the address of an episode to download it, or the address of a programme to get the list of all its episodes.
+- **Preview in playlists**: the new "Preview" button in the selection window lets you listen to an item before downloading it.
+- **Failure summary at the end of the queue**: when several downloads fail, DownAccess waits for the queue to finish and shows a single window, with failures grouped by cause. One report is enough to send them all.
 
-This is fixed:
+### Improvements
 
-- the engine update can no longer leave it half installed, even if DownAccess closes at the wrong moment;
-- if the installed engine is damaged, DownAccess still starts with its built-in version, then reinstalls the engine in the background.
+- Live stream that has just ended: DownAccess explains that the replay is not ready yet and suggests trying again later with F2.
+- BBC iPlayer: DownAccess clearly states that the site restricts its programmes to the United Kingdom.
+- Errors that need immediate action (sign-in required, disk full, anti-bot check) are still shown right away, without waiting for the queue to finish.
 
-If you already had this problem, install this version: DownAccess repairs itself the first time it starts, with nothing to delete by hand.
+### Fixes
+
+- The browser chosen in Preferences did not always open: another browser, left running in the background after earlier use, could take its place.

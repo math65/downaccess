@@ -1,12 +1,17 @@
-## DownAccess 0.2.9
+## DownAccess 0.2.10
 
-### DownAccess ne reste plus bloqué au démarrage après une mise à jour
+### Nouveautés
 
-Si vous acceptiez la mise à jour de DownAccess pendant que son moteur de téléchargement (yt-dlp) se mettait à jour en arrière-plan, ce moteur pouvait rester à moitié installé. DownAccess affichait alors une erreur à chaque démarrage, par exemple « cannot import name 'compat_ord' », et ne s'ouvrait plus.
+- **ici.fr (ex-France Bleu)** : collez l'adresse d'une émission pour la télécharger, ou l'adresse d'un programme pour obtenir la liste de toutes ses émissions.
+- **Aperçu dans les playlists** : le nouveau bouton « Aperçu » de la fenêtre de sélection permet d'écouter un élément avant de le télécharger.
+- **Bilan des échecs en fin de file** : quand plusieurs téléchargements échouent, DownAccess attend la fin de la file et affiche une seule fenêtre, avec les échecs regroupés par cause. Un seul rapport suffit pour tous les signaler.
 
-C'est corrigé :
+### Améliorations
 
-- la mise à jour du moteur ne peut plus le laisser à moitié installé, même si DownAccess se ferme au mauvais moment ;
-- si le moteur installé est abîmé, DownAccess démarre quand même avec sa version intégrée, puis le réinstalle tout seul en arrière-plan.
+- Direct qui vient de se terminer : DownAccess explique que la rediffusion n'est pas encore prête et propose de réessayer plus tard avec F2.
+- BBC iPlayer : DownAccess indique clairement que le site réserve ses programmes au Royaume-Uni.
+- Les erreurs qui demandent une action immédiate (connexion requise, disque plein, contrôle anti-robot) s'affichent toujours sans attendre la fin de la file.
 
-Si vous aviez déjà ce problème, installez cette version : DownAccess se répare au premier lancement, sans rien supprimer à la main.
+### Corrections
+
+- Le navigateur choisi dans les Préférences ne s'ouvrait pas toujours : un autre navigateur, resté ouvert en arrière-plan après une utilisation précédente, pouvait prendre sa place.
