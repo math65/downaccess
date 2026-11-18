@@ -23,7 +23,7 @@ CONTACT_URL = "https://mathieumartin.ovh/api/feedback/contact"
 _BEARER     = "a5b84358b988e5e1fecbf2bc28191bb279db2769bf95c2b0df74b4246dabd93e"
 _APP_ID     = "downaccess"
 
-_MAX_VERBOSE  = 100_000   # caractères
+MAX_VERBOSE  = 100_000   # caractères
 _MAX_COMMENT  =   2_000
 
 # Libellés lisibles des clés system_info. La route générique /api/feedback/report
@@ -61,6 +61,8 @@ def build_report(
     preferences: dict | None = None,
     queue_state: dict | None = None,
     system_info: dict | None = None,
+    extra_sections: dict | None = None,
+    subject_label: str = "",
 ) -> dict:
     try:
         ytdlp_ver = importlib.metadata.version("yt-dlp")
@@ -87,6 +89,12 @@ def build_report(
             "Email utilisateur":  email or "—",
         },
     }
+    # Rapport groupe (bilan de fin de file) : la liste de tous les echecs, juste
+    # apres l'en-tete. Une chaine = section de texte, sans rien changer cote
+    # serveur.
+    for titre, contenu in (extra_sections or {}).items():
+        if contenu:
+            sections[titre] = contenu
     if system_info:
         sections["Informations système"] = {
             _SYSTEM_INFO_LABELS.get(k, k): v for k, v in system_info.items()
@@ -95,7 +103,7 @@ def build_report(
         sections["Préférences"] = preferences
     if queue_state:
         sections["File d'attente"] = queue_state
-    verbose = (verbose_log or "")[:_MAX_VERBOSE]
+    verbose = (verbose_log or "")[:MAX_VERBOSE]
     if verbose:
         sections["Log diagnostic (yt-dlp verbose)"] = verbose
 
@@ -105,7 +113,7 @@ def build_report(
         "app":          _APP_ID,
         "email":        (email or "")[:200],
         "summary":      error_message or "",
-        "subject_hint": f"Erreur — {site_label} — v{__version__} — {now.strftime('%Y-%m-%d %H:%M')}",
+        "subject_hint": f"Erreur — {subject_label or site_label} — v{__version__} — {now.strftime('%Y-%m-%d %H:%M')}",
         "user_comment": (user_comment or "")[:_MAX_COMMENT],
         "sections":     sections,
     }

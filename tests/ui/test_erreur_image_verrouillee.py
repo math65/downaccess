@@ -56,6 +56,9 @@ class FausseListe:
     def count(self):
         return 0
 
+    def get_title(self, dl_id):
+        return ""
+
     def SetFocus(self):
         pass
 
@@ -77,6 +80,7 @@ class FausseFenetre:
         self.rapports = []
         self.statuts = []
         self._error_bursts = {}
+        self._deferred_failures = []
         self._queue = FausseFile()
 
     def set_status(self, message):
@@ -102,6 +106,11 @@ class FausseFenetre:
     _claim_error_dialog      = MainWindow._claim_error_dialog
     _error_burst_key         = MainWindow._error_burst_key
     _reset_error_bursts_if_idle = MainWindow._reset_error_bursts_if_idle
+    # Un echec simple passe par le bilan de fin de file ; file vide et echec
+    # unique, il retrouve aussitot la fenetre d'erreur habituelle.
+    _is_actionable_error     = MainWindow._is_actionable_error
+    _show_error_dialog       = MainWindow._show_error_dialog
+    _flush_failures_if_idle  = MainWindow._flush_failures_if_idle
     # `staticmethod` : sans le rehabiller, `self` partirait comme URL.
     _site_label              = staticmethod(MainWindow._site_label)
 

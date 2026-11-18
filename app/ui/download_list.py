@@ -305,6 +305,13 @@ class DownloadList(wx.ListCtrl):
             return None
         return self._status_codes.get(dl_id)
 
+    def get_title(self, download_id: str) -> str:
+        """Titre affiche d'une ligne (vide si elle n'est plus dans la liste)."""
+        idx = self._items.get(download_id)
+        if idx is None:
+            return ""
+        return self.GetItemText(idx, COL_TITLE)
+
     def get_selected_title(self) -> str:
         """Titre affiche de l'item selectionne (vide si aucune selection)."""
         dl_id = self.get_selected_id()

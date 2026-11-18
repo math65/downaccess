@@ -48,9 +48,13 @@ from app.core import browser
 from app.core.downloader import (
     DownloadInfo,
     DownloadProgress,
+    bot_check_message,
     destination_missing_message,
+    disk_full_message,
     drm_locked_video_message,
 )
+from app.core import error_summary
+from app.ui.failure_summary_dialog import FailureSummaryDialog
 from app.core.ffmpeg_utils import get_ffmpeg_path
 from app.core.queue_manager import QueueManager
 from app.ui.add_url_dialog import AddUrlDialog, FORMAT_MANUAL
@@ -337,6 +341,9 @@ class MainWindow(wx.Frame):
         # ne doit ouvrir qu'UNE fenetre. Cle = site + nature de l'erreur,
         # valeur = nombre d'echecs identiques passes sous silence depuis.
         self._error_bursts: dict[str, int] = {}
+        # Echecs simples mis de cote jusqu'a la fin de la file, pour un seul
+        # bilan et un seul rapport (cf. `_flush_failures_if_idle`).
+        self._deferred_failures: list[error_summary.Failure] = []
         # Conservation de la file sur le disque : un minuteur regroupe les
         # rafales d'ajouts (une playlist de 200 videos = une seule ecriture),
         # et le gel evite qu'une ecriture tardive n'efface le fichier apres
@@ -826,6 +833,21 @@ class MainWindow(wx.Frame):
         dl_data = self._dl_data.get(download_id, {})
         self._log_history(dl_data, status="failed", error=message)
 
+        # Echec simple : rien a faire sur le moment, il attend la fin de la
+        # file. Un seul bilan presentera tous les echecs, avec un seul rapport
+        # (demande de Brad, 2026-11-16). L'item est deja marque en erreur dans
+        # la liste : le retour visuel immediat existe.
+        if not self._is_actionable_error(message, login_required):
+            self._deferred_failures.append(error_summary.Failure(
+                download_id=download_id,
+                url=dl_data.get("url", ""),
+                message=message,
+                title=self.download_list.get_title(download_id),
+                site=dl_data.get("site") or self._site_label(dl_data.get("url", "")),
+            ))
+            wx.CallAfter(self._flush_failures_if_idle)
+            return
+
         # Une meme panne sur une file entiere n'ouvre qu'une fenetre. L'item
         # est deja marque en erreur dans la liste : le retour visuel existe,
         # c'est la fenetre modale repetee qui n'a pas lieu d'etre.
@@ -853,9 +875,13 @@ class MainWindow(wx.Frame):
         # Le message explique deja la marche a suivre, mais la refaire a la
         # main coute un aller-retour — et deux testeurs sont alles changer le
         # format dans les Preferences, ce qui ne relance pas celui-ci.
-        offre_audio = message == drm_locked_video_message()
+        self._show_error_dialog(download_id, message,
+                                audio_offer=message == drm_locked_video_message())
 
-        dlg = ErrorDialog(self, message, audio_offer=offre_audio)
+    def _show_error_dialog(self, download_id: str, message: str,
+                           audio_offer: bool = False) -> None:
+        """La fenetre d'erreur d'UN telechargement, et ses deux suites."""
+        dlg = ErrorDialog(self, message, audio_offer=audio_offer)
         dlg.ShowModal()
         veut_audio  = dlg.wants_audio()
         veut_rapport = dlg.wants_report()
@@ -865,6 +891,54 @@ class MainWindow(wx.Frame):
             self._redownload_as_audio(download_id)
         elif veut_rapport:
             self._start_error_report(download_id, message)
+
+    def _is_actionable_error(self, message: str, login_required: bool) -> bool:
+        """Vrai si l'echec demande une action MAINTENANT, sans attendre la fin
+        de la file : se connecter, liberer ou rebrancher un disque, laisser
+        passer un controle anti-robot, ou accepter la bande-son d'une video
+        verrouillee. Attendre laisserait toute la file echouer pour la meme
+        raison avant qu'on le dise.
+
+        Les messages sont deja traduits a ce stade : on les compare a ceux que
+        produisent les memes fonctions, pas a des mots-cles.
+        """
+        if login_required:
+            return True
+        dossier = self.settings.get("download_folder", "")
+        if message in (bot_check_message(), drm_locked_video_message(),
+                       destination_missing_message(dossier)):
+            return True
+        # Disque plein : la suite du message chiffre l'espace libre, qui a pu
+        # bouger depuis. Seule la premiere phrase est stable.
+        return message.split("\n\n")[0] == disk_full_message("").split("\n\n")[0]
+
+    def _flush_failures_if_idle(self) -> None:
+        """La file est vide : montrer les echecs simples mis de cote.
+
+        Un seul echec garde sa fenetre habituelle. A partir de deux, un bilan
+        unique, regroupe par cause, avec un seul rapport pour l'ensemble.
+        Appelee apres chaque echec et a chaque changement de la file : elle ne
+        fait rien tant qu'un telechargement tourne ou attend.
+        """
+        if not self._deferred_failures or not self._queue.is_idle:
+            return
+        echecs, self._deferred_failures = self._deferred_failures, []
+        if len(echecs) == 1:
+            self._show_error_dialog(echecs[0].download_id, echecs[0].message)
+            return
+
+        groupes = error_summary.group_failures(echecs)
+        self.set_status(_("{count} téléchargements ont échoué.").format(count=len(echecs)))
+        dlg = FailureSummaryDialog(self, error_summary.summary_text(groupes))
+        dlg.ShowModal()
+        veut_rapport = dlg.wants_report()
+        dlg.Destroy()
+        if veut_rapport:
+            self._start_error_report(
+                echecs[0].download_id, error_summary.report_summary(groupes),
+                groups=groupes)
+        else:
+            wx.CallAfter(self.download_list.SetFocus)
 
     def _on_queue_held(self, folder: str) -> None:
         """Le dossier de telechargement est introuvable : la file s'arrete.
@@ -1171,7 +1245,8 @@ class MainWindow(wx.Frame):
             self._start_error_report(download_id, message)
         dlg.Destroy()
 
-    def _start_error_report(self, download_id: str, error_message: str) -> None:
+    def _start_error_report(self, download_id: str, error_message: str,
+                            groups=None) -> None:
         """Avant de laisser l'utilisateur rédiger un rapport, vérifie que l'app
         est à jour : si une version plus récente existe, le bug est peut-être
         déjà corrigé — on bloque et on propose la mise à jour, sans faire perdre
@@ -1184,7 +1259,7 @@ class MainWindow(wx.Frame):
             if status == "update_available":
                 self._report_blocked_outdated(info)
             else:
-                self._open_report_form(download_id, error_message)
+                self._open_report_form(download_id, error_message, groups)
 
         app_updater.check_for_update(
             on_done=lambda s, i, n: wx.CallAfter(_on_checked, s, i, n)
@@ -1300,7 +1375,14 @@ class MainWindow(wx.Frame):
                    "terminé le téléchargement : " + _cause + "\n\n" + verbose)
         return verbose, recovered["filepath"]
 
-    def _open_report_form(self, download_id: str, error_message: str) -> None:
+    def _open_report_form(self, download_id: str, error_message: str,
+                          groups=None) -> None:
+        """Formulaire puis envoi du rapport.
+
+        `groups` (bilan de fin de file) : le rapport couvre alors tous les
+        echecs en UN mail — un diagnostic par cause, les causes les plus
+        frequentes d'abord, et la liste complete des adresses.
+        """
         dl_data = self._dl_data.get(download_id, {})
         url         = dl_data.get("url", "")
         site        = dl_data.get("site", "")
@@ -1321,6 +1403,22 @@ class MainWindow(wx.Frame):
             pause_evt = _th.Event()
 
             def _run_verbose():
+                if groups:
+                    journaux = []
+                    for echec in error_summary.representatives(groups):
+                        d = self._dl_data.get(echec.download_id, {})
+                        journal, recupere = self._diagnostic_rerun(
+                            echec.url, d.get("format_spec", "auto"),
+                            d.get("format_id"), d.get("referer"),
+                            d.get("cookies"), echec.message, stop_evt, pause_evt)
+                        if recupere is not None:
+                            wx.CallAfter(self._on_diagnostic_recovered,
+                                         echec.download_id, recupere)
+                        journaux.append((echec, journal))
+                    verbose_log_holder.append(error_summary.join_logs(
+                        journaux, error_reporter.MAX_VERBOSE))
+                    wx.CallAfter(_send_report)
+                    return
                 verbose, recovered = self._diagnostic_rerun(
                     url, format_spec, format_id, referer, cookies,
                     error_message, stop_evt, pause_evt)
@@ -1422,6 +1520,12 @@ class MainWindow(wx.Frame):
                     preferences=prefs,
                     queue_state=queue_state,
                     system_info=system_info,
+                    extra_sections=(
+                        {"Échecs regroupés": error_summary.report_details(groups)}
+                        if groups else None),
+                    subject_label=(
+                        f"{sum(len(g.failures) for g in groups)} échecs regroupés"
+                        if groups else ""),
                 )
                 error_reporter.send_report(
                     report,
@@ -1437,8 +1541,17 @@ class MainWindow(wx.Frame):
 
             _th.Thread(target=_run_verbose, daemon=True).start()
 
+        if groups:
+            # Le formulaire presente « URL » et « Site » : pour un bilan, le
+            # nombre d'echecs et les sites concernes en tiennent lieu.
+            nombre = sum(len(g.failures) for g in groups)
+            sites = sorted({f.site for g in groups for f in g.failures if f.site})
+            url_affichee = _("{count} téléchargements en échec").format(count=nombre)
+            site_affiche = ", ".join(sites)
+        else:
+            url_affichee, site_affiche = url, site
         report_dlg = ReportDialog(
-            self, url=url, site=site, error_message=error_message,
+            self, url=url_affichee, site=site_affiche, error_message=error_message,
             on_confirmed=_on_confirmed,
             saved_email=self.settings.get("user_email", ""),
         )
@@ -3279,6 +3392,10 @@ class MainWindow(wx.Frame):
         Appelée depuis n'importe quel thread (les workers de téléchargement
         signalent ici leur fin), d'où le passage par `wx.CallAfter`.
         """
+        # Avant le test du gel : c'est ce signal qui annonce la file vide, donc
+        # le moment du bilan des echecs. L'echec lui-meme arrive par le meme
+        # canal juste avant (`_post` puis `_finish`) : l'ordre est garanti.
+        wx.CallAfter(self._flush_failures_if_idle)
         if self._queue_save_frozen:
             return
         wx.CallAfter(self._schedule_queue_save)
