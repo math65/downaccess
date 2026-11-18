@@ -1623,7 +1623,7 @@ msgstr "Preview finished."
 msgid "Aperçu — {title}"
 msgstr "Preview — {title}"
 
-#: app/core/browser.py:118
+#: app/core/browser.py:121
 msgid ""
 "Aucun navigateur compatible trouvé.\n"
 "Installez Google Chrome, Microsoft Edge ou Brave."
@@ -2213,15 +2213,15 @@ msgstr "unknown"
 msgid "{count} entrée(s)"
 msgstr "{count} entries"
 
-#: app/core/downloader.py:649 app/ui/format_dialog.py:175
+#: app/core/downloader.py:660 app/ui/format_dialog.py:175
 msgid "{n:.0f} Ko"
 msgstr "{n:.0f} KB"
 
-#: app/core/downloader.py:648 app/ui/format_dialog.py:173
+#: app/core/downloader.py:659 app/ui/format_dialog.py:173
 msgid "{n:.0f} Mo"
 msgstr "{n:.0f} MB"
 
-#: app/core/downloader.py:646 app/ui/format_dialog.py:171
+#: app/core/downloader.py:657 app/ui/format_dialog.py:171
 msgid "{n:.1f} Go"
 msgstr "{n:.1f} GB"
 
@@ -2241,7 +2241,7 @@ msgstr "Failed"
 msgid "⚠ Mode manuel disponible pour une seule URL à la fois."
 msgstr "⚠ Manual mode is available for only one URL at a time."
 
-#: app/core/downloader.py:1625 app/core/downloader.py:1628
+#: app/core/downloader.py:1663 app/core/downloader.py:1666
 msgid "Annulé par l'utilisateur"
 msgstr "Cancelled by user"
 
@@ -2255,11 +2255,11 @@ msgid "Erreur HTTP {code}."
 msgstr "HTTP error {code}."
 
 #: app/core/error_reporter.py:170 app/core/error_reporter.py:213
-#: app/core/updater.py:152
+#: app/core/updater.py:207
 msgid "Erreur inconnue."
 msgstr "Unknown error."
 
-#: app/core/downloader.py:2273
+#: app/core/downloader.py:2311
 msgid "Erreur incrustation : {error}"
 msgstr "Burn-in error: {error}"
 
@@ -2287,11 +2287,11 @@ msgstr ""
 "Unable to retrieve the checksum (SHA-256) of the new version.\n"
 "Update cancelled for safety — try again later."
 
-#: app/core/updater.py:117
+#: app/core/updater.py:168
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr "Unable to check the version (connection unavailable)."
 
-#: app/core/downloader.py:2261
+#: app/core/downloader.py:2299
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr "Subtitle burn-in failed: {error}"
 
@@ -2417,7 +2417,7 @@ msgid ""
 "fenêtre."
 msgstr "The DownAccess browser is open. Sign in, then close this window."
 
-#: app/core/downloader.py:805
+#: app/core/downloader.py:816
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -2475,7 +2475,7 @@ msgid ""
 "vidéos."
 msgstr "DownAccess will remember your sign-in to {site} for future videos."
 
-#: app/core/downloader.py:790
+#: app/core/downloader.py:801
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -2653,7 +2653,7 @@ msgstr "Checking for updates."
 msgid "Vérification de la version…"
 msgstr "Checking for updates…"
 
-#: app/core/updater.py:187
+#: app/core/updater.py:239
 msgid "Wheel yt-dlp introuvable sur PyPI."
 msgstr "yt-dlp wheel not found on PyPI."
 
@@ -3328,20 +3328,20 @@ msgstr "{site} — {category}"
 msgid "Émissions"
 msgstr "Programmes"
 
-#: app/core/downloader.py:656
+#: app/core/downloader.py:667
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr "Free space in \"{folder}\": {size}."
 
-#: app/core/downloader.py:659
+#: app/core/downloader.py:670
 msgid "Espace nécessaire : environ {size}."
 msgstr "Space required: about {size}."
 
-#: app/core/downloader.py:673
+#: app/core/downloader.py:684
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr "There is not enough free space on the disk to download this file."
 
-#: app/core/downloader.py:665
+#: app/core/downloader.py:676
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3349,7 +3349,7 @@ msgstr ""
 "Free up some space on this disk, or choose a different download folder in "
 "Preferences (Ctrl+P)."
 
-#: app/core/downloader.py:684
+#: app/core/downloader.py:695
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr "Your disk is full: the download could not be saved."
 
@@ -3424,7 +3424,7 @@ msgstr "Download an &extract...\tCtrl+E"
 msgid "Télécharger un extrait"
 msgstr "Download an extract"
 
-#: app/core/downloader.py:2124
+#: app/core/downloader.py:2162
 msgid "fin"
 msgstr "end"
 
@@ -3880,7 +3880,7 @@ msgstr ""
 "\n"
 "If you answer No, the subscription is still created: the {n} items will be offered to you and you choose."
 
-#: app/core/downloader.py:767
+#: app/core/downloader.py:778
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -3890,7 +3890,7 @@ msgstr ""
 "\n"
 "DownAccess cannot download it, and no setting will change that: the protection is put in place by the site. Subscription platforms (Netflix, Disney+, Prime Video) and some france.tv videos work this way."
 
-#: app/core/downloader.py:780
+#: app/core/downloader.py:791
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -4245,7 +4245,7 @@ msgstr ""
 "\n"
 "If you answer No, the catch-up still happens: the items will be offered to you and you choose."
 
-#: app/core/downloader.py:834
+#: app/core/downloader.py:872
 msgid ""
 "Cette vidéo n'est pas accessible.\n"
 "\n"
@@ -4255,7 +4255,7 @@ msgstr ""
 "\n"
 "It has most likely been removed by its author, made private, or restricted to certain countries. Check that it opens normally in your browser: if it does not open there either, there is nothing DownAccess can do."
 
-#: app/core/downloader.py:504
+#: app/core/downloader.py:515
 msgid ""
 "\n"
 "\n"
@@ -4265,11 +4265,11 @@ msgstr ""
 "\n"
 "Countries allowed, as the site lists them: {countries}."
 
-#: app/core/downloader.py:500
+#: app/core/downloader.py:511
 msgid " et {n} autres"
 msgstr " and {n} others"
 
-#: app/core/downloader.py:486
+#: app/core/downloader.py:497
 msgid ""
 "Cette vidéo n'est pas disponible dans votre pays.\n"
 "\n"
@@ -4510,7 +4510,7 @@ msgid ""
 " reprennent."
 msgstr "The download folder is available again: downloads are resuming."
 
-#: app/core/downloader.py:632
+#: app/core/downloader.py:643
 msgid ""
 "Le dossier de téléchargement « {folder} » est introuvable.\n"
 "\n"
@@ -4593,7 +4593,7 @@ msgstr "{count} finished downloads removed from the list."
 msgid "{count} éléments retirés de la liste."
 msgstr "{count} items removed from the list."
 
-#: app/core/downloader.py:848
+#: app/core/downloader.py:886
 msgid ""
 "Cette vidéo n'est pas encore en ligne.\n"
 "\n"
@@ -4603,7 +4603,7 @@ msgstr ""
 "\n"
 "The site already lists it, but will only make it available from {date} at {time}. Please try again then."
 
-#: app/core/downloader.py:826
+#: app/core/downloader.py:864
 msgid ""
 "Le site ne propose aucune vidéo à télécharger sur cette page.\n"
 "\n"
@@ -4806,10 +4806,30 @@ msgstr ""
 "Ctrl+P           Preferences\n"
 "Alt+F4           Quit"
 
-#: app/ui/download_list.py:123
+#: app/ui/download_list.py:132
 msgid "{column} : vide"
 msgstr "{column}: empty"
 
-#: app/ui/download_list.py:124
+#: app/ui/download_list.py:133
 msgid "{column} : {value}"
 msgstr "{column}: {value}"
+
+#: app/core/downloader.py:844
+msgid ""
+"La BBC refuse de fournir ce programme.\n"
+"\n"
+"BBC iPlayer est réservé au Royaume-Uni : depuis un autre pays, le site bloque le téléchargement, et aucun réglage de DownAccess ne peut l'ouvrir. Si vous êtes au Royaume-Uni, vérifiez que le programme se lit encore dans votre navigateur : il a peut-être été retiré."
+msgstr ""
+"The BBC refuses to provide this programme.\n"
+"\n"
+"BBC iPlayer is only available in the United Kingdom: from any other country, the site blocks the download, and no DownAccess setting can change that. If you are in the United Kingdom, check that the programme still plays in your browser: it may have been removed."
+
+#: app/core/downloader.py:832
+msgid ""
+"Le site n'a envoyé aucune donnée pour cette vidéo.\n"
+"\n"
+"Cela arrive surtout avec un direct qui vient de se terminer : le site met parfois plusieurs heures à préparer la rediffusion. Réessayez plus tard avec la touche F2."
+msgstr ""
+"The site sent no data for this video.\n"
+"\n"
+"This mostly happens with a live stream that has just ended: the site can take several hours to prepare the replay. Try again later with the F2 key."

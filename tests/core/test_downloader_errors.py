@@ -726,3 +726,23 @@ def test_controle_anti_robot_a_son_propre_type():
         downloader._raise_download_error(brut, Exception(), "")
     # Surtout pas une demande de connexion (rapport de Brad, 0.2.3).
     assert not isinstance(err.value, downloader.LoginRequiredError)
+
+
+# --- Messages bruts restes en anglais (mails du 14 et du 17/11/2026) ---------
+
+def test_direct_tout_juste_termine_message_clair():
+    """« The downloaded file is empty » sur un direct YouTube qui vient de
+    finir : dire de reessayer plus tard (rapport de Seb, 0.2.9)."""
+    from app.core.downloader import _humanize_error
+    msg = _humanize_error("ERROR: The downloaded file is empty")
+    assert "downloaded file" not in msg
+    assert "direct" in msg and "F2" in msg
+
+
+def test_bbc_iplayer_indisponible_message_clair():
+    """« selectionunavailable » ne dit rien a personne (rapport de Dermot)."""
+    from app.core.downloader import _humanize_error
+    msg = _humanize_error(
+        "ERROR: [bbc.co.uk] m00343c2: bbc.co.uk returned error: selectionunavailable")
+    assert "selectionunavailable" not in msg
+    assert "Royaume-Uni" in msg

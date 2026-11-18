@@ -475,6 +475,17 @@ def is_geo_blocked_error(msg: str) -> bool:
     return any(p in low for p in _GEO_BLOCKED_PATTERNS)
 
 
+def is_empty_file_error(msg: str) -> bool:
+    """Vrai si le site n'a envoye aucune donnee (fichier telecharge vide)."""
+    return "downloaded file is empty" in (msg or "").lower()
+
+
+def is_bbc_unavailable_error(msg: str) -> bool:
+    """Vrai si la BBC refuse de servir le programme (pays ou retrait)."""
+    low = (msg or "").lower()
+    return "bbc" in low and "selectionunavailable" in low
+
+
 def geo_blocked_message(msg: str) -> str:
     """Message clair pour une video reservee a certains pays.
 
@@ -811,6 +822,33 @@ def _humanize_error(msg: str, dest: str = "") -> str:
     # messages coexistent dans la meme erreur, et celui-ci en dit bien plus.
     if is_geo_blocked_error(low):
         return geo_blocked_message(msg)
+
+    # Fichier vide. Le site a accepte la demande puis n'a rien envoye : presque
+    # toujours un direct YouTube tout juste termine, dont la rediffusion n'est
+    # pas encore prete (« Post-Live Manifestless », fragments en erreur 500).
+    # Reessayer tout de suite ne donne rien ; quelques heures plus tard, si
+    # (rapport de Seb, 0.2.9).
+    if is_empty_file_error(low):
+        return _(
+            "Le site n'a envoyé aucune donnée pour cette vidéo.\n\n"
+            "Cela arrive surtout avec un direct qui vient de se terminer : "
+            "le site met parfois plusieurs heures à préparer la rediffusion. "
+            "Réessayez plus tard avec la touche F2."
+        )
+
+    # BBC iPlayer : « selectionunavailable » est la reponse du site quand il
+    # refuse de servir le programme — hors du Royaume-Uni le plus souvent,
+    # sinon programme retire. Le texte brut ne dit rien a personne (rapport de
+    # Dermot, 0.2.9).
+    if is_bbc_unavailable_error(low):
+        return _(
+            "La BBC refuse de fournir ce programme.\n\n"
+            "BBC iPlayer est réservé au Royaume-Uni : depuis un autre pays, le "
+            "site bloque le téléchargement, et aucun réglage de DownAccess ne "
+            "peut l'ouvrir. Si vous êtes au Royaume-Uni, vérifiez que le "
+            "programme se lit encore dans votre navigateur : il a peut-être "
+            "été retiré."
+        )
 
     # Video inaccessible. En dernier recours seulement : le test doit rester
     # APRES celui de la connexion requise, car « Video unavailable. This video
