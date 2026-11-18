@@ -1,0 +1,58 @@
+# Veille de nuit : les tests contre le yt-dlp du jour.
+#
+# Chez les utilisateurs, yt-dlp se met a jour tout seul chaque jour, sans
+# attendre une version de DownAccess. Les autres workflows, eux, ne testent
+# que la version enregistree dans uv.lock, et seulement quand du code est
+# pousse. Entre deux pushes, personne ne verifiait que DownAccess marche
+# encore avec le yt-dlp que les gens ont reellement — or nos extracteurs
+# maison (ici.fr) se branchent sur une partie interne de yt-dlp.
+#
+# Chaque nuit : installer le yt-dlp le plus recent, lancer la suite, puis les
+# tests qui sortent sur Internet (contrats des sites). Un echec = un mail de
+# GitHub. Rien n'est publie ni modifie dans le depot.
+#
+# Lancement a la main : onglet Actions > « Veille yt-dlp » > Run workflow.
+# GitHub suspend les runs programmes apres 60 jours sans commit (il previent
+# par mail ; un clic les reactive).
+
+name: Veille yt-dlp
+
+on:
+  schedule:
+    - cron: "17 4 * * *"   # 04:17 UTC, hors des heures pleines de GitHub
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veille
+  cancel-in-progress: true
+
+jobs:
+  veille:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
+
+      - name: yt-dlp du jour
+        run: |
+          uv lock --upgrade-package yt-dlp
+          uv sync
+          uv run python -c "import yt_dlp.version as v; print('yt-dlp', v.__version__)"
+
+      - name: Moteur JavaScript (YouTube)
+        run: uv run python scripts/update_jsruntime.py
+
+      - name: Suite de tests
+        run: uv run pytest -q
+
+      # Meme si la suite echoue : les deux resultats sont utiles.
+      - name: Contrats des sites (tests qui sortent sur Internet)
+        if: always()
+        run: uv run pytest -m network -q -rs

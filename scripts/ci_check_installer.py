@@ -21,6 +21,10 @@ Scenarios, chacun avec son propre %APPDATA% vierge :
   3. Mise a jour interrompue (le bug de la 0.2.8) : copie AppData abimee
      (compat/__init__.py absent). L'app doit demarrer quand meme, sur la
      copie embarquee, puis reparer la copie AppData toute seule.
+
+Avant cela, le ffmpeg installe est essaye pour de bon (fusion image + son,
+conversion en MP3) : le runner telecharge le ffmpeg le plus recent a chaque
+build, et « le fichier existe » ne dit pas qu'il fonctionne.
 """
 import os
 import shutil
@@ -142,6 +146,35 @@ def expect_location(line: str, appdata: Path, want_appdata: bool) -> None:
         raise CheckFailed(f"yt-dlp attendu depuis {where}, journal : {line}")
 
 
+def check_ffmpeg(ffmpeg: Path, work: Path) -> None:
+    """Fait faire au ffmpeg embarque ce que DownAccess lui demande : fusionner
+    une image et un son telecharges a part, et convertir un son en MP3."""
+    if not ffmpeg.exists():
+        raise CheckFailed(f"ffmpeg absent de l'installation : {ffmpeg}")
+    work.mkdir(parents=True, exist_ok=True)
+    video, audio = work / "image.mp4", work / "son.m4a"
+    fusion, mp3 = work / "fusion.mp4", work / "son.mp3"
+    commandes = [
+        ("fabrication d'une image", video,
+         ["-f", "lavfi", "-i", "testsrc=duration=1:size=160x120:rate=10",
+          "-c:v", "libx264", "-pix_fmt", "yuv420p"]),
+        ("fabrication d'un son", audio,
+         ["-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-c:a", "aac"]),
+        ("fusion image + son", fusion,
+         ["-i", str(video), "-i", str(audio), "-map", "0:v", "-map", "1:a",
+          "-c", "copy"]),
+        ("conversion en MP3", mp3,
+         ["-i", str(audio), "-c:a", "libmp3lame"]),
+    ]
+    for quoi, sortie, args in commandes:
+        r = subprocess.run(
+            [str(ffmpeg), "-hide_banner", "-loglevel", "error", "-y", *args, str(sortie)],
+            capture_output=True, text=True, errors="replace", timeout=120)
+        if r.returncode != 0 or not sortie.exists() or sortie.stat().st_size == 0:
+            print(r.stderr)
+            raise CheckFailed(f"ffmpeg : {quoi} en echec (code {r.returncode})")
+
+
 def run_scenario(name: str, exe: Path, appdata: Path, body) -> None:
     step(name)
     proc = launch(exe, appdata)
@@ -185,6 +218,10 @@ def main() -> int:
     bundled = (install_dir / "_internal" / "ytdlp_bundled.txt").read_text(
         encoding="utf-8").strip()
     ok(f"yt-dlp embarque : {bundled}")
+
+    step("ffmpeg embarque...")
+    check_ffmpeg(install_dir / "_internal" / "ffmpeg.exe", work / "ffmpeg")
+    ok("ffmpeg fusionne et convertit")
 
     first = work / "appdata-1"
     first.mkdir()

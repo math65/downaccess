@@ -172,6 +172,35 @@ class TestContratM6:
         assert video_is_drm_locked(info), "M6 semble telechargeable : revoir le garde-fou"
 
 
+class TestContratIciFr:
+    """ici.fr n'est pas connu de yt-dlp : tout repose sur nos extracteurs
+    (`app/core/extra_extractors.py`), donc sur la forme de la page et de son
+    API, et sur le branchement dans yt-dlp. Aucun des deux ne previent."""
+
+    PROGRAMME = "https://www.ici.fr/emissions/ici-c-est-vous-et-ici-nord"
+
+    def _analyser(self, url, **opts):
+        from app.core import downloader
+        with downloader._open_ydl({"quiet": True, "no_warnings": True,
+                                   "skip_download": True, **opts}) as ydl:
+            return repond(lambda: ydl.extract_info(url, download=False), "ici.fr")
+
+    def test_un_programme_donne_toutes_ses_emissions(self):
+        info = self._analyser(self.PROGRAMME, extract_flat=True)
+        assert info["extractor_key"] == "IciFrProgramme"
+        entrees = list(info["entries"])
+        # La page seule n'en montre qu'une trentaine : au-dela, c'est l'API.
+        assert len(entrees) > 40, "la liste complete ne vient plus de l'API"
+        assert all(e["title"] and e["url"] for e in entrees)
+
+    def test_une_emission_donne_son_fichier_audio(self):
+        entrees = list(self._analyser(self.PROGRAMME, extract_flat=True)["entries"])
+        avec_page = next(e["url"] for e in entrees if "#__youtubedl_smuggle" not in e["url"])
+        info = self._analyser(avec_page)
+        assert info["extractor_key"] == "IciFr"
+        assert info["url"].startswith("https://") and info["title"]
+
+
 class TestContratRechercheAbonnement:
     """La recherche d'une source a suivre depend de trois services tiers.
 

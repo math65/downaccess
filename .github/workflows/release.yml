@@ -6,7 +6,14 @@
 # telecharge en bas de la page du run (Artifacts), mais rien n'est publie.
 #
 # Rien n'est publie si un test echoue ou si l'installeur ne demarre pas
-# (scripts/ci_check_installer.py, qui rejoue notamment le bug de la 0.2.8).
+# (scripts/ci_check_installer.py, qui rejoue notamment le bug de la 0.2.8 et
+# essaie le ffmpeg embarque). Une publication mal preparee — version deja
+# publiee, notes de version perimees — est refusee des la premiere minute.
+#
+# Actions et Inno Setup sont figes sur une version precise : ce workflow a le
+# droit d'ecrire dans le depot, il ne doit pas executer du code qui change
+# sans qu'on le sache. Pour les mettre a jour, changer l'empreinte ET le
+# commentaire de version, puis lancer un essai a blanc.
 #
 # Les pushes sur les branches claude/** qui touchent l'empaquetage lancent un
 # essai a blanc automatique (version = suivante de app/version.py).
@@ -57,32 +64,30 @@ jobs:
       - name: Garde-fou (publication depuis master uniquement)
         if: env.PUBLIER == 'true' && github.ref != 'refs/heads/master'
         shell: bash
+        env:
+          BRANCHE: ${{ github.ref_name }}
         run: |
-          echo "::error::Une publication se lance depuis la branche master (ici : ${{ github.ref_name }})."
+          echo "::error::Une publication se lance depuis la branche master (ici : $BRANCHE)."
           exit 1
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0   # tags : repli des notes de version sur git log
 
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
 
       - name: Dependances (uv.lock)
         run: uv sync --frozen
 
-      - name: Inno Setup
-        run: choco install innosetup -y --no-progress
-
-      - name: ffmpeg et moteur JavaScript
-        run: |
-          uv run python scripts/update_ffmpeg.py
-          uv run python scripts/update_jsruntime.py
-
+      # La saisie passe par une variable : collee dans le script, elle serait
+      # executee avant d'etre controlee.
       - name: Version
         shell: bash
+        env:
+          SAISIE: ${{ inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            v="${{ inputs.version }}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            v="$SAISIE"
           else
             v=$(uv run python -c "import re;v=re.search(r'\"(.+)\"',open('app/version.py').read())[1].split('.');v[-1]=str(int(v[-1])+1);print('.'.join(v))")
           fi
@@ -93,15 +98,27 @@ jobs:
           echo "VERSION=$v" >> "$GITHUB_ENV"
           echo "Version : $v — publication : $PUBLIER"
 
+      - name: Controle prealable (version libre, notes a jour)
+        if: env.PUBLIER == 'true'
+        run: uv run python scripts/release.py $env:VERSION --check
+
+      - name: Inno Setup
+        run: choco install innosetup --version=6.7.1 --allow-downgrade -y --no-progress
+
+      - name: ffmpeg et moteur JavaScript
+        run: |
+          uv run python scripts/update_ffmpeg.py
+          uv run python scripts/update_jsruntime.py
+
       - name: Build (tests, PyInstaller, installeur)
-        run: uv run python scripts/release.py ${{ env.VERSION }} --build-only
+        run: uv run python scripts/release.py $env:VERSION --build-only
 
       - name: Verification de l'installeur
         run: uv run python scripts/ci_check_installer.py installer_output/DownAccess-Setup.exe
 
       # Essai a blanc seulement : une vraie publication met deja l'installeur
       # dans la release, inutile d'en garder une seconde copie.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: env.PUBLIER != 'true'
         with:
           name: DownAccess-Setup-${{ env.VERSION }}
@@ -117,4 +134,4 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          uv run python scripts/release.py ${{ env.VERSION }} --publish-only
+          uv run python scripts/release.py $env:VERSION --publish-only

@@ -5,6 +5,7 @@ Usage :
     python scripts/release.py 0.1.13                 # tout, d'une traite (PC)
     python scripts/release.py 0.1.13 --build-only    # etapes 1-4 (rien n'est publie)
     python scripts/release.py 0.1.13 --publish-only  # etapes 5-6 (installeur deja construit)
+    python scripts/release.py 0.1.13 --check         # controle prealable seul (rien n'est modifie)
 
 Le runner GitHub (.github/workflows/release.yml) enchaine --build-only, la
 verification de l'installeur (scripts/ci_check_installer.py), puis
@@ -159,6 +160,45 @@ def _file_sha256(path: Path) -> str:
     return h.hexdigest().lower()
 
 
+def _tag_exists(tag: str) -> bool:
+    """Vrai si le tag existe deja sur GitHub (ou, hors ligne, en local)."""
+    r = subprocess.run(["git", "ls-remote", "--tags", "origin", f"refs/tags/{tag}"],
+                       cwd=ROOT, capture_output=True, text=True)
+    if r.returncode == 0:
+        return bool(r.stdout.strip())
+    r = subprocess.run(["git", "rev-parse", "-q", "--verify", f"refs/tags/{tag}"],
+                       cwd=ROOT, capture_output=True, text=True)
+    return r.returncode == 0
+
+
+def precheck(version: str) -> int:
+    """Refuse une publication mal preparee AVANT de construire quoi que ce soit.
+
+    Sans ce controle, on l'apprenait apres le build : notes perimees refusees
+    au bout de quatre minutes, ou pire, version deja publiee — le commit de
+    version etait pousse, puis `gh release create` echouait.
+    """
+    step(f"Controle prealable de la version {version}...")
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        print(f"  ERR Version invalide : '{version}' (attendu : 0.2.9)")
+        return 1
+    if _tag_exists(f"v{version}"):
+        print(f"  ERR La version {version} est deja publiee (tag v{version}).")
+        return 1
+    # Notes oubliees = notes de la version precedente publiees telles quelles.
+    # Sur le runner (lance depuis un telephone), personne ne relit la sortie :
+    # on refuse plutot que de publier des notes perimees.
+    for rn in (ROOT / "RELEASE_NOTES.md", ROOT / "RELEASE_NOTES.en.md"):
+        if rn.exists():
+            first = rn.read_text(encoding="utf-8").strip().splitlines()[:1]
+            if not first or f"DownAccess {version}" not in first[0]:
+                print(f"  ERR {rn.name} ne commence pas par « ## DownAccess {version} » :"
+                      " notes de version pas a jour ?")
+                return 1
+    ok("Version libre, notes de version a jour")
+    return 0
+
+
 def build(version: str) -> int:
     """Bump, build PyInstaller, installeur et SHA-256. Ne publie rien."""
     # 1. Bumper version AVANT le build (l'exe doit contenir la nouvelle version)
@@ -211,16 +251,8 @@ def publish(version: str) -> int:
         print("  ERR Installeur ou .sha256 absent : lancer d'abord --build-only")
         return 1
 
-    # Notes oubliees = notes de la version precedente publiees telles quelles.
-    # Sur le runner (lance depuis un telephone), personne ne relit la sortie :
-    # on refuse plutot que de publier des notes perimees.
-    for rn in (ROOT / "RELEASE_NOTES.md", ROOT / "RELEASE_NOTES.en.md"):
-        if rn.exists():
-            first = rn.read_text(encoding="utf-8").strip().splitlines()[:1]
-            if not first or f"DownAccess {version}" not in first[0]:
-                print(f"  ERR {rn.name} ne commence pas par « ## DownAccess {version} » :"
-                      " notes de version pas a jour ?")
-                return 1
+    if precheck(version):
+        return 1
 
     # Les notes AVANT le commit de version : en repli sur git log, elles
     # listent les commits depuis le dernier tag.
@@ -261,13 +293,18 @@ def publish(version: str) -> int:
 def main() -> int:
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
-    unknown = flags - {"--build-only", "--publish-only"}
-    if len(args) != 1 or unknown or flags == {"--build-only", "--publish-only"}:
-        print("Usage : python scripts/release.py <version> [--build-only | --publish-only]")
+    unknown = flags - {"--build-only", "--publish-only", "--check"}
+    if len(args) != 1 or unknown or len(flags) > 1:
+        print("Usage : python scripts/release.py <version> [--build-only | --publish-only | --check]")
         print("  Ex  : python scripts/release.py 0.1.13")
         return 1
 
     version = args[0].lstrip("v")
+    if "--check" in flags:
+        return precheck(version)
+    # Publication complete depuis le PC : controler avant de construire.
+    if not flags and precheck(version):
+        return 1
     if "--publish-only" not in flags:
         if build(version):
             return 1
