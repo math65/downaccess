@@ -482,7 +482,7 @@ msgid ""
 "Installez Google Chrome, Microsoft Edge ou Brave."
 msgstr ""
 
-#: app/core/browser.py:118
+#: app/core/browser.py:121
 msgid ""
 "Aucun navigateur compatible trouvé.\n"
 "Installez Google Chrome, Microsoft Edge ou Brave."
@@ -1419,7 +1419,7 @@ msgid "Erreur de vérification"
 msgstr ""
 
 #: app/core/error_reporter.py:170 app/core/error_reporter.py:213
-#: app/core/updater.py:152
+#: app/core/updater.py:207
 msgid "Erreur inconnue."
 msgstr ""
 
@@ -1870,7 +1870,7 @@ msgid ""
 "Vérifiez votre connexion et réessayez."
 msgstr ""
 
-#: app/core/updater.py:117
+#: app/core/updater.py:168
 msgid "Impossible de vérifier la version (connexion indisponible)."
 msgstr ""
 
@@ -3997,7 +3997,7 @@ msgstr ""
 msgid "Vérifier maintenant"
 msgstr ""
 
-#: app/core/updater.py:187
+#: app/core/updater.py:239
 msgid "Wheel yt-dlp introuvable sur PyPI."
 msgstr ""
 
