@@ -105,9 +105,14 @@ class PlaylistDialog(wx.Dialog):
         self.btn_all    = wx.Button(panel, label=_("Tout sélectionner"))
         self.btn_none   = wx.Button(panel, label=_("Tout désélectionner"))
         self.btn_invert = wx.Button(panel, label=_("Inverser la sélection"))
+        # Apercu : ecouter une entree avant de decider. Indispensable quand les
+        # titres ne disent rien — les emissions de ici.fr sans titre propre ne
+        # portent que le nom du programme et une date.
+        self.btn_preview = wx.Button(panel, label=_("Aperçu"), name=_("Aperçu"))
         row_sel.Add(self.btn_all,    0, wx.RIGHT, 6)
         row_sel.Add(self.btn_none,   0, wx.RIGHT, 6)
-        row_sel.Add(self.btn_invert, 0)
+        row_sel.Add(self.btn_invert, 0, wx.RIGHT, 6)
+        row_sel.Add(self.btn_preview, 0)
 
         # Numérotation des fichiers
         self.radio_number = wx.RadioBox(
@@ -170,7 +175,8 @@ class PlaylistDialog(wx.Dialog):
         self.btn_all.MoveAfterInTabOrder(self.lst)
         self.btn_none.MoveAfterInTabOrder(self.btn_all)
         self.btn_invert.MoveAfterInTabOrder(self.btn_none)
-        self.radio_number.MoveAfterInTabOrder(self.btn_invert)
+        self.btn_preview.MoveAfterInTabOrder(self.btn_invert)
+        self.radio_number.MoveAfterInTabOrder(self.btn_preview)
         self.chk_always_all.MoveAfterInTabOrder(self.radio_number)
         if self.btn_back is not None:
             self.btn_back.MoveAfterInTabOrder(self.chk_always_all)
@@ -185,6 +191,7 @@ class PlaylistDialog(wx.Dialog):
         self.btn_all.Bind(wx.EVT_BUTTON,             self._on_all)
         self.btn_none.Bind(wx.EVT_BUTTON,            self._on_none)
         self.btn_invert.Bind(wx.EVT_BUTTON,          self._on_invert)
+        self.btn_preview.Bind(wx.EVT_BUTTON,         self._on_preview)
         self.btn_ok.Bind(wx.EVT_BUTTON,              self._on_ok)
         if self.btn_back is not None:
             self.btn_back.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(RESULT_BACK))
@@ -194,6 +201,46 @@ class PlaylistDialog(wx.Dialog):
     # ------------------------------------------------------------------
     # Événements
     # ------------------------------------------------------------------
+
+    def preview_url(self, index: int) -> str:
+        """Adresse a donner au lecteur d'apercu pour une entree, ou chaine vide.
+
+        Une playlist YouTube ne donne que l'identifiant de chaque video ; les
+        autres sites donnent une adresse complete, ou rien d'exploitable.
+        """
+        if not 0 <= index < len(self._entries):
+            return ""
+        entry = self._entries[index] or {}
+        url = entry.get("webpage_url") or entry.get("url") or ""
+        if url.startswith(("http://", "https://")):
+            return url
+        ie_key = (entry.get("ie_key") or entry.get("extractor_key") or "").lower()
+        video_id = entry.get("id") or url
+        if video_id and (not ie_key or "youtube" in ie_key) and ":" not in video_id:
+            return f"https://www.youtube.com/watch?v={video_id}"
+        return ""
+
+    def _on_preview(self, _event) -> None:
+        index = self.lst.GetFirstSelected()
+        if index == -1:
+            index = self.lst.GetFocusedItem()
+        url = self.preview_url(index)
+        if not url:
+            wx.MessageBox(
+                _("L'aperçu n'est pas disponible pour cet élément."),
+                _("Aperçu indisponible"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+            self.lst.SetFocus()
+            return
+        # Import tardif : le lecteur charge wx.media, inutile tant qu'on
+        # n'ecoute rien.
+        from app.ui.player_dialog import PlayerDialog
+        dlg = PlayerDialog(self, web_url=url, title=self.lst.GetItemText(index))
+        dlg.ShowModal()
+        dlg.Destroy()
+        self.lst.SetFocus()
 
     def _on_all(self, _event) -> None:
         for i in range(self.lst.GetItemCount()):

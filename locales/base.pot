@@ -388,7 +388,7 @@ msgstr ""
 #: app/ui/guided_login_dialog.py:87 app/ui/guided_login_dialog.py:88
 #: app/ui/login_required_dialog.py:59 app/ui/login_required_dialog.py:60
 #: app/ui/main_window.py:1698 app/ui/main_window.py:2011
-#: app/ui/main_window.py:2409 app/ui/playlist_dialog.py:154
+#: app/ui/main_window.py:2409 app/ui/playlist_dialog.py:159
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:171
 #: app/ui/subscription_search_dialog.py:73 app/ui/subscriptions_dialog.py:217
@@ -416,15 +416,15 @@ msgstr ""
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
-#: app/ui/search_dialog.py:342
+#: app/ui/playlist_dialog.py:111 app/ui/search_dialog.py:342
 msgid "Aperçu"
 msgstr ""
 
-#: app/ui/search_dialog.py:592
+#: app/ui/playlist_dialog.py:231 app/ui/search_dialog.py:592
 msgid "Aperçu indisponible"
 msgstr ""
 
-#: app/ui/player_dialog.py:215
+#: app/ui/player_dialog.py:217
 msgid "Aperçu terminé."
 msgstr ""
 
@@ -1407,7 +1407,7 @@ msgstr ""
 msgid "Erreur HTTP {code}."
 msgstr ""
 
-#: app/ui/player_dialog.py:179
+#: app/ui/player_dialog.py:181
 msgid "Erreur d'aperçu"
 msgstr ""
 
@@ -1764,7 +1764,7 @@ msgstr ""
 msgid "Importer une liste d'URLs"
 msgstr ""
 
-#: app/ui/player_dialog.py:163
+#: app/ui/player_dialog.py:165
 msgid "Impossible d'extraire l'URL de streaming."
 msgstr ""
 
@@ -1976,6 +1976,10 @@ msgstr ""
 msgid "L'adresse email semble invalide."
 msgstr ""
 
+#: app/ui/playlist_dialog.py:230
+msgid "L'aperçu n'est pas disponible pour cet élément."
+msgstr ""
+
 #: app/ui/search_dialog.py:591
 msgid ""
 "L'aperçu n'est pas disponible pour {label}.\n"
@@ -2178,11 +2182,11 @@ msgstr ""
 msgid "Le guide d'utilisation est introuvable."
 msgstr ""
 
-#: app/ui/player_dialog.py:174
+#: app/ui/player_dialog.py:176
 msgid "Le lecteur média n'a pas pu charger ce flux."
 msgstr ""
 
-#: app/ui/player_dialog.py:205
+#: app/ui/player_dialog.py:207
 msgid "Le lecteur média n'a pas pu démarrer la lecture."
 msgstr ""
 
@@ -2283,8 +2287,8 @@ msgstr ""
 msgid "Lecteur audio"
 msgstr ""
 
-#: app/ui/player_dialog.py:117 app/ui/player_dialog.py:211
-#: app/ui/player_dialog.py:228
+#: app/ui/player_dialog.py:117 app/ui/player_dialog.py:213
+#: app/ui/player_dialog.py:230
 msgid "Lecture"
 msgstr ""
 
@@ -2292,15 +2296,15 @@ msgstr ""
 msgid "Lecture / Pause"
 msgstr ""
 
-#: app/ui/player_dialog.py:196
+#: app/ui/player_dialog.py:198
 msgid "Lecture en cours."
 msgstr ""
 
-#: app/ui/player_dialog.py:203 app/ui/player_dialog.py:236
+#: app/ui/player_dialog.py:205 app/ui/player_dialog.py:238
 msgid "Lecture."
 msgstr ""
 
-#: app/ui/playlist_dialog.py:136
+#: app/ui/playlist_dialog.py:141
 msgid ""
 "Les prochaines playlists partiront directement en file, sans passer par "
 "cette fenêtre. Réactivable dans Préférences → Général."
@@ -2472,7 +2476,7 @@ msgstr ""
 msgid "Navigateur à utiliser :"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:119
+#: app/ui/playlist_dialog.py:124
 msgid "Ne pas numéroter"
 msgstr ""
 
@@ -2480,7 +2484,7 @@ msgstr ""
 msgid "Ne plus afficher cet avertissement"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:134 app/ui/playlist_dialog.py:135
+#: app/ui/playlist_dialog.py:139 app/ui/playlist_dialog.py:140
 msgid "Ne plus demander : tout télécharger dans les playlists suivantes"
 msgstr ""
 
@@ -2540,15 +2544,15 @@ msgstr ""
 msgid "Nouveautés de vos abonnements"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:117
+#: app/ui/playlist_dialog.py:122
 msgid "Numéro dans la playlist (position originale)"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:118
+#: app/ui/playlist_dialog.py:123
 msgid "Numéro séquentiel (1, 2, 3...)"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:115 app/ui/playlist_dialog.py:123
+#: app/ui/playlist_dialog.py:120 app/ui/playlist_dialog.py:128
 msgid "Numérotation des fichiers"
 msgstr ""
 
@@ -2722,8 +2726,8 @@ msgstr ""
 msgid "Parcours des résultats"
 msgstr ""
 
-#: app/ui/main_window.py:2010 app/ui/player_dialog.py:200
-#: app/ui/player_dialog.py:234
+#: app/ui/main_window.py:2010 app/ui/player_dialog.py:202
+#: app/ui/player_dialog.py:236
 msgid "Pause"
 msgstr ""
 
@@ -2748,7 +2752,7 @@ msgstr ""
 msgid "Pause levée : les téléchargements reprennent."
 msgstr ""
 
-#: app/ui/player_dialog.py:230
+#: app/ui/player_dialog.py:232
 msgid "Pause."
 msgstr ""
 
@@ -2907,7 +2911,7 @@ msgstr ""
 msgid "Préparation"
 msgstr ""
 
-#: app/ui/player_dialog.py:172
+#: app/ui/player_dialog.py:174
 msgid "Préparation de la lecture…"
 msgstr ""
 
@@ -3092,7 +3096,7 @@ msgstr ""
 msgid "Retour"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:149 app/ui/playlist_dialog.py:150
+#: app/ui/playlist_dialog.py:154 app/ui/playlist_dialog.py:155
 msgid "Retour aux résultats"
 msgstr ""
 
@@ -3394,7 +3398,7 @@ msgstr ""
 msgid "Sélection du format pour {title}. {count} formats disponibles."
 msgstr ""
 
-#: app/ui/playlist_dialog.py:221
+#: app/ui/playlist_dialog.py:268
 msgid "Sélection vide"
 msgstr ""
 
@@ -3682,7 +3686,7 @@ msgstr ""
 msgid "Télécharger la piste choisie"
 msgstr ""
 
-#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:153
+#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:158
 #: app/ui/search_dialog.py:366
 msgid "Télécharger la sélection"
 msgstr ""
@@ -3843,7 +3847,7 @@ msgid ""
 "Exemple : prenom@exemple.com"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:218 app/ui/playlist_dialog.py:220
+#: app/ui/playlist_dialog.py:265 app/ui/playlist_dialog.py:267
 msgid "Veuillez sélectionner au moins une entrée."
 msgstr ""
 
@@ -3896,7 +3900,7 @@ msgstr ""
 msgid "Volume :"
 msgstr ""
 
-#: app/ui/player_dialog.py:250
+#: app/ui/player_dialog.py:252
 msgid "Volume {volume} pour cent."
 msgstr ""
 
@@ -4406,7 +4410,7 @@ msgstr ""
 msgid "{seconds} s"
 msgstr ""
 
-#: app/ui/playlist_dialog.py:237
+#: app/ui/playlist_dialog.py:284
 msgid "{selected} / {total} vidéo(s) sélectionnée(s)"
 msgstr ""
 

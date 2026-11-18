@@ -138,6 +138,15 @@ def test_emission_sans_page_se_telecharge_depuis_son_adresse(programme):
     assert programme == [], "tout etait deja dans l'adresse"
 
 
+def test_l_apercu_audio_trouve_un_flux(page, programme):
+    """Le lecteur d'apercu demande « bestaudio/best » et lit `url` : les deux
+    formes d'emission (avec et sans page) doivent lui en donner une."""
+    sans_page = list(_analyser(PROGRAMME, extract_flat=True)["entries"])[1]["url"]
+    for adresse in (URL, sans_page):
+        info = _analyser(adresse, format="bestaudio/best")
+        assert info["url"].endswith(".mp3")
+
+
 def test_programme_sans_liste_erreur_claire(programme, monkeypatch):
     monkeypatch.setattr(extra_extractors.IciFrProgrammeIE, "_download_webpage",
                         lambda self, url, video_id, *a, **kw: "<h1>Vide</h1>")

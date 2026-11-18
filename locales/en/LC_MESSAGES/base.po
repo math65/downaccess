@@ -46,7 +46,7 @@ msgstr "Action after download:"
 #: app/ui/guided_login_dialog.py:87 app/ui/guided_login_dialog.py:88
 #: app/ui/login_required_dialog.py:59 app/ui/login_required_dialog.py:60
 #: app/ui/main_window.py:1698 app/ui/main_window.py:2011
-#: app/ui/main_window.py:2409 app/ui/playlist_dialog.py:154
+#: app/ui/main_window.py:2409 app/ui/playlist_dialog.py:159
 #: app/ui/playlist_harvest_dialog.py:44 app/ui/report_dialog.py:93
 #: app/ui/report_dialog.py:94 app/ui/settings_dialog.py:171
 #: app/ui/subscription_search_dialog.py:73 app/ui/subscriptions_dialog.py:217
@@ -890,8 +890,8 @@ msgid ""
 "Ouvrir un navigateur pour se connecter à un site et sauvegarder les cookies"
 msgstr "Open a browser to sign into a site and save the cookies"
 
-#: app/ui/main_window.py:2010 app/ui/player_dialog.py:200
-#: app/ui/player_dialog.py:234
+#: app/ui/main_window.py:2010 app/ui/player_dialog.py:202
+#: app/ui/player_dialog.py:236
 msgid "Pause"
 msgstr "Pause"
 
@@ -1411,11 +1411,11 @@ msgstr " and "
 msgid "0 sélectionné(s)"
 msgstr "0 selected"
 
-#: app/ui/search_dialog.py:342
+#: app/ui/playlist_dialog.py:111 app/ui/search_dialog.py:342
 msgid "Aperçu"
 msgstr "Preview"
 
-#: app/ui/search_dialog.py:592
+#: app/ui/playlist_dialog.py:231 app/ui/search_dialog.py:592
 msgid "Aperçu indisponible"
 msgstr "Preview unavailable"
 
@@ -1513,7 +1513,7 @@ msgstr "Select all"
 msgid "Téléchargement volumineux"
 msgstr "Large download"
 
-#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:153
+#: app/ui/new_items_dialog.py:71 app/ui/playlist_dialog.py:158
 #: app/ui/search_dialog.py:366
 msgid "Télécharger la sélection"
 msgstr "Download selection"
@@ -1616,7 +1616,7 @@ msgstr "Email address"
 msgid "Ajouter des URLs"
 msgstr "Add URLs"
 
-#: app/ui/player_dialog.py:215
+#: app/ui/player_dialog.py:217
 msgid "Aperçu terminé."
 msgstr "Preview finished."
 
@@ -1778,7 +1778,7 @@ msgstr "Send a report"
 msgid "Envoyer un rapport d'erreur"
 msgstr "Send an error report"
 
-#: app/ui/player_dialog.py:179
+#: app/ui/player_dialog.py:181
 msgid "Erreur d'aperçu"
 msgstr "Preview error"
 
@@ -1823,7 +1823,7 @@ msgstr "Manual format unavailable"
 msgid "Historique des téléchargements"
 msgstr "Download history"
 
-#: app/ui/player_dialog.py:163
+#: app/ui/player_dialog.py:165
 msgid "Impossible d'extraire l'URL de streaming."
 msgstr "Unable to extract streaming URL."
 
@@ -1873,11 +1873,11 @@ msgstr "The file has been downloaded, but an error occurred:"
 msgid "Le fichier n'existe plus à cet emplacement."
 msgstr "The file no longer exists at this location."
 
-#: app/ui/player_dialog.py:174
+#: app/ui/player_dialog.py:176
 msgid "Le lecteur média n'a pas pu charger ce flux."
 msgstr "The media player could not load this stream."
 
-#: app/ui/player_dialog.py:205
+#: app/ui/player_dialog.py:207
 msgid "Le lecteur média n'a pas pu démarrer la lecture."
 msgstr "The media player could not start playback."
 
@@ -1895,8 +1895,8 @@ msgstr ""
 msgid "Lecteur audio"
 msgstr "Audio player"
 
-#: app/ui/player_dialog.py:117 app/ui/player_dialog.py:211
-#: app/ui/player_dialog.py:228
+#: app/ui/player_dialog.py:117 app/ui/player_dialog.py:213
+#: app/ui/player_dialog.py:230
 msgid "Lecture"
 msgstr "Play"
 
@@ -1904,11 +1904,11 @@ msgstr "Play"
 msgid "Lecture / Pause"
 msgstr "Play / Pause"
 
-#: app/ui/player_dialog.py:196
+#: app/ui/player_dialog.py:198
 msgid "Lecture en cours."
 msgstr "Playing."
 
-#: app/ui/player_dialog.py:203 app/ui/player_dialog.py:236
+#: app/ui/player_dialog.py:205 app/ui/player_dialog.py:238
 msgid "Lecture."
 msgstr "Play."
 
@@ -1936,7 +1936,7 @@ msgstr "Update now"
 msgid "Mise à jour disponible — DownAccess {version}"
 msgstr "Update available — DownAccess {version}"
 
-#: app/ui/playlist_dialog.py:119
+#: app/ui/playlist_dialog.py:124
 msgid "Ne pas numéroter"
 msgstr "Do not number"
 
@@ -1956,15 +1956,15 @@ msgstr "Release notes"
 msgid "Notes de version :"
 msgstr "Release notes:"
 
-#: app/ui/playlist_dialog.py:117
+#: app/ui/playlist_dialog.py:122
 msgid "Numéro dans la playlist (position originale)"
 msgstr "Number in playlist (original position)"
 
-#: app/ui/playlist_dialog.py:118
+#: app/ui/playlist_dialog.py:123
 msgid "Numéro séquentiel (1, 2, 3...)"
 msgstr "Sequential number (1, 2, 3...)"
 
-#: app/ui/playlist_dialog.py:115 app/ui/playlist_dialog.py:123
+#: app/ui/playlist_dialog.py:120 app/ui/playlist_dialog.py:128
 msgid "Numérotation des fichiers"
 msgstr "File numbering"
 
@@ -1988,7 +1988,7 @@ msgstr "Open &folder"
 msgid "Ouvrir le &fichier"
 msgstr "Open &file"
 
-#: app/ui/player_dialog.py:230
+#: app/ui/player_dialog.py:232
 msgid "Pause."
 msgstr "Pause."
 
@@ -2024,7 +2024,7 @@ msgstr ""
 msgid "Progression"
 msgstr "Progress"
 
-#: app/ui/player_dialog.py:172
+#: app/ui/player_dialog.py:174
 msgid "Préparation de la lecture…"
 msgstr "Preparing playback…"
 
@@ -2102,7 +2102,7 @@ msgstr ""
 msgid "Sélection du format pour {title}. {count} formats disponibles."
 msgstr "Format selection for {title}. {count} formats available."
 
-#: app/ui/playlist_dialog.py:221
+#: app/ui/playlist_dialog.py:268
 msgid "Sélection vide"
 msgstr "Empty selection"
 
@@ -2174,7 +2174,7 @@ msgstr "Please enter your email address."
 msgid "Veuillez saisir au moins une URL."
 msgstr "Please enter at least one URL."
 
-#: app/ui/playlist_dialog.py:218 app/ui/playlist_dialog.py:220
+#: app/ui/playlist_dialog.py:265 app/ui/playlist_dialog.py:267
 msgid "Veuillez sélectionner au moins une entrée."
 msgstr "Please select at least one entry."
 
@@ -2194,7 +2194,7 @@ msgstr "Volume"
 msgid "Volume :"
 msgstr "Volume:"
 
-#: app/ui/player_dialog.py:250
+#: app/ui/player_dialog.py:252
 msgid "Volume {volume} pour cent."
 msgstr "Volume {volume} percent."
 
@@ -2230,7 +2230,7 @@ msgstr "{n:.1f} GB"
 msgid "{n} o"
 msgstr "{n} B"
 
-#: app/ui/playlist_dialog.py:237
+#: app/ui/playlist_dialog.py:284
 msgid "{selected} / {total} vidéo(s) sélectionnée(s)"
 msgstr "{selected} / {total} videos selected"
 
@@ -3265,7 +3265,7 @@ msgstr "Browsing results"
 msgid "Retour"
 msgstr "Back"
 
-#: app/ui/playlist_dialog.py:149 app/ui/playlist_dialog.py:150
+#: app/ui/playlist_dialog.py:154 app/ui/playlist_dialog.py:155
 msgid "Retour aux résultats"
 msgstr "Back to results"
 
@@ -4412,7 +4412,7 @@ msgstr ""
 "Saves ticking every row when you often download whole lists. You stay in "
 "control: untick what you do not want before confirming."
 
-#: app/ui/playlist_dialog.py:136
+#: app/ui/playlist_dialog.py:141
 msgid ""
 "Les prochaines playlists partiront directement en file, sans passer par "
 "cette fenêtre. Réactivable dans Préférences → Général."
@@ -4425,7 +4425,7 @@ msgid ""
 "Les prochaines playlists seront téléchargées entièrement, sans confirmation."
 msgstr "The next playlists will be downloaded in full, without confirmation."
 
-#: app/ui/playlist_dialog.py:134 app/ui/playlist_dialog.py:135
+#: app/ui/playlist_dialog.py:139 app/ui/playlist_dialog.py:140
 msgid "Ne plus demander : tout télécharger dans les playlists suivantes"
 msgstr "Stop asking: download everything in the next playlists"
 
@@ -4874,3 +4874,7 @@ msgstr "{downloads} — {cause}"
 #: app/core/error_summary.py:79
 msgid "… et {count} autres"
 msgstr "… and {count} more"
+
+#: app/ui/playlist_dialog.py:230
+msgid "L'aperçu n'est pas disponible pour cet élément."
+msgstr "Preview is not available for this item."

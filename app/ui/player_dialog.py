@@ -15,8 +15,8 @@ Raccourcis clavier :
 import threading
 import wx
 import wx.media
-import yt_dlp
 
+from app.core import downloader
 from app.core import speech
 
 
@@ -156,7 +156,9 @@ class PlayerDialog(wx.Dialog):
                 "format": "bestaudio/best",
                 "skip_download": True,
             }
-            with yt_dlp.YoutubeDL(opts) as ydl:
+            # `_open_ydl` et non `yt_dlp.YoutubeDL` : sans lui, l'apercu
+            # ignorerait les sites que seuls nos extracteurs connaissent (ici.fr).
+            with downloader._open_ydl(opts) as ydl:
                 info = ydl.extract_info(self._web_url, download=False)
             stream_url = info.get("url")
             if not stream_url:
