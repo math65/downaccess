@@ -12,6 +12,7 @@ from urllib.parse import parse_qs, urlparse
 
 import yt_dlp
 
+from app.core import extra_extractors
 from app.core.ffmpeg_utils import get_ffmpeg_path
 from app.core.i18n import _translate as _
 from app.core.jsruntime_utils import get_js_runtimes_opt
@@ -751,6 +752,17 @@ def _cancel_filter(stop_event: threading.Event | None):
     return filtre
 
 
+def _open_ydl(opts: dict):
+    """Un `YoutubeDL` qui connait aussi nos extracteurs maison (ici.fr).
+
+    Point de passage de toute analyse et de tout telechargement : un
+    `yt_dlp.YoutubeDL(...)` direct ignorerait ces sites.
+    """
+    ydl = yt_dlp.YoutubeDL(opts)
+    extra_extractors.register(ydl)
+    return ydl
+
+
 def _humanize_error(msg: str, dest: str = "") -> str:
     """Traduit certaines erreurs yt-dlp cryptiques en messages clairs et
     actionnables pour le grand public.
@@ -1140,7 +1152,7 @@ class Downloader:
         Isole du reste pour que `fetch_info` puisse la rejouer telle quelle
         apres une coupure reseau.
         """
-        with yt_dlp.YoutubeDL(flat_opts) as ydl:
+        with _open_ydl(flat_opts) as ydl:
             info = ydl.extract_info(url, download=False)
         if not info:
             return None
@@ -1164,7 +1176,7 @@ class Downloader:
         # Vidéo unique — deuxième passe pour avoir les formats détaillés
         full_opts = dict(flat_opts)
         full_opts["extract_flat"] = False
-        with yt_dlp.YoutubeDL(full_opts) as ydl:
+        with _open_ydl(full_opts) as ydl:
             info = ydl.extract_info(url, download=False)
         if not info:
             return None
@@ -1452,7 +1464,7 @@ class Downloader:
                      and not opts.get("skip_download"))
 
         def _run_download(active_opts: dict) -> None:
-            with yt_dlp.YoutubeDL(active_opts) as ydl:
+            with _open_ydl(active_opts) as ydl:
                 if burn_subs:
                     ydl.add_post_processor(
                         _BurnSubtitlesPP(
@@ -1532,7 +1544,7 @@ class Downloader:
                             if pp.get("key") != "FFmpegSubtitlesConvertor"
                         ]
                     try:
-                        with yt_dlp.YoutubeDL(opts_retry) as ydl:
+                        with _open_ydl(opts_retry) as ydl:
                             ydl.download([url])
                         subtitle_warning = err_msg
                     except yt_dlp.utils.DownloadError as exc2:

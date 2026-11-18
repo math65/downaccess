@@ -6,7 +6,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app/core/downloader.py:515
+#: app/core/downloader.py:516
 msgid ""
 "\n"
 "\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid " et "
 msgstr ""
 
-#: app/core/downloader.py:511
+#: app/core/downloader.py:512
 msgid " et {n} autres"
 msgstr ""
 
@@ -408,7 +408,7 @@ msgstr ""
 msgid "Annuler tous les téléchargements et vider la liste"
 msgstr ""
 
-#: app/core/downloader.py:1663 app/core/downloader.py:1666
+#: app/core/downloader.py:1675 app/core/downloader.py:1678
 msgid "Annulé par l'utilisateur"
 msgstr ""
 
@@ -690,7 +690,7 @@ msgstr ""
 msgid "Catégorie à parcourir :"
 msgstr ""
 
-#: app/core/downloader.py:816
+#: app/core/downloader.py:828
 msgid ""
 "Ce contenu nécessite que vous soyez connecté au site (vidéo réservée aux "
 "adultes, privée ou réservée aux membres)."
@@ -767,14 +767,14 @@ msgstr ""
 msgid "Cette source ne peut pas être suivie."
 msgstr ""
 
-#: app/core/downloader.py:778
+#: app/core/downloader.py:790
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
 "DownAccess ne peut pas la télécharger, et aucun réglage n'y changera rien : c'est une protection posée par le site. Les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
-#: app/core/downloader.py:402
+#: app/core/downloader.py:403
 msgid ""
 "Cette vidéo est protégée contre la copie (DRM).\n"
 "\n"
@@ -785,21 +785,21 @@ msgid ""
 "Pour l'image, aucun réglage n'y changera rien : c'est une protection posée par le site. M6, les plateformes par abonnement (Netflix, Disney+, Prime Video) et certaines vidéos de france.tv sont dans ce cas."
 msgstr ""
 
-#: app/core/downloader.py:872
+#: app/core/downloader.py:884
 msgid ""
 "Cette vidéo n'est pas accessible.\n"
 "\n"
 "Elle a sans doute été retirée par son auteur, rendue privée, ou réservée à certains pays. Vérifiez qu'elle s'ouvre normalement dans votre navigateur : si elle ne s'y ouvre pas non plus, DownAccess ne peut rien y faire."
 msgstr ""
 
-#: app/core/downloader.py:497
+#: app/core/downloader.py:498
 msgid ""
 "Cette vidéo n'est pas disponible dans votre pays.\n"
 "\n"
 "Son auteur en a réservé l'accès à une liste de pays qui n'inclut pas le vôtre. C'est une restriction posée sur le site : aucun réglage de DownAccess ne peut l'ouvrir."
 msgstr ""
 
-#: app/core/downloader.py:886
+#: app/core/downloader.py:898
 msgid ""
 "Cette vidéo n'est pas encore en ligne.\n"
 "\n"
@@ -1423,7 +1423,7 @@ msgstr ""
 msgid "Erreur inconnue."
 msgstr ""
 
-#: app/core/downloader.py:2311
+#: app/core/downloader.py:2323
 msgid "Erreur incrustation : {error}"
 msgstr ""
 
@@ -1463,11 +1463,11 @@ msgid ""
 "robot de YouTube sur les longues listes. 0 = aucun délai."
 msgstr ""
 
-#: app/core/downloader.py:667
+#: app/core/downloader.py:668
 msgid "Espace libre sur « {folder} » : {size}."
 msgstr ""
 
-#: app/core/downloader.py:670
+#: app/core/downloader.py:671
 msgid "Espace nécessaire : environ {size}."
 msgstr ""
 
@@ -1727,7 +1727,7 @@ msgstr ""
 msgid "Ignorer les chapitres"
 msgstr ""
 
-#: app/core/downloader.py:684
+#: app/core/downloader.py:685
 msgid ""
 "Il n'y a pas assez d'espace libre sur le disque pour télécharger ce fichier."
 msgstr ""
@@ -1798,7 +1798,7 @@ msgid ""
 "{error}"
 msgstr ""
 
-#: app/core/downloader.py:801
+#: app/core/downloader.py:813
 msgid ""
 "Impossible de lire les cookies de votre navigateur car il est actuellement ouvert.\n"
 "\n"
@@ -1878,7 +1878,7 @@ msgstr ""
 msgid "Inclus dans le conteneur (piste désactivable)"
 msgstr ""
 
-#: app/core/downloader.py:2299
+#: app/core/downloader.py:2311
 msgid "Incrustation des sous-titres échouée : {error}"
 msgstr ""
 
@@ -1990,14 +1990,14 @@ msgstr ""
 msgid "L'interception sera activée au lancement du navigateur."
 msgstr ""
 
-#: app/core/downloader.py:844
+#: app/core/downloader.py:856
 msgid ""
 "La BBC refuse de fournir ce programme.\n"
 "\n"
 "BBC iPlayer est réservé au Royaume-Uni : depuis un autre pays, le site bloque le téléchargement, et aucun réglage de DownAccess ne peut l'ouvrir. Si vous êtes au Royaume-Uni, vérifiez que le programme se lit encore dans votre navigateur : il a peut-être été retiré."
 msgstr ""
 
-#: app/core/downloader.py:791
+#: app/core/downloader.py:803
 msgid ""
 "La connexion Internet a été perdue pendant le téléchargement.\n"
 "\n"
@@ -2136,7 +2136,7 @@ msgid ""
 " reprennent."
 msgstr ""
 
-#: app/core/downloader.py:643
+#: app/core/downloader.py:644
 msgid ""
 "Le dossier de téléchargement « {folder} » est introuvable.\n"
 "\n"
@@ -2201,7 +2201,7 @@ msgstr ""
 msgid "Le serveur a répondu {code} ({reason})."
 msgstr ""
 
-#: app/core/downloader.py:262
+#: app/core/downloader.py:263
 msgid ""
 "Le site a interrompu le téléchargement pour vérifier que vous n'êtes pas un robot.\n"
 "\n"
@@ -2225,7 +2225,7 @@ msgid ""
 "téléchargements reprendront seuls dans {count} minutes."
 msgstr ""
 
-#: app/core/downloader.py:832
+#: app/core/downloader.py:844
 msgid ""
 "Le site n'a envoyé aucune donnée pour cette vidéo.\n"
 "\n"
@@ -2239,7 +2239,7 @@ msgid ""
 "C'est en général passager. Vérifiez votre connexion Internet, puis relancez la recherche dans quelques instants."
 msgstr ""
 
-#: app/core/downloader.py:864
+#: app/core/downloader.py:876
 msgid ""
 "Le site ne propose aucune vidéo à télécharger sur cette page.\n"
 "\n"
@@ -2305,7 +2305,7 @@ msgstr ""
 msgid "Les sous-titres de ce média sont vides."
 msgstr ""
 
-#: app/core/downloader.py:676
+#: app/core/downloader.py:677
 msgid ""
 "Libérez de l'espace sur ce disque, ou choisissez un autre dossier de "
 "téléchargement dans les Préférences (Ctrl+P)."
@@ -3883,7 +3883,7 @@ msgstr ""
 msgid "Votre adresse email (obligatoire pour recevoir une réponse) :"
 msgstr ""
 
-#: app/core/downloader.py:695
+#: app/core/downloader.py:696
 msgid "Votre disque est plein : le téléchargement n'a pas pu être enregistré."
 msgstr ""
 
@@ -4062,7 +4062,7 @@ msgstr ""
 msgid "ffmpeg trouvé."
 msgstr ""
 
-#: app/core/downloader.py:2162
+#: app/core/downloader.py:2174
 msgid "fin"
 msgstr ""
 
@@ -4293,15 +4293,15 @@ msgstr ""
 msgid "{minutes} min {seconds} s"
 msgstr ""
 
-#: app/core/downloader.py:660 app/ui/format_dialog.py:175
+#: app/core/downloader.py:661 app/ui/format_dialog.py:175
 msgid "{n:.0f} Ko"
 msgstr ""
 
-#: app/core/downloader.py:659 app/ui/format_dialog.py:173
+#: app/core/downloader.py:660 app/ui/format_dialog.py:173
 msgid "{n:.0f} Mo"
 msgstr ""
 
-#: app/core/downloader.py:657 app/ui/format_dialog.py:171
+#: app/core/downloader.py:658 app/ui/format_dialog.py:171
 msgid "{n:.1f} Go"
 msgstr ""
 
