@@ -47,6 +47,8 @@ jobs:
           uv run python -c "import yt_dlp.version as v; print('yt-dlp', v.__version__)"
 
       - name: Moteur JavaScript (YouTube)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # quota de l'API GitHub (QuickJS)
         run: uv run python scripts/update_jsruntime.py
 
       - name: Suite de tests

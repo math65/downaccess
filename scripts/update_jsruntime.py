@@ -9,6 +9,7 @@ signature YouTube. On embarque QuickJS-ng, minuscule (~2 Mo) et suffisant.
 Source : https://github.com/quickjs-ng/quickjs (asset qjs-windows-x86_64.exe)
 """
 import json
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,7 +24,14 @@ ASSET_NAME   = "qjs-windows-x86_64.exe"
 
 
 def _get(url: str) -> bytes:
-    req = Request(url, headers={"User-Agent": "DownAccess-update-jsruntime"})
+    headers = {"User-Agent": "DownAccess-update-jsruntime"}
+    # Sans jeton, l'API GitHub compte les appels par adresse IP : celles des
+    # runners sont partagees et le quota y est souvent deja epuise (403).
+    # Le jeton ne part que vers l'API, jamais vers l'adresse de telechargement.
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if token and url.startswith("https://api.github.com/"):
+        headers["Authorization"] = f"Bearer {token}"
+    req = Request(url, headers=headers)
     with urlopen(req, timeout=60) as r:
         return r.read()
 
