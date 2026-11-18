@@ -2,12 +2,15 @@
 Détection du navigateur Chromium disponible sur le système.
 Utilisé par l'extraction guidée et le dialogue de connexion.
 """
+import logging
 import os
 import socket
 import time
 from collections.abc import Callable
 
 from app.core.i18n import _translate
+
+_log = logging.getLogger("downaccess.browser")
 
 
 class ConsentRequiredError(Exception):
@@ -122,6 +125,74 @@ def require_browser() -> str:
     return bp
 
 
+_BROWSER_EXES = ("chrome.exe", "msedge.exe", "brave.exe")
+
+
+def _user_data_dir_of(cmdline: list[str]) -> str | None:
+    """Dossier de profil d'un processus navigateur PRINCIPAL, sinon None.
+
+    Les processus auxiliaires (rendu, GPU...) portent `--type=` : ils meurent
+    avec le principal, inutile de les viser.
+    """
+    found = None
+    for arg in cmdline or []:
+        if arg.startswith("--type="):
+            return None
+        if arg.startswith("--user-data-dir="):
+            found = arg.split("=", 1)[1].strip('"')
+    return found
+
+
+def _same_dir(a: str, b: str) -> bool:
+    return os.path.normcase(os.path.normpath(a)) == os.path.normcase(os.path.normpath(b))
+
+
+def release_dedicated_profile() -> int:
+    """Ferme les navigateurs ORPHELINS qui tiennent encore le profil dedie.
+
+    Un navigateur lance par DrissionPage survit a DownAccess s'il n'a pas ete
+    quitte proprement (plantage, mise a jour silencieuse en pleine recolte de
+    playlist). Tant qu'il vit, Chromium lui renvoie tout nouveau lancement sur
+    le meme profil — quel que soit l'executable : choisir Edge ouvrait donc la
+    page dans le Chrome reste la, et DrissionPage n'obtenait jamais son port.
+    Sans fenetre (recolte), rien ne permettait a l'utilisateur de s'en sortir
+    a part redemarrer Windows.
+
+    On ne touche PAS aux navigateurs lances par la session en cours (enfants de
+    ce processus) : ceux-la servent encore (recolte ou connexion en cours).
+    Retourne le nombre de navigateurs fermes.
+    """
+    try:
+        import psutil
+    except Exception:
+        return 0
+    profile = downaccess_profile_dir()
+    me = os.getpid()
+    orphans = []
+    for proc in psutil.process_iter(["name"]):
+        try:
+            if (proc.info.get("name") or "").lower() not in _BROWSER_EXES:
+                continue
+            data_dir = _user_data_dir_of(proc.cmdline())
+            if not data_dir or not _same_dir(data_dir, profile):
+                continue
+            if any(p.pid == me for p in proc.parents()):
+                continue
+            orphans.append(proc)
+        except psutil.Error:
+            continue
+    for proc in orphans:
+        try:
+            _log.warning("Navigateur orphelin sur le profil dedie (pid %s, %s) : fermeture",
+                         proc.pid, proc.info.get("name"))
+            proc.terminate()
+        except psutil.Error:
+            pass
+    if orphans:
+        psutil.wait_procs(orphans, timeout=5)
+    return len(orphans)
+
+
 def build_options(browser_path: str, headless: bool = False):
     """Options DrissionPage communes : profil dédié PERSISTANT + port libre.
 
@@ -136,6 +207,8 @@ def build_options(browser_path: str, headless: bool = False):
     coexister avec le navigateur habituel de l'utilisateur.
     """
     from DrissionPage import ChromiumOptions
+    # Un navigateur orphelin sur le profil capterait le lancement (cf. docstring).
+    release_dedicated_profile()
     co = ChromiumOptions()
     co.set_browser_path(browser_path)
     co.set_user_data_path(downaccess_profile_dir())
