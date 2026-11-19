@@ -227,6 +227,11 @@ class TestContratRechercheAbonnement:
         """Le lien entre les deux moities : ce que la recherche rend doit
         passer tel quel dans `resolve_feed`."""
         resultats = self._cherche(feed_search.SOURCE_YOUTUBE, "arte")
+        if not resultats:
+            # YouTube rend une liste vide, sans erreur, aux adresses qu'il
+            # limite (vu sur le runner GitHub, juste apres une recherche
+            # reussie). Le test precedent, lui, exige des resultats.
+            pytest.skip("YouTube ne rend rien pour l'instant")
         feed, kind, titre = joignable(
             lambda: subs.resolve_feed(resultats[0]["url"]), "YouTube")
         assert kind == subs.KIND_YOUTUBE and titre

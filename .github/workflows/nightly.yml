@@ -40,21 +40,29 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
 
+      # La version est choisie par le code de l'application lui-meme
+      # (`updater.get_latest_version`) : c'est exactement celle que DownAccess
+      # installe chez les utilisateurs. `uv lock --upgrade-package`, lui, a
+      # retenu la version stable sur le runner (mesure le 2026-11-19).
+      # Ensuite, toujours `uv run --no-sync` : sans cela uv reinstallerait la
+      # version de uv.lock avant chaque commande.
       - name: yt-dlp du jour
         run: |
-          uv lock --upgrade-package yt-dlp
-          uv sync
-          uv run python -c "import yt_dlp.version as v; print('yt-dlp', v.__version__)"
+          uv sync --frozen
+          $v = uv run --no-sync python -c "from app.core.updater import get_latest_version; print(get_latest_version() or '')"
+          if (-not $v) { Write-Host "::error::Version nightly de yt-dlp introuvable sur PyPI"; exit 1 }
+          uv pip install "yt-dlp==$v"
+          uv run --no-sync python -c "import yt_dlp.version as v; print('yt-dlp installe :', v.__version__, '(', v.CHANNEL, ')')"
 
       - name: Moteur JavaScript (YouTube)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # quota de l'API GitHub (QuickJS)
-        run: uv run python scripts/update_jsruntime.py
+        run: uv run --no-sync python scripts/update_jsruntime.py
 
       - name: Suite de tests
-        run: uv run pytest -q
+        run: uv run --no-sync pytest -q
 
       # Meme si la suite echoue : les deux resultats sont utiles.
       - name: Contrats des sites (tests qui sortent sur Internet)
         if: always()
-        run: uv run pytest -m network -q -rs
+        run: uv run --no-sync pytest -m network -q -rs
